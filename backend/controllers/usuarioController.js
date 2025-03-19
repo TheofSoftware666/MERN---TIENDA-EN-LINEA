@@ -1,8 +1,14 @@
-import { existeUsuario, consultarUsuario } from "../models/usuario.js"; 
+import { existeUsuario, consultarUsuario, registrar, validarToken, confirmarToken, iniciarUsuario } from "../models/usuario.js"; 
 
 const iniciarSesion = async (req , res ) => {
 
     const { email, password } = req.body;
+
+    if(email.length == 0 || password.length == 0){
+        const error = new Error("EL usuario no existe");
+
+        return res.status(404).json({ msg : error.message });
+    }
 
     const existeEmail = await existeUsuario(email);
 
@@ -12,19 +18,85 @@ const iniciarSesion = async (req , res ) => {
         return res.status(404).json({ msg : error.message });
     }
 
-    const comprobarUser = await consultarUsuario(email);
+    const comprobarUser = await iniciarUsuario(email, password);
 
-    const [{ mail , pass }] = comprobarUser;
+    if(!comprobarUser){
+        const error = new Error("Usuario o contraseña incorrectos");
 
-    if(mail != email || password != pass){
-        const error = new Error("Usuario o Contraseña Incorrectos");
-
-        console.log("Usuario o contraseña incorrectos");
-
-        return res.status(404).json({ msg : error.message });    
+        return res.status(404).json({ msg : error.message });
     }
     
+    const obtenerUsuario = await consultarUsuario(email);
+
+    if(obtenerUsuario[0].correoValidado === 'F'){
+        
+        const error = new Error("La cuenta no esta validado");
+
+        return res.status(200).json({ msg : error.message });
+    }
+
     return res.status(200).json({ msg : "Iniciando sesion"});
 }
 
-export { iniciarSesion } 
+const registrarUsuario = async (req, res) => {
+
+    const { email, password } = req.body;
+
+    if(email.length == 0 || password.length == 0){
+        const error = new Error("Usuario o Contraseña invalido");
+
+        return res.status(404).json({ msg : error.message });
+    }
+
+    const existeEmail = await existeUsuario(email);
+
+    if(existeEmail.length == 1){
+        const error = new Error("EL usuario ya existe");
+
+        return res.status(404).json({ msg : error.message });
+    }
+
+    await registrar(email, password);
+
+    return res.status(200).json({ msg : "Usuario Registrado"});
+}
+
+const confirmarCuenta = async(req, res) => { 
+    
+    try{
+        const token = await req.params?.token;
+        
+        const resultado = await validarToken(token);
+
+        if(resultado.length === 0){
+            const error = new Error("Error al comprobar el Token");
+
+            console.log("No se encontro ningun token");
+
+            return res.status(404).json({ msg : error.message});
+        }
+
+        if(resultado[0].token !== token){
+            const error = new Error("Error al comprobar el Token");
+
+            console.log("El token es distinto");
+
+            return res.status(404).json({ msg : error.message});
+        }
+
+        // Actualizar datos
+        await confirmarToken(token);
+
+        return res.status(200).json({ msg : "Cuenta Verificada"});
+
+    }catch(e){
+        const error = new Error("Error al intentar comprobar el token");
+
+        console.log(e);
+
+        return res.status(500).json({ msg : error.message });
+    }
+
+}
+
+export { iniciarSesion, registrarUsuario, confirmarCuenta } 

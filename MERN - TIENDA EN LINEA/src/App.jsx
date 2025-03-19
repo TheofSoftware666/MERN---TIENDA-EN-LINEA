@@ -1,18 +1,21 @@
 import { useState } from 'react'
-import Header from './components/header'
-import MenuCarrito from './components/MenuCarrito'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css'
-import './../public/css/Header.css'
-import './../public/css/Carrito.css'
+import AuthLayout from './layout/AuthLayout';
+import Home from './pages/Home.jsx';
 
 function App() {
 
-
-
   return (
     <>
-      <Header/>
-      <MenuCarrito/>
+      
+      <BrowserRouter>
+        <Routes>
+          <Route path='/' element={<AuthLayout/>}>
+            <Route index element={<Home/>}/>
+          </Route>
+        </Routes>
+      </BrowserRouter>
       
     </>
   )
