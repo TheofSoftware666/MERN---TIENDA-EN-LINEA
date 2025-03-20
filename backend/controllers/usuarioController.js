@@ -1,4 +1,5 @@
 import { existeUsuario, consultarUsuario, registrar, validarToken, confirmarToken, iniciarUsuario } from "../models/usuario.js"; 
+import generarJWT from "../helpers/generarJWT.js";
 
 const iniciarSesion = async (req , res ) => {
 
@@ -30,12 +31,13 @@ const iniciarSesion = async (req , res ) => {
 
     if(obtenerUsuario[0].correoValidado === 'F'){
         
-        const error = new Error("La cuenta no esta validado");
+        const error = new Error("La cuenta no ah sido verificada");
 
         return res.status(200).json({ msg : error.message });
     }
 
-    return res.status(200).json({ msg : "Iniciando sesion"});
+    // Autentificar
+    return res.status(200).json({ token : generarJWT( obtenerUsuario[0].usuarioId )});
 }
 
 const registrarUsuario = async (req, res) => {
@@ -99,4 +101,11 @@ const confirmarCuenta = async(req, res) => {
 
 }
 
-export { iniciarSesion, registrarUsuario, confirmarCuenta } 
+const mostrarPerfil = async (req, res) => {
+
+    const { usuario } = req; 
+
+    res.status(200).json({ perfil : usuario});
+}
+
+export { iniciarSesion, registrarUsuario, confirmarCuenta, mostrarPerfil } 

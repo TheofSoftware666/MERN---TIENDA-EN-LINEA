@@ -38,7 +38,8 @@ const consultarUsuario = async (usuario) => {
     const conexion = await db();
 
     // Query
-    const query = `SELECT * FROM usuarios WHERE mail = '${usuario}'`;
+    const query =   `SELECT US.usuarioId, US.mail, US.nombre , US.apellido, US.direccion, US.numeroExterior, US.numeroInterior, US.cPostal, US.calle1, US.calle2, US.municipio, US.colonia, US.estado, US.pais, US.lada, US.celular, US.rfc, US.razonSocial
+                    FROM usuarios US WHERE mail = '${usuario}' OR usuarioId = '${usuario}'`;
 
     const [ results, fields ] = await conexion.query(query);
 
