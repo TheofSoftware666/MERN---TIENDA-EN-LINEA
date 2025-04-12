@@ -46,6 +46,48 @@ const consultarUsuario = async (usuario) => {
     return results;
 };
 
+const comprobarUsuario = async (usuario) => {
+      
+    // Establece conexion con DB
+    const conexion = await db();
+
+    // Query
+    const query =   `SELECT US.usuarioId 
+                    FROM usuarios US WHERE mail = '${usuario}' OR usuarioId = '${usuario}'`;
+
+    const [ results, fields ] = await conexion.query(query);
+
+    return results;
+};
+
+const comprobarUsuarioAdmin = async (usuario) => {
+      
+    // Establece conexion con DB
+    const conexion = await db();
+
+    // Query
+    const query =   `SELECT US.usuarioId, US.usuarioAdmin
+                    FROM usuarios US WHERE mail = '${usuario}' OR usuarioId = '${usuario}'`;
+
+    const [ results, fields ] = await conexion.query(query);
+
+    return results;
+};
+
+const consultarUsuarioAdmin = async (usuario) => {
+      
+    // Establece conexion con DB
+    const conexion = await db();
+
+    // Query
+    const query =   `SELECT US.usuarioId, US.mail, US.nombre , US.apellido, US.direccion, US.numeroExterior, US.numeroInterior, US.cPostal, US.calle1, US.calle2, US.municipio, US.colonia, US.estado, US.pais, US.lada, US.celular, US.rfc, US.razonSocial, US.usuarioAdmin
+                    FROM usuarios US WHERE mail = '${usuario}' OR usuarioId = '${usuario}'`;
+
+    const [ results, fields ] = await conexion.query(query);
+
+    return results;
+};
+
 const registrar = async (usuario , password) => {
     
     // Establecer conexion DB
@@ -86,4 +128,4 @@ const confirmarToken = async (token) => {
 }
 
 
-export { existeUsuario, consultarUsuario, registrar, validarToken, confirmarToken, iniciarUsuario };
+export { existeUsuario, comprobarUsuario ,consultarUsuario, registrar, validarToken, confirmarToken, iniciarUsuario, consultarUsuarioAdmin , comprobarUsuarioAdmin };
