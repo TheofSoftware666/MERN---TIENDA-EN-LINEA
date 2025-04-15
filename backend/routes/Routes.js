@@ -3,6 +3,7 @@ import { actualizarInfoTienda, infoTienda, ingresarInfoTienda } from "../control
 import { obtenerProductos, obtenerProducto, obtenerProductosAdmin, obtenerProductoAdmin,registrarProducto, actualizarProducto } from "../controllers/productosController.js";
 import { iniciarSesion, registrarUsuario, confirmarCuenta, mostrarPerfil } from "../controllers/usuarioController.js";
 import { obtenerCategoria, obtenerCategorias, subirCategoria, editarCategoria } from "../controllers/categoriaController.js";
+import { obtenerMarca, obtenerMarcas, subirMarca, editarMarca } from "../controllers/marcaController.js";
 import checkAuth from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -19,13 +20,13 @@ router.get('/Admin/Producto/:id', checkAuth, obtenerProductoAdmin)
 
 router.get('/Admin/Categoria/:id', obtenerCategoria)
         .get('/Admin/Categorias/:limit', obtenerCategorias)
-        .post('/Admin/SubirCategoria', checkAuth, subirCategoria)
+        .post('/Admin/AgregarCategoria', checkAuth, subirCategoria)
         .patch('/Admin/ActualizarCategoria', checkAuth, editarCategoria);
 
-// router.get('/Admin/Marcas/:id', obtenerMarca)
-//         .get('/Admin/Marcas', obtenerMarcas)
-//         .post('/Admin/Marcas', checkAuth, subirMarca)
-//         .patch('/Admin/Marcas', checkAuth, actualizarMarca);
+router.get('/Admin/Marca/:id', obtenerMarca)
+        .get('/Admin/Marcas/:limit', obtenerMarcas)
+        .post('/Admin/AgregarMarcas', checkAuth, subirMarca)
+        .patch('/Admin/ActualizarMarcas', checkAuth, editarMarca);
 
 // router.get('/Admin/Pedido/:id', obtenerPedido)
 //         .get('/Admin/Pedidos', obtenerPedidos)
