@@ -2,6 +2,7 @@ import express from "express";
 import { actualizarInfoTienda, infoTienda, ingresarInfoTienda } from "../controllers/tiendaController.js";
 import { obtenerProductos, obtenerProducto, obtenerProductosAdmin, obtenerProductoAdmin,registrarProducto, actualizarProducto } from "../controllers/productosController.js";
 import { iniciarSesion, registrarUsuario, confirmarCuenta, mostrarPerfil } from "../controllers/usuarioController.js";
+import { obtenerCategoria, obtenerCategorias, subirCategoria, editarCategoria } from "../controllers/categoriaController.js";
 import checkAuth from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -16,11 +17,10 @@ router.get('/Admin/Producto/:id', checkAuth, obtenerProductoAdmin)
       .post('/Admin/AgregarProducto', checkAuth, registrarProducto)
       .patch('/Admin/EditarProducto/:id', checkAuth, actualizarProducto);
 
-
-// router.get('/Admin/Categorias/:id', obtenerCategoria)
-//         .get('/Admin/Categorias', obtenerCategorias)
-//         .post('/Admin/Categoria', checkAuth, subirCategoria)
-//         .patch('/Admin/Categoria', checkAuth, actualizarCategoria);
+router.get('/Admin/Categoria/:id', obtenerCategoria)
+        .get('/Admin/Categorias/:limit', obtenerCategorias)
+        .post('/Admin/SubirCategoria', checkAuth, subirCategoria)
+        .patch('/Admin/ActualizarCategoria', checkAuth, editarCategoria);
 
 // router.get('/Admin/Marcas/:id', obtenerMarca)
 //         .get('/Admin/Marcas', obtenerMarcas)
