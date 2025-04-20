@@ -4,6 +4,7 @@ import { obtenerProductos, obtenerProducto, obtenerProductosAdmin, obtenerProduc
 import { iniciarSesion, registrarUsuario, confirmarCuenta, mostrarPerfil } from "../controllers/usuarioController.js";
 import { obtenerCategoria, obtenerCategorias, subirCategoria, editarCategoria } from "../controllers/categoriaController.js";
 import { obtenerMarca, obtenerMarcas, subirMarca, editarMarca } from "../controllers/marcaController.js";
+import { obtenerPedidoAdmin, obtenerPedidosAdmin, registrarPedidoAdmin, actualizarPedidoAdmin } from "../controllers/pedidoAdminController.js";
 import checkAuth from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -28,10 +29,10 @@ router.get('/Admin/Marca/:id', obtenerMarca)
         .post('/Admin/AgregarMarcas', checkAuth, subirMarca)
         .patch('/Admin/ActualizarMarcas', checkAuth, editarMarca);
 
-// router.get('/Admin/Pedido/:id', obtenerPedido)
-//         .get('/Admin/Pedidos', obtenerPedidos)
-//         .post('/Admin/Pedido', hacerPedido)
-//         .patch('/Admin/Pedido', actualizarPedido);
+router.get('/Admin/Pedido/:id', checkAuth, obtenerPedidoAdmin)
+        .get('/Admin/Pedidos', checkAuth, obtenerPedidosAdmin)
+        .post('/Admin/Pedido', checkAuth, registrarPedidoAdmin)
+        .patch('/Admin/Pedido', checkAuth, actualizarPedidoAdmin);
 
 // Rutas de Usuario Publicas
 router.get('/Productos', obtenerProductos);
