@@ -1,69 +1,64 @@
 import db from "../config/db.js";
 
-const pedidoDetalle = (id) => {
+const pedidoDetalle = async (id) => {
     
     // Conexion DB
-    const conection = db();
+    const conection = await db();
 
     const query = `SELECT * FROM pedido_detalles WHERE pedidoId = ${id}`;
 
-    const [results, fields ] = conection.query(query);
+    const [results, fields ] = await conection.query(query);
 
     return results;
 };
 
-const pedidos = (limit) => {
+const pedidos = async (limit = 50) => {
     
     // Conexion DB
-    const conection = db();
-
-    if(typeof limit != 'number'){
-
-        return "No es un numero";
-    }
+    const conection = await db();
     
     const limite = limit > 0 ? limit : 50;    
 
-    const query = `SELECT * FROM pedido_detalles LIMIT ${limite}`;
+    const query = `SELECT * FROM pedido LIMIT ${limite}`;
 
-    const [results, fields ] = conection.query(query);
+    const [results, fields ] = await conection.query(query);
 
     return results;
 };
 
-const actualizarPedido = (data) => {
+const actualizarPedido = async (data) => {
     
     // Conexion DB
-    const conection = db();  
+    const conection = await db();  
 
     const query = `UPDATE pedido_detalles SET pedidoId = 0,productoId = 0,cantidad = 0,precioUnitario = 0,montoXCantidad = 0,ivaUnitario = 0,descuentoUnitario = 0,totalUbitario ?= 0,totalPedido = 0,fechaEntrega = 0 WHERE pedidoDetallesId = 0`;
 
-    const [results, fields ] = conection.query(query);
+    const [results, fields ] = await conection.query(query);
 
     return results;
 };
 
-const eliminarPedido = (id) => {
+const eliminarPedido = async (id) => {
     
     // Conexion DB
-    const conection = db();
+    const conection = await db();
 
     const query = `DELETE FROM pedido_detalles WHERE pedidoId = ${id}`;
 
-    const [results, fields ] = conection.query(query);
+    const [results, fields ] = await conection.query(query);
 
     return results;
 };
 
-const hacerPedido = (id) => {
+const hacerPedido = async () => {
     
     // Conexion DB
-    const conection = db();
+    const conection = await db();
 
     const query = `INSERT INTO PEDIDO_DETALLES (pedidoId,productoId,cantidad,precioUnitario,montoXCantidad,ivaUnitario,descuentoUnitario,totalUbitario,totalPedido,fechaEntrega)
                      VALUES (1, 3, 1, 2000, 2000, 320, 0, 2320, 10000,'2024-12-25');`;
 
-    const [results, fields ] = conection.query(query);
+    const [results, fields ] = await conection.query(query);
 
     return results;
 };

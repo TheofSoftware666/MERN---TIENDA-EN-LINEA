@@ -1,0 +1,76 @@
+DELIMITER //
+
+CREATE PROCEDURE add_carrito_items (
+    IN usuario INT,
+    IN producto INT,
+    IN cantidad INT
+)
+BEGIN
+    DECLARE carritoID INT DEFAULT 0;
+    DECLARE cantidadStock INT DEFAULT 0;
+    DECLARE msg VARCHAR(100) DEFAULT '';
+    DECLARE existeCarrito INT DEFAULT 0;
+    DECLARE existeProducto INT DEFAULT 0;
+
+    -- Verificar si el usuario tiene un carrito activo
+    SELECT COUNT(*) INTO existeCarrito
+    FROM carrito
+    WHERE usuarioId = usuario AND estado != 'finalizado';
+
+    IF existeCarrito = 0 THEN
+        SET msg = 'Error: Aun no has agregado productos a tu carrito.';
+        SELECT msg AS MSG;
+        RETURN;
+    END IF;
+
+    -- Obtener ID del carrito activo
+    SELECT id INTO carritoID FROM carrito WHERE usuarioId = usuario AND estado != 'finalizado' LIMIT 1;
+
+    -- Verificar si el producto existe y está activo
+    SELECT COUNT(*) INTO existeProducto
+    FROM productos
+    WHERE producto_id = producto AND estatusProducto != FALSE;
+
+    IF existeProducto = 0 THEN
+        SET msg = 'Error: El producto que quieres agregar no existe.';
+        SELECT msg AS MSG;
+        RETURN;
+    END IF;
+
+    -- Verificar el stock del producto
+    SELECT stock INTO cantidadStock
+    FROM productos
+    WHERE producto_id = producto AND estatusProducto != FALSE;
+
+    IF cantidad > cantidadStock THEN
+        SET msg = 'Error: El producto no cuenta con el stock disponible.';
+        SELECT msg AS MSG;
+        RETURN;
+    END IF;
+
+    IF cantidad < 1 THEN
+        SET msg = 'Error: Ocurrió un error inesperado.';
+        SELECT msg AS MSG;
+        RETURN;
+    END IF;
+
+    -- Insertar en carrito_items
+    INSERT INTO carrito_items (
+        carrito_id,
+        producto_id,
+        cantidad,
+        precio_unitario
+    )
+    VALUES (
+        carritoID,
+        producto,
+        cantidad,
+        (SELECT precio_unitario FROM productos WHERE producto_id = producto AND estatusProducto != FALSE)
+    );
+
+    SET msg = 'Success: El producto se agregó correctamente.';
+    SELECT msg AS MSG;
+    RETURN;
+END;
+
+// DELIMITER ;

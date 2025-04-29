@@ -5,6 +5,7 @@ import { iniciarSesion, registrarUsuario, confirmarCuenta, mostrarPerfil } from 
 import { obtenerCategoria, obtenerCategorias, subirCategoria, editarCategoria } from "../controllers/categoriaController.js";
 import { obtenerMarca, obtenerMarcas, subirMarca, editarMarca } from "../controllers/marcaController.js";
 import { obtenerPedidoAdmin, obtenerPedidosAdmin, registrarPedidoAdmin, actualizarPedidoAdmin } from "../controllers/pedidoAdminController.js";
+import { obtenerCarrito, addProductoCarrito, modificarCarrito, elimarItemsCarrito } from "../controllers/carritoController.js";
 import checkAuth from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -31,8 +32,8 @@ router.get('/Admin/Marca/:id', obtenerMarca)
 
 router.get('/Admin/Pedido/:id', checkAuth, obtenerPedidoAdmin)
         .get('/Admin/Pedidos', checkAuth, obtenerPedidosAdmin)
-        .post('/Admin/Pedido', checkAuth, registrarPedidoAdmin)
-        .patch('/Admin/Pedido', checkAuth, actualizarPedidoAdmin);
+        .post('/Admin/Pedido', checkAuth, registrarPedidoAdmin);
+        // .patch('/Admin/Pedido', checkAuth, actualizarPedidoAdmin);
 
 // Rutas de Usuario Publicas
 router.get('/Productos', obtenerProductos);
@@ -42,15 +43,15 @@ router.post('/Login', iniciarSesion);
 router.post('/Registrar', registrarUsuario);
 
 // Ruta de Usuario publica /privada
-// router.get('/MiCarrito/:id', obtenerCarrito)
-//         .post('/MiCarrito', añadirCarrito)
-//         .patch('/Micarrito', modificarCarrito)
-//         .delete('/Micarrito', elimarItemsCarrito);
+router.get('/MiCarrito', checkAuth, obtenerCarrito)
+        .post('/MiCarrito', checkAuth, addProductoCarrito)
+        .patch('/Micarrito', checkAuth ,modificarCarrito)
+        .delete('/Micarrito', checkAuth, elimarItemsCarrito);
 
 // Rutas de Usuario Privadas
-// router.get('/Perfil/:id', mostrarPerfil)
-//         .post('/Perfil/Configuracion/' , completarPerfil)
-//         .patch('/Perfil/Configuracion/', actualizarPerfil);
+router.get('/Perfil', checkAuth, mostrarPerfil);
+        // .post('/Perfil/Configuracion/' , completarPerfil)
+        // .patch('/Perfil/Configuracion/', actualizarPerfil);
 
 // router.get('/Pedidos/:id', checkAuth, obtenerCarrito)
 //         .get('/Pedidos', checkAuth, obtenerCarrito)   
