@@ -44,7 +44,7 @@ router.post('/Registrar', registrarUsuario);
 
 // Ruta de Usuario publica /privada
 router.get('/MiCarrito', checkAuth, obtenerCarrito)
-        .post('/MiCarrito', checkAuth, addProductoCarrito)
+        .post('/AddCarrito/:idProducto', checkAuth, addProductoCarrito)
         .patch('/Micarrito', checkAuth ,modificarCarrito)
         .delete('/Micarrito', checkAuth, elimarItemsCarrito);
 

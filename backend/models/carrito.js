@@ -33,4 +33,19 @@ const carritoEstado = async (id, estado) => {
     return results;
 };
 
-export { carrito, carritoDetalles, carritoEstado }
+const agregarProductoCarrito = async (idUsuario, producto, cantidad) => {
+
+}
+
+const addNewCarrito = async (idUsuario) => {
+    
+    const conection = await db();
+
+    const query = `INSERT INTO carrito (usuarioId) VALUES (${idUsuario}) `;
+
+    const [results , fields] = await conection.query(query);
+
+    return results;
+}
+
+export { carrito, carritoDetalles, carritoEstado, addNewCarrito, agregarProductoCarrito }

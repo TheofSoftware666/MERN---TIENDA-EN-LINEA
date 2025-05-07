@@ -1,4 +1,4 @@
-import { carrito, carritoDetalles, carritoEstado } from "../models/carrito.js";
+import { carrito, carritoDetalles, carritoEstado, addNewCarrito, agregarProductoCarrito } from "../models/carrito.js";
 
 const obtenerCarrito = async (req, res) => {
     const { usuario } = req; 
@@ -50,8 +50,39 @@ const obtenerDetallesCarrito = async (req, res) => {
     return res.status(200).json({ msg : resultado});
 };
 
-const addProductoCarrito = (req, res) => {
+const addProductoCarrito = async (req, res) => {
+    const { usuario } = req;
+    const { idProducto } = req.params;
+    const { usuarioId } = usuario[0];
+
+    if(!usuario){
+        const e = new Error("USUARIO : no existe");
+        return res.status(202).json({ error : e.message});
+    }
+
+    if(!idProducto){
+        const e = new Error("PRODUCTO : no existe");
+        return res.status(202).json({ error : e.message});
+    }
+
+    // Comprobar que exista carrito 
+    const resultado = await carrito(usuarioId);
+
+    if(resultado.length == 0){
+        const carrito = await addNewCarrito(usuarioId);
+        
+        // Comprobar que exista carrito 
+        const validarCarrito = await carrito(usuarioId);
     
+        if(validarCarrito.length == 0){
+            const e = new Error(" Error  : al crear el carrito ");
+            return res.status(202).json({ error : e.message});
+        }
+    }
+     
+    
+
+    return res.status(202).json({ success : resultado});
 };
 
 const modificarCarrito = (req, res) => {
