@@ -15,7 +15,8 @@ const carritoDetalles = async (id) => {
 
     const conection = await db();
 
-    const query = `SELECT * FROM carrito_items WHERE carrito_id = ${id}`;
+    const query = `SELECT productoId, nombre, descripcion, cantidad FROM carrito_items 
+                    LEFT JOIN productos ON producto_id = productoId WHERE carrito_id = ${id}`;
 
     const [results, fields] = await conection.query(query);
 
@@ -33,8 +34,15 @@ const carritoEstado = async (id, estado) => {
     return results;
 };
 
-const agregarProductoCarrito = async (idUsuario, producto, cantidad) => {
+const agregarProductoCarrito = async (idUsuario, producto) => {
 
+    const conection = await db();
+
+    const query = `SELECT agregarProductoCarrito(${idUsuario}, ${producto});`;
+
+    const [results , fields ] = await conection.query(query);
+
+    return results;
 }
 
 const addNewCarrito = async (idUsuario) => {

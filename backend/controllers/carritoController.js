@@ -53,7 +53,7 @@ const obtenerDetallesCarrito = async (req, res) => {
 const addProductoCarrito = async (req, res) => {
     const { usuario } = req;
     const { idProducto } = req.params;
-    const { usuarioId } = usuario[0];
+    const { usuarioId } = usuario[0];    
 
     if(!usuario){
         const e = new Error("USUARIO : no existe");
@@ -79,13 +79,23 @@ const addProductoCarrito = async (req, res) => {
             return res.status(202).json({ error : e.message});
         }
     }
-     
-    
 
-    return res.status(202).json({ success : resultado});
+    const message = await agregarProductoCarrito(usuarioId, idProducto);
+     
+    return res.status(202).json({ success : message});
 };
 
 const modificarCarrito = (req, res) => {
+    
+    const { usuario } = req;
+    const { usuarioId } = usuario[0];    
+    const { productoId, cantidad} = req.body;
+
+    let message = "Se actualizo tu carrito exitosamente";
+
+
+
+    return res.status(200).json({ success : message});
     
 };
 
