@@ -6,6 +6,7 @@ import { obtenerCategoria, obtenerCategorias, subirCategoria, editarCategoria } 
 import { obtenerMarca, obtenerMarcas, subirMarca, editarMarca } from "../controllers/marcaController.js";
 import { obtenerPedidoAdmin, obtenerPedidosAdmin, registrarPedidoAdmin, actualizarPedidoAdmin } from "../controllers/pedidoAdminController.js";
 import { obtenerCarrito, addProductoCarrito, modificarCarrito, elimarItemsCarrito } from "../controllers/carritoController.js";
+import {  obtenerPedido, obtenerPedidos, capturarPedido, actualizarPedido } from "../controllers/pedidoController.js";
 import checkAuth from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -53,10 +54,10 @@ router.get('/Perfil', checkAuth, mostrarPerfil);
         // .post('/Perfil/Configuracion/' , completarPerfil)
         // .patch('/Perfil/Configuracion/', actualizarPerfil);
 
-// router.get('/Pedidos/:id', checkAuth, obtenerCarrito)
-//         .get('/Pedidos', checkAuth, obtenerCarrito)   
-//         .post('/Pedidos', checkAuth, añadirCarrito)
-//         .patch('/Pedidos', checkAuth, modificarCarrito)
+router.get('/Pedidos/:id', checkAuth, obtenerPedido)
+        .get('/Pedidos', checkAuth, obtenerPedidos)   
+        .post('/Pedidos', checkAuth, capturarPedido)
+        .patch('/Pedidos', checkAuth, actualizarPedido)
 
 // router.get('/Devoluciones/:id', checkAuth, obtenerCarrito)
 //         .get('/Devoluciones', checkAuth, obtenerCarrito)   

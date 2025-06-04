@@ -1,0 +1,10 @@
+
+1.- Terminar el carrito. 
+    * Al capturar pedido poner precio unitario en el carrito. quitar los decuentos, cupones de descuentos.
+    * Actualizar items del carrito.
+    * Eliminar items del carrito.
+
+2.- Terminar los pedidos
+    * Capturar un pedido & poner el monto total del precio unitario del carrito.
+    * Proceso de Pago de pedido.
+    
