@@ -31,7 +31,7 @@ const actualizarPedido = async (data) => {
     // Conexion DB
     const conection = await db();  
 
-    const query = `UPDATE pedido_detalles SET pedidoId = 0,productoId = 0,cantidad = 0,precioUnitario = 0,montoXCantidad = 0,ivaUnitario = 0,descuentoUnitario = 0,totalUbitario ?= 0,totalPedido = 0,fechaEntrega = 0 WHERE pedidoDetallesId = 0`;
+    const query = `UPDATE pedido_detalles SET productoId = 0,cantidad = 0,precioUnitario = 0,montoXCantidad = 0,ivaUnitario = 0,descuentoUnitario = 0,totalUbitario ?= 0,totalPedido = 0,fechaEntrega = 0 WHERE pedidoDetallesId = 0`;
 
     const [results, fields ] = await conection.query(query);
 

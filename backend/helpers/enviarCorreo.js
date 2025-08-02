@@ -1,0 +1,156 @@
+import nodemailer from 'nodemailer';
+
+const enviarCorreo = async (correoDestino) => {
+    try {
+        // 1. Configura el transporter (SMTP)
+        const transporter = nodemailer.createTransport({
+            service: 'Gmail',
+            auth: {
+                user: 'marcoricovaladez172@gmail.com',
+                pass: 'jhor vwbv qbwi rjwk ', // ⚠️ Usa una "App Password" si tienes 2FA activado
+            },
+        });
+
+        // 2. Opciones del correo
+        const mailOptions = {
+            from: '"Building Technology" <marcoricovaladez172@gmail.com>',
+            to: correoDestino,
+            subject: '¡Nuevo Pedido!',
+            html: `
+          <!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pedido en camino</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f4f4f4; font-family:Arial, sans-serif;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding: 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:10px; overflow:hidden; max-width:600px;">
+
+          <!-- Encabezado -->
+          <tr>
+            <td style="background-color:#3483fa; padding: 20px 30px; color:white; text-align:center;">
+              <h1 style="margin:0; font-size:24px;">¡Tu pedido ya está en camino! 🎉</h1>
+            </td>
+          </tr>
+
+          <!-- GIF animado -->
+          <tr>
+            <td align="center" style="padding: 20px;">
+              <img src="https://i.gifer.com/JOP.gif" 
+                   alt="Camión en camino" width="120" style="display:block; border-radius:8px;">
+            </td>
+          </tr>
+
+          <!-- Texto de bienvenida -->
+          <tr>
+            <td style="padding: 0 30px 10px 30px; font-size:16px; color:#333; text-align:center;">
+              <p><b>Hola Marco</b>, gracias por tu compra en <b>TU ECOMMERCE</b>. Hemos preparado tu pedido <b>#98324</b> y ya va en camino hacia tu domicilio.</p>
+            </td>
+          </tr>
+
+          <!-- Producto -->
+          <tr>
+            <td align="center" style="padding: 10px 30px;">
+              <img src="https://chenson.com.mx/cdn/shop/files/bdc0398d-c66e-4c4c-91bc-b5086b21cd63_1000x.jpg?v=1732738037" alt="Mochila" width="200" style="border-radius:10px; box-shadow: 0 0 5px rgba(0,0,0,0.1);">
+              <p style="margin-top:10px; font-size: 14px; color: #666;">Mochila Urban Pro Black</p>
+            </td>
+          </tr>
+
+          <!-- Seguimiento visual -->
+          <tr>
+            <td style="padding: 10px 30px;">
+              <table width="100%">
+                <tr>
+                  <td style="text-align:center; font-size:14px;">✅ Procesado</td>
+                  <td style="text-align:center; font-size:14px;">🚚 En camino</td>
+                  <td style="text-align:center; font-size:14px;">📦 Entregado</td>
+                </tr>
+                <tr>
+                  <td colspan="3">
+                    <div style="width:100%; height:10px; background:#e0e0e0; border-radius:5px; margin-top:5px;">
+                      <div style="width:66%; height:10px; background:#3483fa; border-radius:5px;"></div>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Reseña visual -->
+          <tr>
+            <td style="text-align:center; padding: 20px 30px 10px 30px;">
+              <p style="margin:0; font-size:14px;">Calificación de compradores:</p>
+              <p style="color: #ffcc00; font-size:20px; margin:0;">★★★★★</p>
+              <p style="font-size:13px; color:#999; margin-top:4px;">Basado en más de 1,200 opiniones</p>
+            </td>
+          </tr>
+
+          <!-- Cupón de descuento -->
+          <tr>
+            <td style="padding: 20px 30px; text-align:center;">
+              <p style="font-size:16px; color:#333;">🎁 Usa el cupón <b>GRACIAS10</b> y obtén <b>10% de descuento</b> en tu próxima compra.</p>
+              <p style="font-size:14px; color:#d9534f;"><b>¡Solo válido por 48 horas!</b></p>
+            </td>
+          </tr>
+
+          <!-- Botón de acción -->
+          <tr>
+            <td align="center" style="padding: 30px;">
+              <a href="https://www.chenson.com.mx" style="background-color:#3483fa; color:#ffffff; padding:15px 30px; text-decoration:none; border-radius:5px; font-weight:bold; display:inline-block;">
+                Seguir Comprando
+              </a>
+            </td>
+          </tr>
+
+          <!-- Redes sociales -->
+          <tr>
+            <td align="center" style="padding: 10px;">
+              <a href="https://www.instagram.com/" style="margin: 0 10px;">
+                <img src="https://cdn-icons-png.flaticon.com/24/2111/2111463.png" alt="Instagram" />
+              </a>
+              <a href="https://www.facebook.com/" style="margin: 0 10px;">
+                <img src="https://cdn-icons-png.flaticon.com/24/733/733547.png" alt="Facebook" />
+              </a>
+            </td>
+          </tr>
+
+          <!-- Firma -->
+          <tr>
+            <td style="padding: 20px 30px; font-size: 14px; color:#666;">
+              <p>Gracias por confiar en nosotros,</p>
+              <p><b>Marco Rico</b><br>Atención al cliente<br><a href="mailto:contacto@chenson.com.mx">contacto@chenson.com.mx</a></p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 10px 30px; background-color:#f4f4f4; text-align:center; font-size:12px; color:#999;">
+              <p>CHENSON México © 2025. Todos los derechos reservados.</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
+
+            `,
+        };
+
+        // 3. Envía el correo (con await)
+        const info = await transporter.sendMail(mailOptions);
+        return 'Correo enviado: ' + info.response;
+    } catch (error) {
+        return 'Error al enviar: ' + error.message;
+    }
+};
+
+export { enviarCorreo };

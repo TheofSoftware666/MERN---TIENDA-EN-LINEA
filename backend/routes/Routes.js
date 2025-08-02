@@ -4,9 +4,11 @@ import { obtenerProductos, obtenerProducto, obtenerProductosAdmin, obtenerProduc
 import { iniciarSesion, registrarUsuario, confirmarCuenta, mostrarPerfil } from "../controllers/usuarioController.js";
 import { obtenerCategoria, obtenerCategorias, subirCategoria, editarCategoria } from "../controllers/categoriaController.js";
 import { obtenerMarca, obtenerMarcas, subirMarca, editarMarca } from "../controllers/marcaController.js";
-import { obtenerPedidoAdmin, obtenerPedidosAdmin, registrarPedidoAdmin, actualizarPedidoAdmin } from "../controllers/pedidoAdminController.js";
+import { obtenerPedidoAdmin, obtenerPedidosAdmin } from "../controllers/pedidoAdminController.js";
 import { obtenerCarrito, addProductoCarrito, modificarCarrito, elimarItemsCarrito } from "../controllers/carritoController.js";
-import {  obtenerPedido, obtenerPedidos, capturarPedido, actualizarPedido } from "../controllers/pedidoController.js";
+import { obtenerPedido, obtenerPedidos, capturarPedido } from "../controllers/pedidoController.js";
+import { obtenerDevolucion, obtenerDevoluciones, GenerarDevolucion} from '../controllers/devolucionController.js';
+import { Enviar } from "../controllers/correoController.js";
 import checkAuth from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -33,7 +35,7 @@ router.get('/Admin/Marca/:id', obtenerMarca)
 
 router.get('/Admin/Pedido/:id', checkAuth, obtenerPedidoAdmin)
         .get('/Admin/Pedidos', checkAuth, obtenerPedidosAdmin)
-        .post('/Admin/Pedido', checkAuth, registrarPedidoAdmin);
+        //.patch('/Admin/Pedido', checkAuth, ActualizarPedido);
         // .patch('/Admin/Pedido', checkAuth, actualizarPedidoAdmin);
 
 // Rutas de Usuario Publicas
@@ -47,21 +49,25 @@ router.post('/Registrar', registrarUsuario);
 router.get('/MiCarrito', checkAuth, obtenerCarrito)
         .post('/agregarCarrito/:idProducto', checkAuth, addProductoCarrito)
         .patch('/ActualizarCarrito', checkAuth ,modificarCarrito)
-        .delete('/EliminarItemCarrito', checkAuth, elimarItemsCarrito);
+        .delete('/EliminarItemCarrito/:id', checkAuth, elimarItemsCarrito);
 
 // Rutas de Usuario Privadas
 router.get('/Perfil', checkAuth, mostrarPerfil);
         // .post('/Perfil/Configuracion/' , completarPerfil)
         // .patch('/Perfil/Configuracion/', actualizarPerfil);
 
+// Rutas de Realizacion de Pedidos
 router.get('/Pedidos/:id', checkAuth, obtenerPedido)
         .get('/Pedidos', checkAuth, obtenerPedidos)   
-        .post('/Pedidos', checkAuth, capturarPedido)
-        .patch('/Pedidos', checkAuth, actualizarPedido)
+        .post('/Pedidos', checkAuth, capturarPedido);
+        // .patch('/Pedidos', checkAuth, actualizarPedido)
 
-// router.get('/Devoluciones/:id', checkAuth, obtenerCarrito)
-//         .get('/Devoluciones', checkAuth, obtenerCarrito)   
-//         .post('/Devoluciones', checkAuth, añadirCarrito)
-//         .patch('/Devoluciones', checkAuth, modificarCarrito)      
+// Rutas de Devoluciones
+router.get('/Devoluciones/:id', checkAuth, obtenerDevolucion)
+        .get('/Devoluciones', checkAuth,   obtenerDevoluciones)   
+        .post('/Devoluciones', checkAuth, GenerarDevolucion);
+
+// Rutas de EnviarCorreos 
+router.post('/Email', checkAuth, Enviar);
 
 export default router;

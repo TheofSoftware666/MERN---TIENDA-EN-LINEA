@@ -56,4 +56,26 @@ const addNewCarrito = async (idUsuario) => {
     return results;
 }
 
-export { carrito, carritoDetalles, carritoEstado, addNewCarrito, agregarProductoCarrito }
+const obtenerProductoCarrito = async (idUsuario,idProducto, cantidad) => {
+
+    const conection = await db();
+
+    const query = `SELECT ActualizarProductoCarrito(${idUsuario}, ${idProducto}, ${cantidad});;`;
+
+    const [results, fields] = await conection.query(query);
+
+    return results;
+}
+
+const eliminarProductoCarrito = async (idUsuario, idProducto) => {
+    
+    const conection = await db();
+
+    const query = `SELECT EliminarItemCarrito(${idUsuario},${idProducto});`;
+    
+    const [results, fields ] = await conection.query(query);
+
+    return fields;
+} 
+
+export { carrito, carritoDetalles, carritoEstado, addNewCarrito, agregarProductoCarrito, obtenerProductoCarrito, eliminarProductoCarrito }

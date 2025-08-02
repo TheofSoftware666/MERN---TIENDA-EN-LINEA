@@ -1,4 +1,4 @@
-import { carrito, carritoDetalles, carritoEstado, addNewCarrito, agregarProductoCarrito } from "../models/carrito.js";
+import { carrito, carritoDetalles, carritoEstado, addNewCarrito, agregarProductoCarrito, obtenerProductoCarrito, eliminarProductoCarrito } from "../models/carrito.js";
 
 const obtenerCarrito = async (req, res) => {
     const { usuario } = req; 
@@ -85,22 +85,47 @@ const addProductoCarrito = async (req, res) => {
     return res.status(202).json({ success : message});
 };
 
-const modificarCarrito = (req, res) => {
+const modificarCarrito = async (req, res) => {
     
     const { usuario } = req;
     const { usuarioId } = usuario[0];    
     const { productoId, cantidad} = req.body;
-
     let message = "Se actualizo tu carrito exitosamente";
 
+    const resultado = await carrito(usuarioId);
 
+    if(resultado.length === 0){
+        const error = new Error('El usuario no cuenta con un carrito');
+        return res.status(404).json({ success : error});
+    }
+
+    const productoCarrito = await obtenerProductoCarrito(usuarioId, productoId, cantidad);
+
+    if(productoCarrito.length === 0){
+        const error = new Error('No se encontro ningun producto.');
+        return res.status(404).json({ success : error});
+    }
+
+    if(productoCarrito[0].cantidad === cantidad){        
+        return res.status(200).json({ success : message});
+    }
 
     return res.status(200).json({ success : message});
     
 };
 
-const elimarItemsCarrito = (req, res) => {
+const elimarItemsCarrito = async (req, res) => {
     
+    const { usuario } = req;
+    const { usuarioId } = usuario[0];   
+    const id = req.params.id;
+
+    const resultado = await eliminarProductoCarrito(usuarioId, id);
+
+    console.log(resultado[0]);
+    
+    return res.status(200).json({ success : "Se elimino el producto correctamente"});
+
 };
 
 export {obtenerCarrito, obtenerDetallesCarrito, addProductoCarrito, modificarCarrito, elimarItemsCarrito};
