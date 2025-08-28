@@ -1,161 +1,73 @@
+import React, { useState } from "react";
+import { X } from "lucide-react";
 
-const SideCarrito = () => {
+const SideCarrito = ({ onClose }) => {
+  // 🔹 Simulamos productos en el carrito
+  const [items] = useState([
+    { id: 1, name: "Mochila CHB Pro", price: 450, qty: 1, image: "https://fm.chenson.com.mx/1500X1500/1861105-3/1861105-3_01.jpg" },
+    { id: 2, name: "Lapicera Premium", price: 120, qty: 2, image: "https://fm.chenson.com.mx/1500X1500/1861105-3/1861105-3_01.jpg" },
+    { id: 3, name: "Laptop Case", price: 300, qty: 1, image: "https://fm.chenson.com.mx/1500X1500/1861105-3/1861105-3_01.jpg" },
+  ]);
+
+  const subtotal = items.reduce((acc, item) => acc + item.price * item.qty, 0);
+  const envioGratis = 1000; // monto meta para envío gratis
+  const faltante = envioGratis - subtotal;
+
   return (
-    <>
-       <div className="p-4 border-b flex justify-between items-center">
-        <h2 className="text-xl font-semibold">🛒 Tu carrito</h2>
-        <button className="text-gray-500 hover:text-black text-xl font-bold">×</button>
+    <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-2xl z-50 flex flex-col">
+      {/* Header */}
+      <div className="flex justify-between items-center p-4 border-b">
+        <h2 className="text-lg font-bold">Tu Carrito</h2>
+        <button onClick={onClose}>
+          <X size={20} />
+        </button>
       </div>
 
-      <div className="p-4 space-y-6 flex flex-col h-[calc(100%-64px)] justify-between">
-
-        {/* Lista de productos */}
-        <div className="space-y-4 overflow-y-auto max-h-[55vh] pr-2">
-          
-          {/* Producto 1 */}
-          <div className="flex items-start gap-3 border-b pb-3">
-            <img src="https://cdn.prod.website-files.com/60aec0444be46a4ded9aecb0/61a04ffaa7771e7453fd6279_portada-napoleon-hill-1.jpg" alt="Producto" className="w-16 h-16 object-cover rounded" />
-            <div className="flex-1">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="font-medium">Mochila Azul</p>
-                  <p className="text-sm text-gray-500">Cantidad: 2</p>
-                </div>
-                <button className="text-sm text-red-500 hover:underline">Eliminar</button>
+      {/* Productos */}
+      <div className="flex-1 overflow-y-auto p-4">
+        {items.length === 0 ? (
+          <p className="text-gray-500 text-sm text-center">Tu carrito está vacío 🛒</p>
+        ) : (
+          items.map((item) => (
+            <div key={item.id} className="flex items-center gap-3 mb-4 border-b pb-3">
+              <img src={item.image} alt={item.name} className="w-12 h-12 rounded object-cover" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">{item.name}</p>
+                <p className="text-xs text-gray-500">x{item.qty}</p>
               </div>
-              <div className="flex items-center gap-2 mt-2">
-                <button className="px-2 py-1 text-sm border rounded">−</button>
-                <button className="px-2 py-1 text-sm border rounded">+</button>
-              </div>
+              <p className="text-sm font-semibold">${item.price * item.qty}</p>
             </div>
-            <span className="text-sm font-semibold">$400.00</span>
+          ))
+        )}
+      </div>
+
+      {/* Subtotal + Incentivo */}
+      {items.length > 0 && (
+        <div className="p-4 border-t space-y-3">
+          {faltante > 0 ? (
+            <p className="text-xs text-blue-600">
+              🚚 Te faltan <span className="font-bold">${faltante}</span> para envío gratis
+            </p>
+          ) : (
+            <p className="text-xs text-green-600">🎉 ¡Ya tienes envío gratis!</p>
+          )}
+
+          <div className="flex justify-between font-semibold text-sm">
+            <span>Subtotal:</span>
+            <span>${subtotal}</span>
           </div>
 
-          {/* Producto 2 */}
-          <div className="flex items-start gap-3 border-b pb-3">
-            <img src="https://cdn.prod.website-files.com/60aec0444be46a4ded9aecb0/61a04ffaa7771e7453fd6279_portada-napoleon-hill-1.jpg" alt="Producto" className="w-16 h-16 object-cover rounded" />
-            <div className="flex-1">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="font-medium">Lonchera Negra</p>
-                  <p className="text-sm text-gray-500">Cantidad: 1</p>
-                </div>
-                <button className="text-sm text-red-500 hover:underline">Eliminar</button>
-              </div>
-              <div className="flex items-center gap-2 mt-2">
-                <button className="px-2 py-1 text-sm border rounded">−</button>
-                <button className="px-2 py-1 text-sm border rounded">+</button>
-              </div>
-            </div>
-            <span className="text-sm font-semibold">$250.00</span>
-          </div>
-
-          {/* Producto 3 */}
-          <div className="flex items-start gap-3 border-b pb-3">
-            <img src="https://cdn.prod.website-files.com/60aec0444be46a4ded9aecb0/61a04ffaa7771e7453fd6279_portada-napoleon-hill-1.jpg" alt="Producto" className="w-16 h-16 object-cover rounded" />
-            <div className="flex-1">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="font-medium">Lonchera Negra</p>
-                  <p className="text-sm text-gray-500">Cantidad: 1</p>
-                </div>
-                <button className="text-sm text-red-500 hover:underline">Eliminar</button>
-              </div>
-              <div className="flex items-center gap-2 mt-2">
-                <button className="px-2 py-1 text-sm border rounded">−</button>
-                <button className="px-2 py-1 text-sm border rounded">+</button>
-              </div>
-            </div>
-            <span className="text-sm font-semibold">$250.00</span>
-          </div>
-
-          {/* Producto 4 */}
-          <div className="flex items-start gap-3 border-b pb-3">
-            <img src="https://cdn.prod.website-files.com/60aec0444be46a4ded9aecb0/61a04ffaa7771e7453fd6279_portada-napoleon-hill-1.jpg" alt="Producto" className="w-16 h-16 object-cover rounded" />
-            <div className="flex-1">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="font-medium">Lonchera Negra</p>
-                  <p className="text-sm text-gray-500">Cantidad: 1</p>
-                </div>
-                <button className="text-sm text-red-500 hover:underline">Eliminar</button>
-              </div>
-              <div className="flex items-center gap-2 mt-2">
-                <button className="px-2 py-1 text-sm border rounded">−</button>
-                <button className="px-2 py-1 text-sm border rounded">+</button>
-              </div>
-            </div>
-            <span className="text-sm font-semibold">$250.00</span>
-          </div>
-
-          {/* Producto 5 */}
-          <div className="flex items-start gap-3 border-b pb-3">
-            <img src="https://cdn.prod.website-files.com/60aec0444be46a4ded9aecb0/61a04ffaa7771e7453fd6279_portada-napoleon-hill-1.jpg" alt="Producto" className="w-16 h-16 object-cover rounded" />
-            <div className="flex-1">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="font-medium">Lonchera Negra</p>
-                  <p className="text-sm text-gray-500">Cantidad: 1</p>
-                </div>
-                <button className="text-sm text-red-500 hover:underline">Eliminar</button>
-              </div>
-              <div className="flex items-center gap-2 mt-2">
-                <button className="px-2 py-1 text-sm border rounded">−</button>
-                <button className="px-2 py-1 text-sm border rounded">+</button>
-              </div>
-            </div>
-            <span className="text-sm font-semibold">$250.00</span>
-          </div>
-        </div>
-
-        {/* Resumen, cupón y acciones */}
-        <div className="space-y-4 pt-4 border-t">
-
-          {/* Cupón de descuento */}
-          <div>
-            <label className="text-sm font-medium block mb-1">Cupón de descuento</label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Ingresa tu cupón"
-                className="flex-1 border rounded px-3 py-2 text-sm"
-              />
-              <button className="px-4 py-2 bg-gray-800 text-white text-sm rounded hover:bg-black transition">
-                Aplicar
-              </button>
-            </div>
-          </div>
-
-          {/* Totales */}
-          <div className="space-y-1 text-sm">
-            <div className="flex justify-between">
-              <span>Subtotal</span>
-              <span>$650.00</span>
-            </div>
-            <div className="flex justify-between text-green-600">
-              <span>Descuento</span>
-              <span>− $50.00</span>
-            </div>
-            <div className="flex justify-between font-semibold text-base">
-              <span>Total</span>
-              <span>$600.00</span>
-            </div>
-          </div>
-
-          {/* Botón de pago */}
-          <button className="w-full bg-black text-white py-3 rounded hover:bg-gray-800 transition font-semibold">
-            Ir a pagar
+          <button className="bg-blue-600 text-white w-full py-3 rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+            Finalizar compra
           </button>
 
-          {/* Mensaje de confianza */}
-          <div className="text-xs text-gray-600 text-center">
-            🔒 Pagos 100% seguros y protegidos
-          </div>
+          <p className="text-[11px] text-gray-500 text-center mt-2">
+            🔒 Pago 100% seguro · Devoluciones fáciles
+          </p>
         </div>
-      </div>
-        
-    </>
-  )
-}
+      )}
+    </div>
+  );
+};
 
-export default SideCarrito
+export default SideCarrito;

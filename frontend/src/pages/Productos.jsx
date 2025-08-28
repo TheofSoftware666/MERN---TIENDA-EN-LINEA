@@ -2,21 +2,21 @@ import CardProducto from "../components/CardProducto.jsx";
 import FiltrosProductos from "../components/FiltrosProductos.jsx";
 
 const Productos = () => {
+
+  // Consultar productos
+
   return (
     <>
       <div className="container mx-auto px-4 md:px-20 py-10 bg-gray-50">
 
-        {/* Filtros */}
         <FiltrosProductos/>
 
-        {/* Productos */}
         <div className="grid gap-6 grid-cols-2 sm:grid-cols-2 md:grid-cols-3   lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           {Array.from({ length: 18 }).map((_, idx) => (
             <CardProducto key={idx} />
           ))}
         </div>
 
-        {/* Paginación minimalista */}
         <div className="flex justify-center mt-12">
           <nav className="flex items-center gap-2 px-5 py-2 bg-white border border-gray-200 rounded-full shadow-sm">
             <button className="px-3 py-1.5 text-gray-500 hover:text-blue-600 rounded-full transition duration-200">

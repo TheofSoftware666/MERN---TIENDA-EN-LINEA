@@ -1,6 +1,64 @@
-import React from 'react'
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import useAuth from '../hooks/useAuth.jsx';
 
 const FormLogin = () => {
+
+    const [ email, SetEmail ] = useState('');
+    const [ password, SetPassword ] = useState('');
+    const Navigation = useNavigate();
+
+    const HandleSubmit = async e => {
+        e.preventDefault();
+
+        if([email, password].includes('')){
+            console.log("Correo & password invalidos");
+            return;
+        }
+
+        if(!email.includes('@')){
+            console.log("Correo invalido.");
+            return;
+        }
+
+        // if(password.length < 6){
+        //     console.log("password invalido");
+        //     return;
+        // }
+
+        try{
+            // Petición
+            const url = "http://localhost:3001/tienda/api/Login";
+            const response = await axios.post(url, { email, password });
+            console.log(response.data.token);
+
+            localStorage.setItem('ape_token', response.data.token);
+
+            setTimeout(() => {
+                console.log("Bienvenido");
+                Navigation('/');
+            }, 1700);
+
+        }catch(error){
+            
+            console.log(error.response.data.msg);
+
+            if(error.response.data.msg.includes('verificada')){
+                
+                setTimeout(() => {
+
+                    Navigation('/Auth/confirmar');
+
+                }, 1500);
+
+                return;
+            }
+
+            console.log(error.response.data.msg);
+        }
+    }
+
   return (
     <>
      <div className="flex items-center justify-center min-h-screen bg-gray-100 px-2 py-8">
@@ -10,11 +68,13 @@ const FormLogin = () => {
             <div className="flex flex-col justify-center items-center w-full px-8 py-10">
             <h2 className="text-2xl font-bold text-blue-700 mb-6">👋 ¡Nos alegra verte de nuevo!</h2>
 
-            <form action="#" className="w-full max-w-md space-y-5">
+            <form className="w-full max-w-md space-y-5" onSubmit={HandleSubmit}>
                 <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1">Correo electrónico</label>
                 <input
                     type="email"
+                    value={email}
+                    onChange={e => SetEmail(e.target.value)}
                     placeholder="Ingresa tu correo"
                     className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
                 />
@@ -24,6 +84,8 @@ const FormLogin = () => {
                 <label className="block text-sm font-medium text-gray-600 mb-1">Contraseña</label>
                 <input
                     type="password"
+                    value={password}
+                    onChange={e => SetPassword(e.target.value)}
                     placeholder="••••••••"
                     className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
                 />
@@ -34,7 +96,7 @@ const FormLogin = () => {
                     <input type="checkbox" className="mr-2" />
                     Recuérdame
                 </label>
-                <a href="#" className="text-blue-500 hover:underline">¿Olvidaste tu contraseña?</a>
+                <Link to="/Auth/olvide-password" className="text-blue-500 hover:underline">¿Olvidaste tu contraseña?</Link>
                 </div>
 
                 <button
@@ -46,7 +108,7 @@ const FormLogin = () => {
 
                 <p className="text-center text-sm text-gray-600">
                 ¿No tienes cuenta?
-                <a href="#" className="text-blue-500 hover:underline"> Crea una cuenta aqui</a>
+                <Link to="/Auth" className="text-blue-500 hover:underline"> Crea una cuenta aqui</Link>
                 </p>
             </form>
             </div>

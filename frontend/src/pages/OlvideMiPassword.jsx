@@ -1,6 +1,37 @@
-import React from 'react'
+import axios from "axios";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const OlvideMiPassword = () => {
+
+  const [ email, SetEmail ] = useState('');
+
+  const HandleSubmit = async e => {
+    
+    // Evitar enviar el formulario
+    e.preventDefault();
+
+    // Validaciones
+    if(email == ''){
+      console.log("El correo ingresado es invalido");
+      return;
+    }
+
+    if(email.indexOf('@') == -1){
+      console.log("El correo ingresado es invalido");
+      return;
+    }
+
+    try{
+      const url = "http://localhost:3001/tienda/api/TokenPassword";
+      const response = await axios.post(url, { email });
+      console.log(response);
+
+    }catch(e){
+      console.log(e)
+    }
+  }
+
   return (
     <>
       <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4 py-8">
@@ -13,12 +44,14 @@ const OlvideMiPassword = () => {
         Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
       </p>
 
-      <form action="#" className="w-full max-w-md space-y-5">
+      <form className="w-full max-w-md space-y-5" onSubmit={HandleSubmit}>
         <div>
           <label className="block text-sm font-medium text-gray-600 mb-1">Correo electrónico</label>
           <input
             type="email"
             placeholder="tucorreo@ejemplo.com"
+            onChange={e => SetEmail(e.target.value.toLowerCase().trim())}
+            value={email}
             className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
           />
         </div>
@@ -32,7 +65,7 @@ const OlvideMiPassword = () => {
 
         <p className="text-center text-sm text-gray-600">
           ¿Ya recordaste tu contraseña?
-          <a href="#" className="text-blue-500 hover:underline ml-1">Inicia sesión</a>
+          <Link to="/Auth/inicio-sesion" className="text-blue-500 hover:underline ml-1">Inicia sesión</Link>
         </p>
       </form>
       </div>

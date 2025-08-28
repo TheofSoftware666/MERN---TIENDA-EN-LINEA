@@ -5,7 +5,7 @@ const CardProducto = () => {
     <>
         <div class="max-w-sm bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition duration-300 group">
             <div class="relative">
-                <img src="https://afizionados.com/cdn/shop/files/GORRIARAN1.jpg?v=1716950077&width=720" alt="iPhone 15 Pro Max" class="w-full h-60 object-cover transition-transform duration-300 group-hover:scale-105" />
+                <img src="http://localhost:3001/uploads/JavaScript.png" alt="iPhone 15 Pro Max" class="w-full h-60 object-cover transition-transform duration-300 group-hover:scale-105" />
                 <div class="absolute top-2 left-2 bg-red-500 text-gray-100 text-xs font-semibold px-2 py-1 rounded-md">🔥 Hasta 15% OFF • ¡Quedan 3!</div>
                 <div class="absolute top-2 right-2 flex space-x-2">
                 </div>

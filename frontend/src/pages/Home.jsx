@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import HeaderCategorias from "../components/HeaderCategorias.jsx"
 import Carousel from "../components/Carousel.jsx"
 import CardProducto from "../components/CardProducto.jsx"
@@ -5,6 +6,14 @@ import CardCategoria from "../components/CardCategoria.jsx"
 import CardMarca from "../components/CardMarca.jsx"
 
 const Home = () => {
+
+  useEffect(() => {
+
+    const token = localStorage.getItem('ape_tokens');
+    console.log(token);
+
+  }, []);
+
   return (
     <>
       <HeaderCategorias />

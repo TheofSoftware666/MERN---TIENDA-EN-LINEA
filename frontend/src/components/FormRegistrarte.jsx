@@ -1,6 +1,51 @@
-import React from 'react'
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import axios from 'axios';
+import Alerta from "./Alerta.jsx";
 
 const FormRegistrarte = () => {
+    const [ nombre, setNombre ] = useState('');
+    const [ email, setEmail ] = useState('');
+    const [ password, setPassword ] = useState('');
+    const [ repetir , setRepetir ] = useState('');
+
+    const [ alerta, setAlerta ] = useState({});
+    const navigate = useNavigate();
+
+    const handleSubmit = async e => {
+        e.preventDefault();
+
+        if([nombre, email.trim(), password.trim(), repetir.trim()].includes('')){
+            setAlerta({ msg: 'Es necesario completar todos los campos.', tipo : 'Error'});
+            return;
+        }
+
+        if(password !== repetir){
+            setAlerta({ msg: 'No coincide el ingreso de contraseña con la repetida', tipo : 'Error'});
+            return;
+        }
+
+        if(password.length < 8){
+            setAlerta({msg: 'La contraseña debera de contener minimo 8 caracteres', tipo : 'Error'});
+            return;
+        }
+
+        setAlerta({msg: 'Estamos preparando todo para ti...', tipo: 'Info'});
+
+        try{
+            const url = 'http://localhost:3001/tienda/api/Registrar'
+            const respuesta = await axios.post(url, {nombre ,email, password, repetir });
+            
+            setTimeout(() => {
+                setAlerta({msg : respuesta.data.msg + nombre, tipo: 'Exito'});
+            navigate('/Auth/confirmar');
+            }, 1000);
+            
+        }catch(error){
+            setAlerta({ msg: error.response.data.msg, tipo: 'Error'});
+        }
+    }
+
   return (
     <>
        <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4 py-8">
@@ -51,13 +96,16 @@ const FormRegistrarte = () => {
             <div className="flex flex-col justify-center items-center w-full px-8 py-10">
             <h2 className="text-2xl font-bold text-blue-700 mb-6">¡Crea tu cuenta y empieza a disfrutar!</h2>
 
-            <form action="#" className="w-full max-w-md space-y-5">
+            <Alerta alerta={alerta}/>
+            <form className="w-full max-w-md space-y-5" onSubmit={handleSubmit}>
                 <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1">Nombre</label>
                 <input
-                    type="email"
+                    type="text"
                     placeholder="ingresa tu nombre y apellido"
                     className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
+                    value={nombre}
+                    onChange={e => setNombre(e.target.value)}
                 />
                 </div>
                 
@@ -67,6 +115,8 @@ const FormRegistrarte = () => {
                     type="email"
                     placeholder="Ingresa tu correo"
                     className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
+                    value={email}
+                    onChange={e => setEmail(e.target.value.trim().toLowerCase())}
                 />
                 </div>
 
@@ -76,6 +126,8 @@ const FormRegistrarte = () => {
                     type="password"
                     placeholder="••••••••"
                     className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
+                    value={password}
+                    onChange={e => setPassword(e.target.value.trim())}
                 />
                 </div>
 
@@ -85,6 +137,8 @@ const FormRegistrarte = () => {
                     type="password"
                     placeholder="••••••••"
                     className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
+                    value={repetir}
+                    onChange={e => setRepetir(e.target.value.trim())}
                 />
                 </div>
 
@@ -101,7 +155,7 @@ const FormRegistrarte = () => {
 
                 <p className="text-center text-sm text-gray-600">
                 ¿Ya tienes una cuenta?
-                <a href="#" className="text-blue-500 hover:underline"> Inicia sesion aqui</a>
+                <Link to="/Auth/inicio-sesion" className="text-blue-500 hover:underline"> Inicia sesion aqui</Link>
                 </p>
             </form>
             </div>

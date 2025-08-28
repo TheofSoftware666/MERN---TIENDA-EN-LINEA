@@ -1,6 +1,43 @@
-import React from 'react'
+import axios from "axios";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Alerta from "../components/Alerta.jsx";
 
 const ConfirmarCuenta = () => {
+  
+  const [ Codigo, SetCodigo  ] = useState('');
+  const [ Message, setMessage  ] = useState({});
+  const [ Title, SetTitle ] = useState('');
+  const Navigate = useNavigate();
+
+  const HandleSubmit = async e => {
+    // Evitar enviar el formulario
+    e.preventDefault();
+
+    console.log("se ejecuto para validar cuenta");
+
+    if(Codigo.length < 6){
+      setMessage({msg: 'Codigo de verificacion invalido', tipo: 'Error'});
+      return;
+    } 
+
+    setMessage({msg: "Verificando codigo...", tipo: 'Info'});
+    
+    try{
+      const url = "http://localhost:3001/tienda/api/ConfirmarCuenta/" + Codigo;
+      const response = await axios.get(url);
+
+      setTimeout(() => {
+      setMessage({msg: response.data.msg, tipo: 'Exito'});
+      Navigate('/Auth/inicio-sesion');
+    }, 1000);
+
+    }catch(error){
+      setMessage({ msg: error.response.data.msg, tipo: 'Error'});
+    }
+
+  }
+  
   return (
     <>
       <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4 py-8">
@@ -13,10 +50,12 @@ const ConfirmarCuenta = () => {
               Te hemos enviado un código de verificación a tu correo electrónico. Ingresa el código a continuación para activar tu cuenta.
             </p>
 
-            <form action="#" className="w-full max-w-md space-y-5">
+            <form className="w-full max-w-md space-y-5" onSubmit={HandleSubmit}>
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1">Código de verificación</label>
                 <input
+                  value={Codigo}
+                  onChange={e => SetCodigo(e.target.value.trim().toUpperCase())}
                   type="text"
                   placeholder="Ej: 123456"
                   className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 tracking-widest text-center"
@@ -34,6 +73,7 @@ const ConfirmarCuenta = () => {
                 <p>¿No recibiste el código?</p>
                 <a href="#" className="text-blue-500 hover:underline">Reenviar código</a>
               </div>
+                <Alerta alerta={Message} />
             </form>
           </div>
 

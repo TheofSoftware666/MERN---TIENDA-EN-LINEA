@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   LineChart,
   Line,
@@ -14,86 +15,83 @@ import {
   Legend,
 } from 'recharts';
 
-const COLORS = ['#60A5FA', '#F87171', '#34D399', '#FBBF24', '#A78BFA', '#F472B6'];
+const COLORS = ['#3B82F6', '#F59E0B', '#10B981', '#EF4444', '#6366F1', '#EC4899'];
 
-const productosMasVendidos = [
-  { name: 'Shampoo A', value: 120 },
-  { name: 'Suero B', value: 98 },
+const kpis = [
+  { title: 'Top Selling Products', value: '$69,120', change: '+23%', color: 'text-green-600' },
+  { title: 'Orders', value: '4,820', change: '+72%', color: 'text-green-600' },
+  { title: 'Conversion Rate', value: '1.23%', change: '+02%', color: 'text-orange-500' },
+  { title: 'Avg. Order Value', value: '$89.21', change: '+4.6%', color: 'text-green-600' },
+];
+
+const productsData = [
+  { name: 'Shampoo A', value: 40 },
+  { name: 'Seruth B', value: 10 },
   { name: 'Gel C', value: 80 },
-  { name: 'Crema D', value: 60 },
+  { name: 'Cream D', value: 10 },
 ];
 
-const visitasPorProducto = [
-  { name: 'ID 101', visitas: 1500 },
-  { name: 'ID 102', visitas: 1200 },
-  { name: 'ID 103', visitas: 900 },
-  { name: 'ID 104', visitas: 750 },
+const revenueData = [
+  { mes: 'Jan', total: 300 },
+  { mes: 'Feb', total: 350 },
+  { mes: 'Mar', total: 480 },
+  { mes: 'Apr', total: 400 },
+  { mes: 'May', total: 420 },
+  { mes: 'Jun', total: 260 },
+  { mes: 'Jul', total: 500 },
+  { mes: 'Aug', total: 450 },
+  { mes: 'Sep', total: 460 },
+  { mes: 'Oct', total: 470 },
+  { mes: 'Nov', total: 550 },
+  { mes: 'Dec', total: 620 },
 ];
 
-const pedidosPorEstatus = [
-  { name: 'Entregado', cantidad: 140 },
-  { name: 'En camino', cantidad: 60 },
-  { name: 'Pendiente', cantidad: 30 },
-  { name: 'Cancelado', cantidad: 10 },
+const visitorsData = [
+  { name: 'New Visitors', value: 400 },
+  { name: 'Returning', value: 450 },
+  { name: 'Ted Visitors', value: 150 },
+  { name: 'Refunded', value: 220 },
 ];
 
-const comprasUsuarios = [
-  { name: 'Clientes con cuenta', compras: 180 },
-  { name: 'Usuarios sin cuenta', compras: 95 },
+const ordersStatus = [
+  { name: 'Delivered', value: 600 },
+  { name: 'Pending', value: 150 },
+  { name: 'Cancelled', value: 60 },
 ];
 
-const ventasPorMes = [
-  { mes: 'Ene', total: 45000 },
-  { mes: 'Feb', total: 52000 },
-  { mes: 'Mar', total: 61000 },
-  { mes: 'Abr', total: 48000 },
-  { mes: 'May', total: 70000 },
-  { mes: 'Jun', total: 67500 },
+const trafficData = [
+  { name: 'Direct', value: 60 },
+  { name: 'Search', value: 30 },
+  { name: 'Other', value: 10 },
 ];
 
-
-const AdminDashBoard = () => {
+const AdminKPIDashboard = () => {
   return (
-    <>
-      <section className="w-full mt-12">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Análisis del Ecommerce</h2>
+    <section className="w-full mt-12 text-gray-900 bg-white min-h-screen p-6">
+      <h2 className="text-2xl font-bold mb-6">E-commerce Overview</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 mb-10">
-        {/* Total ventas */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col items-start">
-          <span className="text-sm text-gray-500">Ventas totales del mes</span>
-          <h3 className="text-3xl font-bold text-green-600 mt-2">$67,500.00</h3>
-        </div>
-
-        {/* Total pedidos */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col items-start">
-          <span className="text-sm text-gray-500">Pedidos procesados</span>
-          <h3 className="text-3xl font-bold text-blue-600 mt-2">240</h3>
-        </div>
-
-        {/* Total devoluciones */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col items-start">
-          <span className="text-sm text-gray-500">Total devoluciones</span>
-          <h3 className="text-3xl font-bold text-red-500 mt-2">15</h3>
-        </div>
+      {/* KPI Summary */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+        {kpis.map((kpi, i) => (
+          <div
+            key={i}
+            className="bg-gray-100 p-5 rounded-lg shadow-sm border border-gray-200 flex flex-col gap-1"
+          >
+            <span className="text-sm text-gray-500">{kpi.title}</span>
+            <h3 className={`text-2xl font-bold ${kpi.color}`}>{kpi.value}</h3>
+            <span className="text-xs text-green-600">{kpi.change}</span>
+          </div>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        {/* Productos más vendidos */}
-        <div className="bg-white p-5 shadow-sm rounded-lg border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Top productos más vendidos</h3>
+        {/* Top Selling Products */}
+        <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Top Selling Products</h3>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
-              <Pie
-                data={productosMasVendidos}
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                label
-              >
-                {productosMasVendidos.map((_, index) => (
+              <Pie dataKey="value" data={productsData} cx="50%" cy="50%" outerRadius={80} label>
+                {productsData.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
@@ -103,75 +101,66 @@ const AdminDashBoard = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* Visitas por producto */}
-        <div className="bg-white p-5 shadow-sm rounded-lg border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Visitas por producto</h3>
+        {/* Revenue Graph */}
+        <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Revenue</h3>
           <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={visitasPorProducto}>
-              <Bar dataKey="visitas" fill="#60A5FA" />
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Pedidos por estatus */}
-        <div className="bg-white p-5 shadow-sm rounded-lg border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Pedidos por estatus</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={pedidosPorEstatus}>
-              <Bar dataKey="cantidad" fill="#34D399" />
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Compras por tipo de usuario */}
-        <div className="bg-white p-5 shadow-sm rounded-lg border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Tipo de comprador</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={comprasUsuarios}
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="compras"
-                label
-              >
-                {comprasUsuarios.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Ventas por mes */}
-        <div className="bg-white p-5 shadow-sm rounded-lg border border-gray-200 md:col-span-2 xl:col-span-3">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Historial de ventas por mes</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={ventasPorMes}>
-              <Line type="monotone" dataKey="total" stroke="#4F46E5" strokeWidth={3} />
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="mes" />
-              <YAxis />
+            <LineChart data={revenueData}>
+              <Line type="monotone" dataKey="total" stroke="#3B82F6" strokeWidth={2} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis dataKey="mes" stroke="#6B7280" />
+              <YAxis stroke="#6B7280" />
               <Tooltip />
             </LineChart>
           </ResponsiveContainer>
         </div>
+
+        {/* Visitors */}
+        <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Visitors</h3>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={visitorsData}>
+              <Bar dataKey="value" fill="#6366F1" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis dataKey="name" stroke="#6B7280" />
+              <YAxis stroke="#6B7280" />
+              <Tooltip />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Orders by Status */}
+        <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Orders by Status</h3>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={ordersStatus}>
+              <Bar dataKey="value" fill="#10B981" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis dataKey="name" stroke="#6B7280" />
+              <YAxis stroke="#6B7280" />
+              <Tooltip />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Traffic Source */}
+        <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Traffic Source</h3>
+          <ResponsiveContainer width="100%" height={250}>
+            <PieChart>
+              <Pie dataKey="value" data={trafficData} cx="50%" cy="50%" outerRadius={80} label>
+                {trafficData.map((_, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </section>
-    </>
-  )
-}
+  );
+};
 
-export default AdminDashBoard
+export default AdminKPIDashboard;

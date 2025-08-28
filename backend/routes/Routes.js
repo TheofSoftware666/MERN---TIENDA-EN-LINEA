@@ -1,7 +1,7 @@
 import express from "express";
 import { actualizarInfoTienda, infoTienda, ingresarInfoTienda } from "../controllers/tiendaController.js";
 import { obtenerProductos, obtenerProducto, obtenerProductosAdmin, obtenerProductoAdmin,registrarProducto, actualizarProducto } from "../controllers/productosController.js";
-import { iniciarSesion, registrarUsuario, confirmarCuenta, mostrarPerfil } from "../controllers/usuarioController.js";
+import { iniciarSesion, registrarUsuario, confirmarCuenta, mostrarPerfil, CambiarPasswordToken, ComprobarTokenPassword, ActualizarPassword } from "../controllers/usuarioController.js";
 import { obtenerCategoria, obtenerCategorias, subirCategoria, editarCategoria } from "../controllers/categoriaController.js";
 import { obtenerMarca, obtenerMarcas, subirMarca, editarMarca } from "../controllers/marcaController.js";
 import { obtenerPedidoAdmin, obtenerPedidosAdmin } from "../controllers/pedidoAdminController.js";
@@ -44,6 +44,9 @@ router.get('/Productos/:id', obtenerProducto);
 router.get('/ConfirmarCuenta/:token', confirmarCuenta);
 router.post('/Login', iniciarSesion);
 router.post('/Registrar', registrarUsuario);
+router.post('/TokenPassword', CambiarPasswordToken);
+router.post('/ActualizarPassword', ActualizarPassword);
+router.get('/ActualizarPassword/:id', ComprobarTokenPassword);
 
 // Ruta de Usuario publica /privada
 router.get('/MiCarrito', checkAuth, obtenerCarrito)
