@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
 
-const SideCarrito = ({ onClose }) => {
+const SideCarrito = ({ onOpenCheck }) => {
   // 🔹 Simulamos productos en el carrito
   const [items] = useState([
     { id: 1, name: "Mochila CHB Pro", price: 450, qty: 1, image: "https://fm.chenson.com.mx/1500X1500/1861105-3/1861105-3_01.jpg" },
@@ -14,14 +14,14 @@ const SideCarrito = ({ onClose }) => {
   const faltante = envioGratis - subtotal;
 
   return (
-    <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-2xl z-50 flex flex-col">
+    <>
       {/* Header */}
-      <div className="flex justify-between items-center p-4 border-b">
+      {/* <div className="flex justify-between items-center p-4 border-b">
         <h2 className="text-lg font-bold">Tu Carrito</h2>
         <button onClick={onClose}>
           <X size={20} />
         </button>
-      </div>
+      </div> */}
 
       {/* Productos */}
       <div className="flex-1 overflow-y-auto p-4">
@@ -57,7 +57,7 @@ const SideCarrito = ({ onClose }) => {
             <span>${subtotal}</span>
           </div>
 
-          <button className="bg-blue-600 text-white w-full py-3 rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+          <button onClick={onOpenCheck()} className="bg-blue-600 text-white w-full py-3 rounded-lg hover:bg-blue-700 transition text-sm font-medium">
             Finalizar compra
           </button>
 
@@ -66,7 +66,7 @@ const SideCarrito = ({ onClose }) => {
           </p>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { categoria, categorias, actualizarCategoria, adicionarCategoria, categoriaNombre } from "../models/categoria.js";
 
 const obtenerCategoria = async (req, res) => {
@@ -24,7 +26,6 @@ const obtenerCategoria = async (req, res) => {
 }
 
 const obtenerCategorias = async (req, res) => {
-    
     try{
         const { limit } = req.params;
 
@@ -35,8 +36,6 @@ const obtenerCategorias = async (req, res) => {
         const resultado = await categorias(parseInt(limit));
 
         console.log(resultado)
-        console.log(resultado.length)
-
         res.status(200).json({ categorias : resultado });
 
     }catch(e){
@@ -51,22 +50,35 @@ const obtenerCategorias = async (req, res) => {
 const subirCategoria = async (req, res) => {
     try{
         const postData = req.body;
+        const { imagen } = req.body;
+        const allowedTypes = ["image/jpeg", "image/png"];
 
-        if(postData.nombre.length < 4){
-            const error = new Error("El nombre de la categoria debe contener por lo menos 5 caracteres");
-
-            return res.status(404).json({ error });
+        if(!req.file){
+            const error = new Error("Es necesario cargar alguna una imagen para subir una nueva categoria");    
+            return res.status(404).json({ error: error.message });
         }
 
-        const resultado = await categoriaNombre(postData.nombre);
-
-        if(resultado.length != 0){
-            const error = new Error("El nombre " + postData.nombre + " ya existe en la base de datos");
-
+        if (!allowedTypes.includes(req.file.mimetype)) {
+            const error = new Error("Solo se permiten imágenes PNG o JPG");    
             return res.status(404).json({ error : error.message });
         }
 
-        await adicionarCategoria(postData.nombre.toUpperCase());
+        if(postData.nombre.length < 4){
+            const error = new Error("El nombre de la categoria debe contener por lo menos 5 caracteres. ");
+            return res.status(404).json({ error : error.message });
+        }
+        
+        const resultado = await categoriaNombre(postData.nombre, req.file.originalname);
+
+        if(resultado.length != 0){  
+            const error = new Error("Actualmente ya existe una categoria llamada " + postData.nombre + " o la imagen ya existe " + req.file.originalname);
+            return res.status(404).json({ error : error.message });
+        }
+
+        const uploadPath = path.join(process.cwd(), "uploads/categorias", req.file.originalname );        
+        fs.writeFileSync(uploadPath, req.file.buffer);
+
+        await adicionarCategoria(postData.nombre.toUpperCase(), req.file.originalname);
 
         const validar = await categoriaNombre(postData.nombre);
 
@@ -76,13 +88,13 @@ const subirCategoria = async (req, res) => {
             return res.status(404).json({ error : error.message });
         }
 
+
         return res.status(200).json({ msg : "Exito: se añadio una nueva categoria" });
 
     }catch(e){
-        const error = new Error("Ocurrio un error al consultar la informacion");
         console.log(e);
-
-        res.status(404).json({ error : error.message });        
+        const error = new Error("Ocurrio un error al consultar la informacion");
+        res.status(404).json({ error : error.message + e});        
     }
 
 }

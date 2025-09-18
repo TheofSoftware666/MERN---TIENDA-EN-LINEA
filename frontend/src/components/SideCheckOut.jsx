@@ -76,9 +76,9 @@ const SideCheckOut = () => {
   return (
     <div className="h-full flex flex-col bg-white">
       {/* Header (puedes poner un botón de cerrar aquí si quieres) */}
-      <div className="p-4 border-b">
+      {/* <div className="p-4 border-b">
         <h2 className="text-lg font-semibold">🧾 Finalizar compra</h2>
-      </div>
+      </div> */}
 
       {/* CONTENIDO SCROLLEABLE */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">

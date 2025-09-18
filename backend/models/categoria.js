@@ -11,11 +11,11 @@ const categoria = async (id) => {
     return results;
 }
 
-const categoriaNombre = async (id) => {
+const categoriaNombre = async (id, imagen) => {
 
     const conexion = await db();
-
-    const query = `SELECT * FROM categoria WHERE nombre = '${id}'`;
+    
+    const query = `SELECT * FROM categoria WHERE nombre = '${id}' OR imagen = '${imagen}'`;
 
     const [ results , fields] = await conexion.query(query);
 
@@ -40,11 +40,11 @@ const categorias = async (limit) => {
     return results;
 }
 
-const adicionarCategoria = async (nombre) => {
+const adicionarCategoria = async (nombre, imagen) => {
 
     const conexion = await db();
 
-    const query = `INSERT INTO categoria (nombre) VALUES ('${nombre}');`;
+    const query = `INSERT INTO categoria (nombre, imagen) VALUES ('${nombre}', '${imagen}');`;
 
     const [ results, fields ] = await conexion.query(query);
 

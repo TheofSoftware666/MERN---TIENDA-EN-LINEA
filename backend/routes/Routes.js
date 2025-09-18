@@ -1,4 +1,6 @@
 import express from "express";
+import { createMulter } from "./../helpers/upload.js";
+import { subirArchivo } from "../helpers/uploadFile.js";
 import { actualizarInfoTienda, infoTienda, ingresarInfoTienda } from "../controllers/tiendaController.js";
 import { obtenerProductos, obtenerProducto, obtenerProductosAdmin, obtenerProductoAdmin,registrarProducto, actualizarProducto } from "../controllers/productosController.js";
 import { iniciarSesion, registrarUsuario, confirmarCuenta, mostrarPerfil, CambiarPasswordToken, ComprobarTokenPassword, ActualizarPassword } from "../controllers/usuarioController.js";
@@ -13,6 +15,9 @@ import checkAuth from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+// Declaraciones de Archivos
+const uploadCategorias = createMulter("categorias");
+
 // Rutas de Administrador
 router.get('/Admin/MiTienda', checkAuth, infoTienda)
         .post('/Admin/MiTienda', checkAuth, ingresarInfoTienda)
@@ -23,9 +28,10 @@ router.get('/Admin/Producto/:id', checkAuth, obtenerProductoAdmin)
       .post('/Admin/AgregarProducto', checkAuth, registrarProducto)
       .patch('/Admin/EditarProducto/:id', checkAuth, actualizarProducto);
 
+
 router.get('/Admin/Categoria/:id', obtenerCategoria)
         .get('/Admin/Categorias/:limit', obtenerCategorias)
-        .post('/Admin/AgregarCategoria', checkAuth, subirCategoria)
+        .post('/Admin/AgregarCategoria', checkAuth, subirArchivo(uploadCategorias, "imagen"), subirCategoria)
         .patch('/Admin/ActualizarCategoria', checkAuth, editarCategoria);
 
 router.get('/Admin/Marca/:id', obtenerMarca)

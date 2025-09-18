@@ -67,8 +67,8 @@ const trafficData = [
 
 const AdminKPIDashboard = () => {
   return (
-    <section className="w-full mt-12 text-gray-900 bg-white min-h-screen p-6">
-      <h2 className="text-2xl font-bold mb-6">E-commerce Overview</h2>
+    <section className="w-full  text-gray-900 bg-white min-h-screen p-6">
+      <h2 className="text-2xl font-bold mb-6">Altisys - Results</h2>
 
       {/* KPI Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">

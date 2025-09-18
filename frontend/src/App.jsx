@@ -15,7 +15,8 @@ import AdminDashBoard from './pages/AdminDashBoard.jsx';
 import Productos from './pages/Productos.jsx';
 import Producto from './pages/Producto.jsx';
 import AdminPedidos from './pages/AdminPedidos.jsx';
-import AdminAddProducto from './pages/AdminAddProducto.jsx';
+import AdminDevoluciones from './pages/AdminDevoluciones.jsx';
+// import AdminAddProducto from './pages/AdminAddProducto.jsx';
 import AdminProductos from './pages/AdminProductos.jsx';
 import AdminEmailMarketing from './pages/AdminEmailMarketing.jsx';
 import AdminCupones from './pages/AdminCupones.jsx';
@@ -39,9 +40,9 @@ function App() {
         </Route>
         
         <Route path="/Admin" element={<AdminLayout />}>
-            <Route index element={<AdminDashBoard/> }/>
+            <Route index element={<AdminDashBoard/> }/> 
             <Route path='Pedidos' element={<AdminPedidos/> }/>
-            <Route path='AgregarProducto' element={<AdminAddProducto/> }/>
+            <Route path='Devoluciones' element={<AdminDevoluciones/> }/>
             <Route path='Productos' element={<AdminProductos/> }/>
             <Route path='EmailMarketing' element={<AdminEmailMarketing/> }/>
             <Route path='Cupones' element={<AdminCupones/> }/>

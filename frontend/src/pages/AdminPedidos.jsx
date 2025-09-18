@@ -2,7 +2,7 @@ import React from 'react';
 
 const AdminPedidos = () => {
   return (
-    <section className="w-full mt-12 text-gray-900 bg-white min-h-screen p-6">
+    <section className="w-full text-gray-900 bg-white min-h-screen p-6">
       <h2 className="text-2xl font-bold mb-6">Gestión de Pedidos</h2>
 
       <div className="bg-gray-100 p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
