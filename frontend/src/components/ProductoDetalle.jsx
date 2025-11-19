@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 import {
 //   FaShoppingCart,
   // FaCheckCircle,
@@ -12,60 +14,120 @@ import {
   FaCcPaypal,
 } from 'react-icons/fa6';
 
-const ProductoDetalle = () => {
+const ProductoDetalle = ({ productoId }) => {
+   const [producto, setProducto] = useState({});
+  
+
+   useEffect(() => {
+
+    console.log("Producto ID:", productoId);
+    if (!productoId) return;
+
+    const fetchProducto = async () => {
+      try {
+        const res = await axios.get(`http://localhost:3001/tienda/api/Productos/${productoId}`);
+        setProducto(res.data.data);
+        console.log(res.data.data)
+      } catch (err) {
+        console.log(err.response?.data?.error || err.message);
+      } 
+    };
+
+    fetchProducto();
+  }, [productoId]);
+    
   return (
     <section className="w-full max-w-7xl mx-auto px-4 py-10">
-  <div className="flex flex-col md:flex-row items-start gap-8">
+      <div className="flex flex-col md:flex-row items-start gap-8">
 
-    {/* Imagen del producto */}
-    <div className="w-full md:w-1/2 aspect-[4/5] bg-white rounded-lg overflow-hidden shadow-md">
-      <img
-        src="https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/hds/hds94959/l/24.jpg"
-        alt="Producto"
-        className="w-full h-full object-contain"
-      />
-    </div>
+      {/* Imagen del producto */}
+      <div className="w-full md:w-1/2 aspect-[4/5] bg-white rounded-lg overflow-hidden shadow-md">
+        <img
+          src="https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/hds/hds94959/l/24.jpg"
+          alt="Producto"
+          className="w-full h-full object-contain"
+        />
+      </div>
 
-    {/* Detalles del producto */}
-    <div className="w-full md:w-1/2 flex flex-col gap-5">
+      {/* Detalles del producto */}
+      <div className="w-full md:w-1/2 flex flex-col gap-5">
 
       {/* Título */}
-      <h1 className="text-3xl font-bold text-gray-900">Shampoo Anticaída</h1>
+      <h1 className="text-3xl font-bold text-gray-900">{producto?.Producto?.NombreProducto}</h1>
 
       {/* Descripción */}
-      <p className="text-lg text-gray-600">
-        Kit de limpieza personal para dama. Incluye un shampoo anticaída y un suero reconstructor de regalo.
+      <p className="text-lg text-gray-600 line-clamp-3">
+        {producto?.Producto?.Descripcion || "Descripción breve del producto para captar la atención del cliente."}
       </p>
 
       {/* Stock y precio */}
       <div className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-green-600">Disponible: 15 piezas</span>
-        <span className="text-2xl font-bold text-gray-900">$999.00</span>
-        <span className="text-base line-through text-red-500">$1,299.00</span>
-        <span className="text-sm text-red-600 font-semibold">¡Ahorra 23% en tu compra!</span>
+        <span className="text-sm font-medium text-green-600">
+          Disponible: {producto?.Producto?.Disponible}
+        </span>
+
+        {/* Precio con descuento si aplica */}
+        {producto?.Producto?.Descuento > 0 ? (
+          <>
+            {/* Precio final con descuento */}
+            <span className="text-2xl font-bold text-gray-900">
+              $ { (producto?.Producto?.Precio * (1 - producto?.Producto?.Descuento / 100)).toFixed(2) }
+            </span>
+
+            {/* Precio original tachado */}
+            <span className="text-base line-through text-red-500">
+              $ { (producto?.Producto?.Precio).toFixed(2) }
+            </span>
+
+            {/* Texto de ahorro */}
+            <span className="text-sm text-red-600 font-semibold">
+              ¡Ahorra {producto?.Producto?.Descuento}% en tu compra!
+            </span>
+          </>
+        ) : (
+          <>
+            {/* Solo precio normal */}
+            <span className="text-2xl font-bold text-gray-900">
+              ${ producto?.Producto?.Precio }
+            </span>
+          </>
+        )}
       </div>
+
 
       {/* Selección de tallas (ropa) */}
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-gray-800">Talla:</label>
-        <div className="flex gap-2">
-          <button className="border border-gray-300 px-4 py-2 rounded hover:border-black text-sm">S</button>
-          <button className="border border-gray-300 px-4 py-2 rounded hover:border-black text-sm">M</button>
-          <button className="border border-gray-300 px-4 py-2 rounded hover:border-black text-sm">L</button>
-          <button className="border border-gray-300 px-4 py-2 rounded hover:border-black text-sm">XL</button>
+      {producto?.Variantes?.length > 0 && (
+        <div className="flex flex-col gap-2 mt-4">
+          <label className="text-sm font-medium text-gray-800">Variantes:</label>
+          <div className="flex gap-2 flex-wrap">
+            {producto.Variantes.map((v) => (
+              <button
+                key={v.VarianteId}
+                className="border border-gray-300 px-4 py-2 rounded hover:border-black text-sm"
+              >
+                {v.Nombre}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Selección de color (ropa) */}
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-gray-800">Color:</label>
-        <div className="flex gap-3">
-          <span className="w-6 h-6 rounded-full bg-black border-2 border-gray-300"></span>
-          <span className="w-6 h-6 rounded-full bg-blue-600 border-2 border-gray-300"></span>
-          <span className="w-6 h-6 rounded-full bg-pink-500 border-2 border-gray-300"></span>
-          <span className="w-6 h-6 rounded-full bg-gray-400 border-2 border-gray-300"></span>
+      {producto?.Variantes?.some((v) => v.ColorHex && v.ColorHex.trim() !== "") && (
+        <div className="flex flex-col gap-2 mt-4">
+          <label className="text-sm font-medium text-gray-800">Color:</label>
+          <div className="flex gap-3">
+            {producto.Variantes.filter((v) => v.ColorHex && v.ColorHex.trim() !== "").map((v) => (
+              <span
+                key={v.VarianteId}
+                className="w-6 h-6 rounded-full border-2 border-gray-300 cursor-pointer"
+                style={{ backgroundColor: v.ColorHex }}
+                title={v.Nombre}
+              ></span>
+            ))}
+          </div>
         </div>
-      </div>
+)}
 
       {/* Botones de acción */}
       <div className="flex flex-col sm:flex-row gap-3 mt-4">
@@ -127,102 +189,44 @@ const ProductoDetalle = () => {
     </div>
   </div>
 
-  {/* Seccion de Descripcion del producto */}  
+    {/* Sección de Descripción del producto */}
+  <section className="w-full max-w-5xl mx-auto px-4 py-12 border-t border-gray-200 mt-8">
+    <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+      Descripción de {producto?.Producto?.NombreProducto}
+    </h2>
+
+    <div
+      className="text-gray-700 space-y-5 leading-relaxed text-base"
+      dangerouslySetInnerHTML={{ __html: producto?.Producto?.Descripcion || "Sin descripción disponible" }}
+    />
+  </section>
+
+  {/* Preguntas & Respuestas */}
+  {producto?.Faqs?.length > 0 && (
     <section className="w-full max-w-5xl mx-auto px-4 py-12 border-t border-gray-200 mt-8">
-  <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
-    Descripción del producto
-  </h2>
+      <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+        Preguntas frecuentes
+      </h2>
 
-  <div className="text-gray-700 space-y-5 leading-relaxed text-base">
-    <p>
-      El <strong>Shampoo Anticaída con Suero Reconstructor</strong> ha sido diseñado para quienes buscan un tratamiento efectivo y diario contra la caída del cabello. Su fórmula especializada actúa directamente en la raíz, fortaleciendo el folículo y estimulando el crecimiento natural.
-    </p>
+      <div className="space-y-4">
+        {producto.Faqs.map((faq, index) => (
+          <div
+            key={index}
+            className="border border-gray-300 rounded-lg p-4 bg-white shadow-sm"
+          >
+            <h3 className="text-md font-semibold text-gray-800 flex justify-between items-center">
+              {faq.Pregunta}
+              <span className="text-gray-500">▼</span>
+            </h3>
+            <p className="text-sm text-gray-600 mt-2">
+              {faq.Respuesta}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
 
-    <p>
-      Gracias a su combinación de ingredientes activos como la biotina, cafeína y extractos botánicos, este shampoo no solo detiene la caída, sino que también mejora el brillo, la textura y el volumen del cabello desde las primeras aplicaciones.
-    </p>
-
-    <p>
-      El suero incluido como regalo complementa el tratamiento, nutriendo profundamente el cuero cabelludo y reparando zonas debilitadas. Este kit es ideal para uso en mujeres y hombres, libre de sulfatos y formulado para todo tipo de cabello, incluso el teñido.
-    </p>
-
-    <p>
-      Dermatológicamente probado. Producto vegano. No probado en animales.
-    </p>
-
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-      <ul className="list-disc pl-5 space-y-2">
-        <li>Contenido: 1 Shampoo (350 ml) + 1 Suero Reconstructor (100 ml)</li>
-        <li>Aroma suave, textura ligera, fácil enjuague</li>
-        <li>Ideal para uso diario</li>
-        <li>Conserva el color en cabellos teñidos</li>
-      </ul>
-
-      <ul className="list-disc pl-5 space-y-2">
-        <li>Origen: Hecho en México 🇲🇽</li>
-        <li>100% libre de parabenos y siliconas</li>
-        <li>Con activos de origen natural</li>
-        <li>Incluye instructivo de uso</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-{/* Preguntas & Respuestas */}
-
-<section className="w-full max-w-5xl mx-auto px-4 py-12 border-t border-gray-200 mt-8">
-  <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
-    Preguntas frecuentes
-  </h2>
-
-  <div className="space-y-4">
-
-    {/* Pregunta 1 */}
-    <div className="border border-gray-300 rounded-lg p-4 bg-white shadow-sm">
-      <h3 className="text-md font-semibold text-gray-800 flex justify-between items-center">
-        ¿Cuánto tiempo tarda en llegar mi pedido?
-        <span className="text-gray-500">▼</span>
-      </h3>
-      <p className="text-sm text-gray-600 mt-2">
-        El tiempo estimado de entrega es de 1 a 3 días hábiles. Si estás en una zona metropolitana, podrías recibirlo incluso al día siguiente.
-      </p>
-    </div>
-
-    {/* Pregunta 2 */}
-    <div className="border border-gray-300 rounded-lg p-4 bg-white shadow-sm">
-      <h3 className="text-md font-semibold text-gray-800 flex justify-between items-center">
-        ¿Qué pasa si no me gusta el producto?
-        <span className="text-gray-500">▼</span>
-      </h3>
-      <p className="text-sm text-gray-600 mt-2">
-        No te preocupes, ofrecemos devoluciones 100% gratuitas en un plazo de 15 días. Queremos que compres sin riesgo.
-      </p>
-    </div>
-
-    {/* Pregunta 3 */}
-    <div className="border border-gray-300 rounded-lg p-4 bg-white shadow-sm">
-      <h3 className="text-md font-semibold text-gray-800 flex justify-between items-center">
-        ¿El producto es original?
-        <span className="text-gray-500">▼</span>
-      </h3>
-      <p className="text-sm text-gray-600 mt-2">
-        Sí, todos nuestros productos son originales y adquiridos directamente de fabricantes autorizados.
-      </p>
-    </div>
-
-    {/* Pregunta 4 */}
-    <div className="border border-gray-300 rounded-lg p-4 bg-white shadow-sm">
-      <h3 className="text-md font-semibold text-gray-800 flex justify-between items-center">
-        ¿Puedo pagar contra entrega?
-        <span className="text-gray-500">▼</span>
-      </h3>
-      <p className="text-sm text-gray-600 mt-2">
-        Actualmente no ofrecemos pago contra entrega, pero puedes pagar con tarjetas, transferencias o PayPal de forma segura.
-      </p>
-    </div>
-
-  </div>
-</section>
 
 
 </section>

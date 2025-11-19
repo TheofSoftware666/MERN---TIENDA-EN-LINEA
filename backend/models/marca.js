@@ -11,16 +11,24 @@ const marca = async (id) => {
     return results;
 }
 
-const marcaNombre = async (id) => {
+const SearchBrandByName = async (nameBrand) => {
+  let conexion;
+  try 
+  {
+    conexion = await db();
+    const query = `SELECT * FROM marca WHERE nombre = ?`;
+    const [results] = await conexion.query(query, [nameBrand]);
 
-    const conexion = await db();
+    return results.length > 0;
+  } catch (e)
+  {
+    console.error("Error al buscar marca por nombre:", e);
+    return false; 
+  } finally {
+    if (conexion) await conexion.end();
+  }
+};
 
-    const query = `SELECT * FROM marca WHERE nombre = '${id}'`;
-
-    const [ results , fields] = await conexion.query(query);
-
-    return results;
-}
 
 const marcas = async (limit) => {
 
@@ -40,16 +48,22 @@ const marcas = async (limit) => {
     return results;
 }
 
-const adicionarMarca = async (nombre) => {
+const createBrandModel = async (nombre) => {
+  let conexion;
+  try {
+    conexion = await db();
 
-    const conexion = await db();
+    const query = `INSERT INTO marca (nombre) VALUES (?)`;
+    const [results] = await conexion.query(query, [nombre]);
 
-    const query = `INSERT INTO marca (nombre) VALUES ('${nombre}');`;
-
-    const [ results, fields ] = await conexion.query(query);
-
-    return results;
-}
+    return results.insertId; 
+  } catch (e) {
+    console.error("Error al crear la marca:", e);
+    throw e;
+  } finally {
+    if (conexion) await conexion.end();
+  }
+};
 
 const actualizarMarca = async (id, nombre) => {
 
@@ -62,4 +76,4 @@ const actualizarMarca = async (id, nombre) => {
     return results;
 }
 
-export { marca, marcas, adicionarMarca, actualizarMarca, marcaNombre };
+export { marca, marcas, createBrandModel, actualizarMarca, SearchBrandByName };

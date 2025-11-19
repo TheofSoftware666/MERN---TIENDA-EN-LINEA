@@ -1,5 +1,5 @@
 import { useState, useEffect, createContext } from "react";
-import axios from 'axios';
+import clientAxios from "../config/axios.jsx";
 // import useAuth from "../hooks/useAuth";
 
 const AuthContext = createContext()
@@ -27,17 +27,15 @@ const AuthProvider = ({children}) => {
             }
 
             try{
-                const url = `http://localhost:3001/tienda/api/Perfil`
-                const response = await axios(url, config);
+                
+                const response = await clientAxios.get('/Perfil', config);
 
                 setAuth(response.data.msg);
             }catch(error){
                 console.log(error.response.data.msg);
                 setAuth({});
             }
-
             setCargando(false);
-
         } 
 
         autenticarUsuario();

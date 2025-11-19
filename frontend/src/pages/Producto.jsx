@@ -1,14 +1,18 @@
+import { useParams } from "react-router-dom";
+
 import Devoluciones from "../components/Devoluciones.jsx";
 import ProductoDetalle from "../components/ProductoDetalle.jsx"
 import Testimonios from "../components/Testimonios.jsx";
 import CardProducto from "../components/CardProducto.jsx";
 
 const Producto = () => {
+  const { id } = useParams();
+
   return (
     <>
       <div>
-        <ProductoDetalle/>
-        <Testimonios/>
+        <ProductoDetalle productoId={id}/>
+        <Testimonios productoId={id}/>
         <Devoluciones/>
        <div className="w-full max-w-6xl mx-auto mt-20 px-4">
 

@@ -57,7 +57,6 @@ const consultarUsuario = async (usuario) => {
                         , US.celular
                         , US.rfc
                         , US.razonSocial
-                        , US.token
                         , US.correoValidado
                     FROM usuarios US 
                     WHERE mail = '${usuario}' 

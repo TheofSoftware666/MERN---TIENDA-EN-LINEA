@@ -2,7 +2,6 @@ import jwt from "jsonwebtoken";
 import { consultarUsuario } from "../models/usuario.js";
 
 const checkAuth = async (req, res, next) => {
-    
     let token;
 
     if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
@@ -13,7 +12,6 @@ const checkAuth = async (req, res, next) => {
              
             return next();
         }catch(e){
-
             if(e.name === 'TokenExpiredError'){
                 const error = new Error('Token expirado');
                 return res.status(401).json({ msg : error.message });
@@ -25,10 +23,10 @@ const checkAuth = async (req, res, next) => {
     }
 
     if(!token){
+        console.log("error en check ");
         const error = new Error('Token no Válido o inexistente');
-        res.status(404).json({ msg : error.message })
+        return res.status(404).json({ msg : error.message })
     }
-    
     next();
 }
 

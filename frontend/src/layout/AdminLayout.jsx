@@ -8,7 +8,14 @@ const AdminLayout = () => {
   const { Auth, cargando } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  if(cargando) return 'cargando...';
+  if (cargando) return (
+    <div className="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
+        <div className="flex flex-col items-center space-y-4">
+            <div className="w-12 h-12 border-4 border-gray-200 border-t-green-500 rounded-full animate-spin"></div>
+            <span className="text-gray-700 font-medium">Estamos preparando todo para ti...</span>
+        </div>
+    </div>
+);
 
   return (
     <div className="flex w-full h-screen overflow-hidden">

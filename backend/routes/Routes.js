@@ -1,42 +1,50 @@
 import express from "express";
 import { createMulter } from "./../helpers/upload.js";
 import { subirArchivo } from "../helpers/uploadFile.js";
-import { actualizarInfoTienda, infoTienda, ingresarInfoTienda } from "../controllers/tiendaController.js";
+import { UpdateConfigEco, GetConfigEco, SetConfigEco } from "../controllers/tiendaController.js";
 import { obtenerProductos, obtenerProducto, obtenerProductosAdmin, obtenerProductoAdmin,registrarProducto, actualizarProducto } from "../controllers/productosController.js";
 import { iniciarSesion, registrarUsuario, confirmarCuenta, mostrarPerfil, CambiarPasswordToken, ComprobarTokenPassword, ActualizarPassword } from "../controllers/usuarioController.js";
-import { obtenerCategoria, obtenerCategorias, subirCategoria, editarCategoria } from "../controllers/categoriaController.js";
-import { obtenerMarca, obtenerMarcas, subirMarca, editarMarca } from "../controllers/marcaController.js";
+import { obtenerCategoria, obtenerCategorias, CreateCategory, editarCategoria } from "../controllers/categoriaController.js";
+import { obtenerMarca, obtenerMarcas, createBrand, editarMarca } from "../controllers/marcaController.js";
 import { obtenerPedidoAdmin, obtenerPedidosAdmin } from "../controllers/pedidoAdminController.js";
 import { obtenerCarrito, addProductoCarrito, modificarCarrito, elimarItemsCarrito } from "../controllers/carritoController.js";
 import { obtenerPedido, obtenerPedidos, capturarPedido } from "../controllers/pedidoController.js";
 import { obtenerDevolucion, obtenerDevoluciones, GenerarDevolucion} from '../controllers/devolucionController.js';
+import { getFileImage, DeleteFileImage } from "../controllers/imageController.js";
+import { GetCodePostal } from "../controllers/codigoPostalController.js";
 import { Enviar } from "../controllers/correoController.js";
 import checkAuth from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
 // Declaraciones de Archivos
-const uploadCategorias = createMulter("categorias");
+const uploadCategorias = createMulter("categories");
+const uploadProductos = createMulter("products");
+const uploadConfigEco = createMulter("ecommerceLogo");
 
 // Rutas de Administrador
-router.get('/Admin/MiTienda', checkAuth, infoTienda)
-        .post('/Admin/MiTienda', checkAuth, ingresarInfoTienda)
-        .patch('/Admin/MiTienda', checkAuth, actualizarInfoTienda)
+router.get('/Admin/GetConfiguracion', checkAuth, GetConfigEco)
+        .post('/Admin/SetConfiguracionEco', checkAuth, subirArchivo(uploadConfigEco, "logo"), SetConfigEco)
+        .patch('/Admin/UpdateConfiguracionEco', checkAuth, subirArchivo(uploadConfigEco, "logo") , UpdateConfigEco);
 
-router.get('/Admin/Producto/:id', checkAuth, obtenerProductoAdmin)
-      .get('/Admin/Productos', checkAuth, obtenerProductosAdmin)
-      .post('/Admin/AgregarProducto', checkAuth, registrarProducto)
-      .patch('/Admin/EditarProducto/:id', checkAuth, actualizarProducto);
+router.get('/GetCodePostal/:cp', GetCodePostal);
 
+router.get('/Admin/GetProducto/:id', checkAuth, obtenerProductoAdmin)
+      .get('/Admin/GetProducts/:limit', checkAuth, obtenerProductosAdmin)
+      .post('/Admin/AgregarProducto', checkAuth, subirArchivo(uploadProductos, "images"), registrarProducto)
+      .patch('/Admin/EditarProducto/:id', checkAuth, subirArchivo(uploadProductos, "images"), actualizarProducto);
+
+router.post('/Admin/GetImage', checkAuth, getFileImage)
+router.post('/Admin/DeleteImage', checkAuth, DeleteFileImage);
 
 router.get('/Admin/Categoria/:id', obtenerCategoria)
-        .get('/Admin/Categorias/:limit', obtenerCategorias)
-        .post('/Admin/AgregarCategoria', checkAuth, subirArchivo(uploadCategorias, "imagen"), subirCategoria)
+        .get('/Admin/Categorias/:limit', obtenerCategorias) 
+        .post('/Admin/CreateCategory', checkAuth, subirArchivo(uploadCategorias, "image"), CreateCategory)
         .patch('/Admin/ActualizarCategoria', checkAuth, editarCategoria);
 
 router.get('/Admin/Marca/:id', obtenerMarca)
         .get('/Admin/Marcas/:limit', obtenerMarcas)
-        .post('/Admin/AgregarMarcas', checkAuth, subirMarca)
+        .post('/Admin/CreateBrand', checkAuth, createBrand)
         .patch('/Admin/ActualizarMarcas', checkAuth, editarMarca);
 
 router.get('/Admin/Pedido/:id', checkAuth, obtenerPedidoAdmin)

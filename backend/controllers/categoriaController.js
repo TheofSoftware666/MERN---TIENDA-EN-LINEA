@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { categoria, categorias, actualizarCategoria, adicionarCategoria, categoriaNombre } from "../models/categoria.js";
+import { categoria, categorias, actualizarCategoria, CreateCategoryModel, SearchCategoryByName } from "../models/categoria.js";
 
 const obtenerCategoria = async (req, res) => {
     try{
@@ -8,7 +8,7 @@ const obtenerCategoria = async (req, res) => {
 
         if(id.length == 0){
             const error = new Error("No se encontro ninguna categoria");    
-            res.status(404).json({ error : error });       
+            res.status(400).json({ error : error });       
             return;
         }
 
@@ -20,7 +20,7 @@ const obtenerCategoria = async (req, res) => {
         const error = new Error("Ocurrio un error al consultar la informacion");
         console.log(e);
 
-        res.status(404).json({ error : error });        
+        res.status(400).json({ error : error });        
     }
 
 }
@@ -35,66 +35,70 @@ const obtenerCategorias = async (req, res) => {
 
         const resultado = await categorias(parseInt(limit));
 
-        console.log(resultado)
+        // console.log(resultado)
         res.status(200).json({ categorias : resultado });
 
     }catch(e){
         const error = new Error("Ocurrio un error al consultar la informacion");
         console.log(e);
 
-        res.status(404).json({ error : error });        
+        res.status(400).json({ error : error });        
     }
 
 }
 
-const subirCategoria = async (req, res) => {
+const CreateCategory = async (req, res) => {
     try{
-        const postData = req.body;
-        const { imagen } = req.body;
-        const allowedTypes = ["image/jpeg", "image/png"];
-
-        if(!req.file){
-            const error = new Error("Es necesario cargar alguna una imagen para subir una nueva categoria");    
-            return res.status(404).json({ error: error.message });
+        if(!req.body || !req.body.name){
+            const error = new Error("No hay datos para procesar.");    
+            return res.status(400).json({ error: error.message });
         }
 
-        if (!allowedTypes.includes(req.file.mimetype)) {
-            const error = new Error("Solo se permiten imágenes PNG o JPG");    
-            return res.status(404).json({ error : error.message });
+        if(!req.files){
+            const error = new Error("Es necesario cargar alguna una imagen para subir una nueva categoría");    
+            return res.status(400).json({ error: error.message });
         }
 
-        if(postData.nombre.length < 4){
-            const error = new Error("El nombre de la categoria debe contener por lo menos 5 caracteres. ");
-            return res.status(404).json({ error : error.message });
+        if(!req.usuario){
+            const error = new Error("Token Caducado.");
+            return res.status(303).json({ error : error.message });
         }
         
-        const resultado = await categoriaNombre(postData.nombre, req.file.originalname);
-
-        if(resultado.length != 0){  
-            const error = new Error("Actualmente ya existe una categoria llamada " + postData.nombre + " o la imagen ya existe " + req.file.originalname);
-            return res.status(404).json({ error : error.message });
+        const allowedTypes = ["image/jpeg", "image/png"];
+        if (!allowedTypes.includes(req.files[0].mimetype)) {
+            const error = new Error("Solo se permiten imágenes PNG o JPG");    
+            return res.status(400).json({ error : error.message });
         }
 
-        const uploadPath = path.join(process.cwd(), "uploads/categorias", req.file.originalname );        
-        fs.writeFileSync(uploadPath, req.file.buffer);
+        if(req.body.name.length < 4){
+            const error = new Error("El nombre de la categoría debe contener por lo menos 5 caracteres. ");
+            return res.status(400).json({ error : error.message });
+        }   
 
-        await adicionarCategoria(postData.nombre.toUpperCase(), req.file.originalname);
+        const nameCategory = req.body.name;
+        const image = req.files[0];
 
-        const validar = await categoriaNombre(postData.nombre);
+        const responseExistCategory = await SearchCategoryByName(nameCategory, image.originalname);
 
-        if(validar.length == 0){
-            const error = new Error("Ocurrio un error al dar de alta la nueva categoria");
+        if(responseExistCategory){  
+            const error = new Error("Actualmente ya existe una categoria llamada " + nameCategory + " o la imagen ya existe " + image.originalname);
+            return res.status(400).json({ error : error.message });
+        }
+       
+        const uploadPath = path.join(process.cwd(), "uploads/categories", image.originalname);        
+        fs.writeFileSync(uploadPath, image.buffer);
 
-            return res.status(404).json({ error : error.message });
+        const response = await CreateCategoryModel(nameCategory.toUpperCase(), "/uploads/categories/" + image.originalname);
+        if(response.success !== true){
+            const error = new Error("Oucrrio un error al crear la categoría" + response.message + " " + response.sqlMessage);
+            return res.status(400).json({ error : error.message });
         }
 
-
-        return res.status(200).json({ msg : "Exito: se añadio una nueva categoria" });
-
+        return res.status(200).json({ success : "Se ah creado una nueva categoría." });
     }catch(e){
         console.log(e);
-        const error = new Error("Ocurrio un error al consultar la informacion");
-        res.status(404).json({ error : error.message + e});        
+        const error = new Error("Ocurrio un error al consultar la informacíon");
+        res.status(400).json({ error : error.message + e});        
     }
 
 }
@@ -106,7 +110,7 @@ const editarCategoria = async (req, res) => {
         if(postData.nombre.length < 4){
             const error = new Error("El nombre de la categoria debe contener por lo menos 5 caracteres");
 
-            return res.status(404).json({ error });
+            return res.status(400).json({ error });
         }
 
         const resultado = await categoria(postData.id);
@@ -114,7 +118,7 @@ const editarCategoria = async (req, res) => {
         if(resultado.length == 0){
             const error = new Error("La categoria " + postData.id + " no existe en la base de datos");
 
-            return res.status(404).json({ error : error.message });
+            return res.status(400).json({ error : error.message });
         }
 
         await actualizarCategoria(postData.id, postData.nombre.toUpperCase());
@@ -124,7 +128,7 @@ const editarCategoria = async (req, res) => {
         if(validar[0].nombre === postData.nombre){
             const error = new Error("El nombre de la categoria es identico");
 
-            return res.status(404).json({ error : error.message });
+            return res.status(400).json({ error : error.message });
         }
 
         return res.status(200).json({ msg : "Exito: se actualizo la categoria" });
@@ -133,9 +137,9 @@ const editarCategoria = async (req, res) => {
         const error = new Error("Ocurrio un error al actualizar la informacion");
         console.log(e);
 
-        res.status(404).json({ error : error.message });        
+        res.status(400).json({ error : error.message });        
     }
 
 }
 
-export { obtenerCategoria, obtenerCategorias, subirCategoria, editarCategoria};
+export { obtenerCategoria, obtenerCategorias, CreateCategory, editarCategoria};

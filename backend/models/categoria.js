@@ -11,16 +11,29 @@ const categoria = async (id) => {
     return results;
 }
 
-const categoriaNombre = async (id, imagen) => {
+const SearchCategoryByName = async (nameCategory, image) => {
+  const conexion = await db();
 
-    const conexion = await db();
+  try {
+    const query = `
+      SELECT 1 
+      FROM categoria 
+      WHERE nombre = ? OR imagen = ?
+      LIMIT 1
+    `;
     
-    const query = `SELECT * FROM categoria WHERE nombre = '${id}' OR imagen = '${imagen}'`;
+    const [results] = await conexion.query(query, [nameCategory, image]);
 
-    const [ results , fields] = await conexion.query(query);
+    // Devuelve true si existe al menos un resultado
+    return results.length > 0;
+  } catch (error) {
+    console.error('Error al buscar la categoría:', error);
+    throw error;
+  } finally {
+    await conexion.end(); // Cierra la conexión si no usas pool
+  }
+};
 
-    return results;
-}
 
 const categorias = async (limit) => {
 
@@ -40,16 +53,37 @@ const categorias = async (limit) => {
     return results;
 }
 
-const adicionarCategoria = async (nombre, imagen) => {
+const CreateCategoryModel = async (nombre, imagen) => {
+  const conexion = await db();
 
-    const conexion = await db();
+  try {
+    const query = `
+      INSERT INTO categoria (nombre, imagen)
+      VALUES (?, ?)
+    `;
 
-    const query = `INSERT INTO categoria (nombre, imagen) VALUES ('${nombre}', '${imagen}');`;
+    const [result] = await conexion.query(query, [nombre, imagen]);
 
-    const [ results, fields ] = await conexion.query(query);
+    return {
+      success: true,
+      message: 'Categoría creada correctamente',
+      data: {
+        insertId: result.insertId,
+        affectedRows: result.affectedRows,
+      },
+    };
+  } catch (error) {
 
-    return results;
-}
+    return {
+      success: false,
+      message: 'Error al crear la categoría',
+      sqlMessage: error.sqlMessage || error.message,
+      code: error.code || null,
+    };
+  } finally {
+    await conexion.end(); 
+  }
+};
 
 const actualizarCategoria = async (id, nombre) => {
 
@@ -62,4 +96,4 @@ const actualizarCategoria = async (id, nombre) => {
     return results;
 }
 
-export { categoria, categorias, adicionarCategoria, actualizarCategoria, categoriaNombre };
+export { categoria, categorias, CreateCategoryModel, actualizarCategoria, SearchCategoryByName };

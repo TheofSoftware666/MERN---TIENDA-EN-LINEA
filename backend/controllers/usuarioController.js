@@ -44,7 +44,7 @@ const iniciarSesion = async (req , res ) => {
         console.log(mailResponse);
         
         const error = new Error("Tu cuenta no ah sido verificada. Te enviamos un codigo de verificacion a tu correo electronico...");
-        return res.status(404).json({ msg : error.message });
+        return res.status(203).json({ msg : error.message });
     }
 
     // Autentificar
