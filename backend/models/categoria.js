@@ -34,24 +34,18 @@ const SearchCategoryByName = async (nameCategory, image) => {
   }
 };
 
-
 const categorias = async (limit) => {
-
     const conexion = await db();
-
-    if(typeof limit != 'number'){
-
+    if (typeof limit !== "number" || Number.isNaN(limit)) {
         return "No es un numero";
     }
-    
-    const limite = limit > 0 ? limit : 50;         
 
-    const query = `SELECT * FROM categoria LIMIT ${limite}`;
+    const limite = limit > 0 ? limit : 50;
+    const query = "SELECT * FROM categoria LIMIT ?";
 
-    const [ results , fields] = await conexion.query(query);
-
+    const [results] = await conexion.query(query, [limite]);
     return results;
-}
+};
 
 const CreateCategoryModel = async (nombre, imagen) => {
   const conexion = await db();

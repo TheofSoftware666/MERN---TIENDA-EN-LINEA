@@ -1,37 +1,138 @@
 import db from "../config/db.js";
 import mysql from "mysql2/promise";
 
-const Productos = async (limit = "50") => {
+const BuscarProductos = async (filters = {}) => {
+  const connection = await db();
 
-    const conection = await db();
+  try {
+    let sql = `
+        SELECT 
+          PD.productoId AS id,
+          PD.nombre AS Name,
+          PD.descripcion AS Description,
+          MC.nombre AS Brand,
+          CT.nombre AS Categorie,
+          PD.stock,
+          PD.monto AS Price,
+          PD.descuento1 AS Discount,
+          PD.vendidos AS Sell,
+          PD.SKU AS SKU,
 
-    const query = limit.length > 1 ? "LIMIT " + limit : "LIMIT 50";
+          (
+            SELECT JSON_ARRAYAGG(JSON_OBJECT('name', PE2.Etiqueta))
+            FROM productoetiquetas PE2
+            WHERE PE2.ProductoId = PD.productoId
+          ) AS KeyWords,
 
-    const [ results, fields ] = await conection.query(` SELECT PD.productoId, PD.nombre, PD.descripcion, MC.nombre AS MARCA, CT.nombre AS CATEGORIA, PD.stock, PD.imagen1, PD.imagen2, PD.imagen3, PD.imagen4, PD.imagen5, PD.promocion, PD.monto, PD.descuento1, PD.descuento2, PD.iva, PD.vendidos
-                                                        FROM productos PD
-                                                        LEFT JOIN marca MC ON MC.marcaId = PD.marcaId 
-                                                        LEFT JOIN categoria CT ON CT.categoriaId = PD.categoriaId WHERE PD.estatusProducto != false ${query}`);
+          (
+            SELECT JSON_ARRAYAGG(JSON_OBJECT('url', PI2.URL, 'orden', PI2.Orden))
+            FROM productoimagenes PI2
+            WHERE PI2.ProductoId = PD.productoId
+            ORDER BY PI2.Orden
+          ) AS Images
 
-    return results; 
+        FROM productos PD
+        LEFT JOIN marca MC ON MC.marcaId = PD.marcaId
+        LEFT JOIN categoria CT ON CT.categoriaId = PD.categoriaId
+        WHERE PD.estatusProducto = 1
+          AND PD.monto > 0
+      `;
+
+    const params = [];
+
+    if (filters.keywords) {
+      sql += `
+        AND (
+          PD.nombre LIKE ?
+          OR PD.descripcion LIKE ?
+          OR EXISTS (
+              SELECT 1
+              FROM productoetiquetas PE
+              WHERE PE.ProductoId = PD.productoId
+                AND PE.Etiqueta LIKE ?
+          )
+        )
+      `;
+      params.push(`%${filters.keywords}%`);
+      params.push(`%${filters.keywords}%`);
+      params.push(`%${filters.keywords}%`);
+    }
+
+    // ✅ categorías
+    if (filters.categories?.length > 0) {
+      sql += ` AND PD.categoriaId IN (${filters.categories.map(() => '?').join(',')})`;
+      params.push(...filters.categories);
+    }
+
+    // ✅ marcas
+    if (filters.brands?.length > 0) {
+      sql += ` AND PD.marcaId IN (${filters.brands.map(() => '?').join(',')})`;
+      params.push(...filters.brands);
+    }
+
+    // ✅ precio
+    if (filters.priceMin) {
+      sql += ` AND PD.monto >= ?`;
+      params.push(filters.priceMin);
+    }
+
+    if (filters.priceMax) {
+      sql += ` AND PD.monto <= ?`;
+      params.push(filters.priceMax);
+    }
+
+    sql += "GROUP BY PD.productoId";
+    // ✅ ordenamiento
+    switch (filters.order) {
+      case "price_asc":
+        sql += ` ORDER BY PD.monto ASC`;
+        break;
+      case "price_desc":
+        sql += ` ORDER BY PD.monto DESC`;
+        break;
+      case "popular":
+        sql += ` ORDER BY PD.vendidos DESC`;
+        break;
+      default:
+        sql += ` ORDER BY PD.productoId DESC`;
+        break;
+    }
+    sql += ` LIMIT ?`;
+    params.push(filters.limit || 50);
+    const [results] = await connection.query(sql, params);
+    return results;
+
+  } finally {
+    if (connection.end) await connection.end();
+  }
 };
 
 const Producto = async (idProducto) => {
-    const conection = await db();
-    const query = `CALL SP_GetProductDetalleJSON(${idProducto})`;
-    const [results, fields] = await conection.query(query);
+    const con = await db();
 
-    // Extraer el JSON de la primera fila
-    const rawJson = results[0][0]?.ProductoDetalle;
-    
-    if (!rawJson || rawJson === "{}") {
-        return null; // o lanzar un error controlado
+    try {
+        const [results] = await con.query(
+            "CALL SP_GetProductDetalleJSON(?)",
+            [idProducto]
+        );
+        
+        const rawJson = results[0][0]?.ProductoDetalle;
+
+        if (!rawJson || rawJson === "{}") {
+            return null;
+        }
+        
+        const producto = typeof rawJson == "string" ? JSON.parse(rawJson) : rawJson;
+        return producto;
+
+    } catch (error) {
+        console.error("Error obteniendo producto:", error);
+        throw new Error("No se pudo obtener el producto");
+    } finally {
+        if (con) await con.end();
     }
-
-    // Parsear a objeto JS
-    const producto = JSON.parse(rawJson);
-
-    return producto;
 }
+
 
 const ProductosAdmin = async (limit = 50) => {
   const conection = await db();
@@ -273,7 +374,7 @@ const SetUpdateProductAdmin = async (data) => {
   }
 };
 
-export { Productos
+export { BuscarProductos
   , Producto
   , ProductosAdmin
   , ProductoAdmin

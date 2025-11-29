@@ -1,7 +1,7 @@
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from 'fs/promises';
-import { Productos
+import { BuscarProductos
   , Producto
   , ProductoAdmin
   , ProductosAdmin
@@ -12,19 +12,38 @@ import { Productos
 } from "../models/productos.js";
 
 const obtenerProductos = async (req, res) => {
+  try {
 
-    try {
-    //Consultar Productos
-    const productos = await Productos();
-    return res.status(200).json({ productos});
+    const body = req.body || {};
+    console.log(body);
+    const filters = {
+      keywords: body.keywords || null,
+      categories: Array.isArray(body.categories) ? body.categories : [],
+      brands: Array.isArray(body.brands) ? body.brands : [],
+      priceMin: Number(body.priceMin) || null,
+      priceMax: Number(body.priceMax) || null,
+      order: body.order || "default",
+      limit: Number(body.limit) || 50
+    };
 
-    }catch(e){
-        console.log(e);
+    const productos = await BuscarProductos(filters);
 
-        const error = new Error("Error al consultar los productos");
-        return res.status(404).json({ msg : error });
-    }
-}
+    return res.status(200).json({
+      ok: true,
+      total: productos.length,
+      data: productos
+    });
+
+  } catch (e) {
+    console.error("❌ Error en obtenerProductos:", e.message);
+
+    return res.status(500).json({
+      ok: false,
+      msg: "Error al consultar los productos"
+    });
+  }
+};
+
 
 const obtenerProducto = async (req, res) => {
    try {
@@ -36,10 +55,10 @@ const obtenerProducto = async (req, res) => {
         message: "El ID de producto es inválido"
       });
     }
-
+    
     const producto = await Producto(idProducto);
 
-    if (!producto) {
+    if (!producto || producto.Producto == null) {
       return res.status(404).json({
         status: "ERROR",
         message: `No se encontró el producto con ID ${idProducto}`

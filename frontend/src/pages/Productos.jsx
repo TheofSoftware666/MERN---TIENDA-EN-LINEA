@@ -1,185 +1,210 @@
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import clientAxios from "../config/axios.jsx";
+
+import {
+  FaFire,
+  FaStar,
+  FaCartShopping,
+  FaBolt,
+  FaCheck,
+  FaTag
+} from "react-icons/fa6";
 
 const Productos = () => {
-  const [quickView, setQuickView] = useState(null);
+  const [productos, setProductos] = useState([]);
+  const [loading, setLoading] = useState(true);       
+  const [notFound, setNotFound] = useState(false);   
 
-  const productos = Array.from({ length: 12 }).map((_, i) => ({
-    id: i + 1,
-    nombre: `Producto destacado ${i + 1}`,
-    marca: "MarcaX",
-    precio: 899,
-    precioOriginal: 1099,
-    descuento: 200,
-    stock: 4 - (i % 4),
-    variaciones: ["Rojo", "Azul", "Negro"],
-    img: "https://images.unsplash.com/photo-1541643600914-78b084683601?q=80&w=704&auto=format&fit=crop",
-  }));
+  const [selectedFilters, setSelectedFilters] = useState({
+    categoria: "Todos",
+    precio: "Todos",
+    orden: "Más relevantes"
+  });
+
+  const location = useLocation();
+
+  const handleFilterChange = (filterType, value) => {
+    setSelectedFilters(prev => ({
+      ...prev,
+      [filterType]: value
+    }));
+  };
+
+  const getProducts = async () => {
+    try {
+      setLoading(true);
+      setNotFound(false);
+
+      const queryParams = new URLSearchParams(location.search);
+      const q = queryParams.get("q");
+      const categoria = queryParams.get("categoria");
+
+      const body = {
+        keywords: (q && q.trim() !== "") ? q.trim() : "",
+        categories: categoria ? [Number(categoria)] : [],
+        brands: [],
+        priceMin: null,
+        priceMax: null,
+        order: "default",
+        limit: 20
+      };
+
+      const response = await clientAxios.post("/Productos", body);
+
+      const adaptados = response.data.data.map(p => ({
+        id: p.id,
+        nombre: p.Name,
+        marca: p.Brand,
+        precio: Number(p.Price),
+        precioOriginal: Number(p.Price) + Number(p.Discount),
+        descuento: Number(p.Discount),
+        stock: p.stock,
+        vendidos: p.Sell,
+        rating: (Math.random() * 0.8 + 4.2).toFixed(1),
+        img: p.Images?.length > 0 ? p.Images[0].url : "/no-image.png"
+      }));
+
+      setProductos(adaptados);
+
+      if (adaptados.length === 0) {
+        setNotFound(true);
+      }
+
+    } catch (ex) {
+      console.error("Error al cargar productos:", ex);
+      setNotFound(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  useEffect(() => {
+    getProducts();
+  }, [location.search]);
 
   return (
-    <>
-      <div className="container mx-auto px-4 md:px-20 py-10 bg-gray-50">
-        {/* Filtros */}
-        <details className="group mb-8 bg-white rounded-2xl shadow-md overflow-hidden transition-all duration-300">
-          <summary className="cursor-pointer px-6 py-4 text-lg font-semibold text-gray-800 flex items-center justify-between hover:bg-gray-100 transition-colors">
-            <span>🔍 Filtros</span>
-            <svg
-              className="w-5 h-5 ml-2 transform transition-transform duration-300 group-open:rotate-180"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-          </summary>
+    <div className="container mx-auto px-4 lg:px-20 py-8 bg-gray-50 min-h-screen">
 
-          <div className="p-6 space-y-6 animate-fade-in-down">
-            <div>
-              <p className="text-gray-700 font-semibold mb-2">Categoría</p>
-              <div className="flex flex-wrap gap-2">
-                {["Todos", "Mochilas", "Escolar", "Accesorios"].map((cat) => (
-                  <button
-                    key={cat}
-                    className="px-4 py-2 bg-gray-100 text-gray-800 rounded-full hover:bg-blue-100 hover:text-blue-700 text-sm transition-all duration-200"
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            </div>
+      {/* FILTROS */}
+      <div className="bg-white rounded-2xl shadow-lg p-6 mb-10 border border-blue-100">
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="flex-1">
+            <label className="block text-gray-800 font-bold mb-3 text-sm uppercase tracking-wide">
+              <FaTag className="inline mr-2 text-blue-600" />
+              Categorías
+            </label>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-gray-700 font-semibold mb-2">Rango de Precio</label>
-                <select className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option>Todos</option>
-                  <option>Menos de $500</option>
-                  <option>$500 - $1000</option>
-                  <option>Más de $1000</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-gray-700 font-semibold mb-2">Ordenar por</label>
-                <select className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option>Relevancia</option>
-                  <option>Precio: menor a mayor</option>
-                  <option>Precio: mayor a menor</option>
-                  <option>Novedades</option>
-                </select>
-              </div>
+            <div className="flex flex-wrap gap-2">
+              {["Todos", "Mochilas", "Escolar", "Accesorios", "Ejecutiva", "Viaje"].map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => handleFilterChange("categoria", cat)}
+                  className={`
+                    px-4 py-2 rounded-xl text-sm font-medium transition-all border
+                    ${selectedFilters.categoria === cat
+                      ? "bg-blue-600 text-white border-blue-600 shadow-md"
+                      : "bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:bg-blue-50"
+                    }
+                  `}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
           </div>
-        </details>
+        </div>
+      </div>
 
-        {/* Cards de productos */}
-        <div className="grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4">
-          {productos.map((p) => (
+      {/* ============================
+            SPINNER CARGANDO
+      ============================ */}
+      {loading && (
+        <div className="flex flex-col items-center justify-center py-20">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-600 font-medium">Cargando productos...</p>
+        </div>
+      )}
+
+      {/* ============================
+            SIN RESULTADOS
+      ============================ */}
+      {!loading && notFound && (
+        <div className="text-center py-20">
+          <p className="text-2xl font-bold text-gray-700">No se encontraron resultados</p>
+          <p className="text-gray-500 mt-2">Intenta con otro término de búsqueda</p>
+        </div>
+      )}
+
+      {/* ============================
+            GRID DE PRODUCTOS
+      ============================ */}
+      {!loading && !notFound && (
+        <div className="grid gap-6 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {productos.map(p => (
             <div
               key={p.id}
-              className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition group relative flex flex-col"
+              className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition border border-gray-100 hover:border-blue-200 flex flex-col relative"
             >
-              {/* Imagen */}
-              <Link to="/Producto/sd" className="relative">
+              <Link to={`/Producto/${p.id}`}>
                 <img
-                  src={p.img}
+                  src={import.meta.env.VITE_BACKEND_URL_IMAGENES + p.img}
                   alt={p.nombre}
-                  className="w-full h-40 md:h-56 object-cover group-hover:scale-105 transition-transform"
+                  className="w-full h-48 object-cover hover:scale-105 transition-transform duration-500"
                   loading="lazy"
                 />
-                {/* Etiqueta de descuento */}
-                <span className="absolute top-2 left-2 bg-red-600 text-white px-2 py-0.5 rounded-md text-xs md:text-sm font-bold shadow">
-                  -20% OFF
-                </span>
-                {/* Vista rápida */}
-                <button
-                  onClick={() => setQuickView(p)}
-                  className="hidden md:block absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-md text-xs font-semibold shadow hover:bg-gray-100"
-                >
-                  👁 Vista rápida
-                </button>
+
+                {p.descuento > 0 && (
+                  <span className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-md flex items-center gap-1">
+                    <FaFire /> -{p.descuento}% OFF
+                  </span>
+                )}
+
+                {p.stock < 3 && (
+                  <span className="absolute top-2 right-2 bg-amber-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-md flex items-center gap-1">
+                    <FaBolt /> Solo {p.stock}
+                  </span>
+                )}
               </Link>
 
-              {/* Contenido */}
-              <div className="p-3 md:p-4 flex flex-col flex-grow justify-between">
-                {/* Nombre y marca */}
-                <div>
-                  <h3 className="text-sm md:text-lg font-semibold text-gray-800 mb-1">
-                    {p.nombre}
-                  </h3>
-                  <p className="text-xs md:text-sm text-gray-500">{p.marca}</p>
+              <div className="p-4 flex flex-col flex-grow">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1">
+                    <FaStar className="text-amber-500" />
+                    <span className="text-xs font-bold">{p.rating}</span>
+                  </div>
+
+                  <span className="text-xs text-gray-500 font-medium">
+                    {p.vendidos}+ vendidos
+                  </span>
                 </div>
 
-                {/* Precios */}
-                <div className="mt-2">
-                  <span className="text-base md:text-xl font-bold text-gray-900">
-                    ${p.precio}
-                  </span>
-                  <span className="text-xs md:text-sm text-gray-400 line-through ml-2">
-                    ${p.precioOriginal}
-                  </span>
-                  <p className="hidden md:block text-xs text-green-600 font-medium">
-                    Ahorras ${p.descuento}
+                <h3 className="text-sm font-bold text-gray-800 line-clamp-2 mb-1">
+                  {p.nombre}
+                </h3>
+                <p className="text-xs text-gray-500 mb-3">{p.marca}</p>
+
+                <div className="mb-3">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-lg font-bold text-gray-900">${p.precio}</span>
+                    <span className="text-xs line-through text-gray-400">${p.precioOriginal}</span>
+                  </div>
+
+                  <p className="text-xs font-bold text-green-600 flex items-center gap-1 mt-1">
+                    <FaCheck className="text-xs" /> Ahorras ${p.descuento}
                   </p>
                 </div>
 
-                {/* Variaciones (solo mobile) */}
-                <div className="mt-2 md:hidden">
-                  <select className="w-full px-2 py-1 text-xs border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
-                    {p.variaciones.map((v, i) => (
-                      <option key={i} selected={i === 0}>
-                        {v}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Microcopy confianza (solo desktop) */}
-                <div className="hidden md:flex flex-wrap text-xs text-gray-500 gap-3 mt-3">
-                  <span>🚚 Entrega en 24h</span>
-                  <span>💳 3 meses sin interés</span>
-                </div>
-
-                {/* CTA */}
-                <button className="bg-blue-600 hover:bg-blue-700 w-full text-white py-2 md:py-3 mt-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition text-sm md:text-base">
-                  🛒 Agregar al Carrito
+                <button className="mt-auto bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg">
+                  <FaCartShopping /> Agregar al Carrito
                 </button>
               </div>
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Quick View Modal */}
-      {quickView && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6 relative">
-            <button
-              onClick={() => setQuickView(null)}
-              className="absolute top-3 right-3 text-gray-600 hover:text-gray-900"
-            >
-              ✖
-            </button>
-            <img
-              src={quickView.img}
-              alt={quickView.nombre}
-              className="w-full h-48 object-cover rounded-lg mb-4"
-            />
-            <h3 className="text-lg font-bold text-gray-800 mb-1">{quickView.nombre}</h3>
-            <p className="text-sm text-gray-500 mb-4">{quickView.marca}</p>
-            <div className="mb-4">
-              <span className="text-xl font-bold text-gray-900">${quickView.precio}</span>
-              <span className="text-sm text-gray-400 line-through ml-2">
-                ${quickView.precioOriginal}
-              </span>
-            </div>
-            <button className="bg-blue-600 hover:bg-blue-700 w-full text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition">
-              🛒 Agregar al carrito
-            </button>
-          </div>
-        </div>
       )}
-    </>
+    </div>
   );
 };
 

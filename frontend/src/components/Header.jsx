@@ -1,12 +1,47 @@
 import { useNavigate, Link } from "react-router-dom";
-import { useState } from "react";
-import { Home, Flame, Star, ShoppingCart, Laptop, Cog, Headphones, Monitor, Phone, Search  } from "lucide-react";
+import { useState, useEffect } from "react";
+import clientAxios from "../config/axios.jsx";
+import {
+  Home, Flame, Star, ShoppingCart, Laptop,
+  Cog, Headphones, Monitor, Phone, Search
+} from "lucide-react";
 
 export default function Header({ onOpenCart }) {
+
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    GetCategories();
+  } , []);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (!search.trim()) return;
+
+    navigate(`/Productos?q=${encodeURIComponent(search.trim())}`);
+  };
+
+  const GetCategories = async () => {
+    try{
+      const data = await clientAxios.get('/Admin/Categorias/6');
+      setCategories(data.data.categorias);
+    }catch(ex){
+      console.warn(ex.data || ex || "Ocurrio un error inesperado al intentar consultar las.categorias");
+    }
+  };
+
+  const formatName = (name) => {
+    if (!name) return "";
+    return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+  };
+
 
   return (
     <header className="w-full bg-gray-900 text-white shadow-md relative">
+
       {/* Barra de promoción */}
       <div className="w-full bg-blue-600 text-white text-xs md:text-sm text-center py-1.5">
         🚚 Envío gratis en compras mayores a $899 MXN
@@ -14,7 +49,7 @@ export default function Header({ onOpenCart }) {
 
       {/* Header principal */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between gap-4">
-        
+
         {/* Mobile: Hamburguesa */}
         <button
           onClick={() => setMenuOpen(true)}
@@ -28,23 +63,24 @@ export default function Header({ onOpenCart }) {
           <h1 className="text-xl md:text-2xl font-bold tracking-wide">Building Technology</h1>
         </div>
 
-        {/* Búsqueda - solo desktop */}
+        {/* Búsqueda - SOLO DESKTOP */}
         <form
-          action="#"
-          method="post"
+          onSubmit={handleSearch}
           className="hidden md:flex flex-1 relative max-w-xl mx-6"
         >
           <input
             type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar productos, marcas o categorías..."
             className="w-full rounded-full border border-gray-300 px-5 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none"
           />
+
           <button
             type="submit"
             className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full transition"
           >
-            {/* <img src="/img/icon-busqueda.png" alt="Buscar" className="w-4 h-4" /> */}
-            <Search size={20}/>
+            <Search size={20} />
           </button>
         </form>
 
@@ -61,11 +97,18 @@ export default function Header({ onOpenCart }) {
 
       {/* Navbar secundaria desktop */}
       <nav className="hidden md:flex justify-center bg-gray-800 text-sm py-2 gap-6">
-        <a href="#" className="hover:text-blue-400">Laptops</a>
-        <a href="#" className="hover:text-blue-400">Componentes</a>
-        <a href="#" className="hover:text-blue-400">Accesorios</a>
-        <a href="#" className="hover:text-blue-400">Ofertas</a>
+        {categories.map(cat => (
+          <Link
+            key={cat.categoriaId}
+            to={`/Productos?categoria=${cat.categoriaId}`}
+            className="hover:text-blue-400"
+            onClick={() => setSearch("")}
+          >
+            {formatName(cat.nombre)}
+          </Link>
+        ))}
       </nav>
+
 
       {/* Sidebar Mobile */}
       {menuOpen && (
@@ -78,88 +121,93 @@ export default function Header({ onOpenCart }) {
 
           {/* Drawer */}
           <div className="fixed top-0 left-0 w-72 h-full bg-white shadow-lg z-50 transform transition-transform duration-300 flex flex-col">
-          {/* Header del Drawer */}
-          <div className="flex items-center justify-between px-4 py-4 border-b">
-            <h2 className="text-lg font-bold text-gray-800">Menú</h2>
-            <button
-              onClick={() => setMenuOpen(false)}
-              className="text-gray-600 hover:text-gray-800"
-            >
-              ✖
-            </button>
-          </div>
 
-          {/* Barra de búsqueda */}
-          <div className="px-4 py-3 border-b">
-          <div className="flex items-center border rounded-full overflow-hidden">
-            <input
-              type="text"
-              placeholder="Buscar productos..."
-              className="flex-1 px-4 py-2 text-sm focus:outline-none text-gray-500"
-            />
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2">
-              <Search size={20}/>
-            </button>
-          </div>
-        </div>
-
-          {/* Menú lateral optimizado con Lucide */}
-          <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-6 text-gray-700 font-medium">
-
-            {/* Sección destacada */}
-            <div className="space-y-2">
-              <a href="#" className="flex items-center gap-2 text-lg font-semibold text-blue-600">
-                <Home size={20} /> Inicio
-              </a>
-              <a href="#" className="flex items-center gap-2 text-lg font-semibold text-red-600">
-                <Flame size={20} /> Ofertas
-              </a>
+            {/* Header del Drawer */}
+            <div className="flex items-center justify-between px-4 py-4 border-b">
+              <h2 className="text-lg font-bold text-gray-800">Menú</h2>
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="text-gray-600 hover:text-gray-800"
+              >
+                ✖
+              </button>
             </div>
 
-            {/* Descubrimiento */}
-            <div>
-              <h3 className="text-xs uppercase text-gray-400 mb-2">Descubre</h3>
+            {/* Búsqueda Mobile */}
+            <div className="px-4 py-3 border-b">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!search.trim()) return;
+                  setMenuOpen(false);
+                  navigate(`/Productos?q=${encodeURIComponent(search.trim())}`);
+                }}
+                className="flex items-center border rounded-full overflow-hidden"
+              >
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Buscar productos..."
+                  className="flex-1 px-4 py-2 text-sm focus:outline-none text-gray-500"
+                />
+                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2">
+                  <Search size={20} />
+                </button>
+              </form>
+            </div>
+
+            {/* Menú lateral */}
+            <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-6 text-gray-700 font-medium">
+
               <div className="space-y-2">
-                <a href="#" className="flex items-center gap-2 hover:text-blue-600">
-                  <Star size={20} /> Novedades
+                <a href="#" className="flex items-center gap-2 text-lg font-semibold text-blue-600">
+                  <Home size={20} /> Inicio
                 </a>
-                <a href="#" className="flex items-center gap-2 hover:text-blue-600">
-                  <ShoppingCart size={20} /> Lo más vendido
-                </a>
-              </div>
-            </div>
-
-            {/* Categorías */}
-            <div>
-              <h3 className="text-xs uppercase text-gray-400 mb-2">Categorías</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <a href="#" className="flex flex-col items-center p-3 border rounded-lg hover:bg-gray-50">
-                  <Laptop size={22} /> 
-                  <span className="mt-1 text-sm">Laptops</span>
-                </a>
-                <a href="#" className="flex flex-col items-center p-3 border rounded-lg hover:bg-gray-50">
-                  <Cog size={22} /> 
-                  <span className="mt-1 text-sm">Componentes</span>
-                </a>
-                <a href="#" className="flex flex-col items-center p-3 border rounded-lg hover:bg-gray-50">
-                  <Headphones size={22} /> 
-                  <span className="mt-1 text-sm">Accesorios</span>
-                </a>
-                <a href="#" className="flex flex-col items-center p-3 border rounded-lg hover:bg-gray-50">
-                  <Monitor size={22} /> 
-                  <span className="mt-1 text-sm">Monitores</span>
+                <a href="#" className="flex items-center gap-2 text-lg font-semibold text-red-600">
+                  <Flame size={20} /> Ofertas
                 </a>
               </div>
-            </div>
 
-            {/* Ayuda */}
-            <div>
-              <h3 className="text-xs uppercase text-gray-400 mb-2">Soporte</h3>
-              <a href="#" className="flex items-center gap-2 hover:text-blue-600">
-                <Phone size={20} /> Contacto / Ayuda
-              </a>
-            </div>
-          </nav>
+              <div>
+                <h3 className="text-xs uppercase text-gray-400 mb-2">Descubre</h3>
+                <div className="space-y-2">
+                  <a href="#" className="flex items-center gap-2 hover:text-blue-600">
+                    <Star size={20} /> Novedades
+                  </a>
+                  <a href="#" className="flex items-center gap-2 hover:text-blue-600">
+                    <ShoppingCart size={20} /> Lo más vendido
+                  </a>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-xs uppercase text-gray-400 mb-2">Categorías</h3>
+
+                <div className="grid grid-cols-2 gap-3">
+                  {categories.map(cat => (
+                    <Link
+                      key={cat.categoriaId}
+                      to={`/Productos?categoria=${cat.categoriaId}`}
+                      className="flex flex-col items-center p-3 border rounded-lg hover:bg-gray-50"
+                      onClick={() => setSearch("")}
+                    >
+                      <span className="mt-1 text-sm text-center">
+                        {formatName(cat.nombre)}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-xs uppercase text-gray-400 mb-2">Soporte</h3>
+                <a href="#" className="flex items-center gap-2 hover:text-blue-600">
+                  <Phone size={20} /> Contacto / Ayuda
+                </a>
+              </div>
+
+            </nav>
 
             {/* Acciones abajo */}
             <div className="px-4 py-4 border-t">
@@ -174,7 +222,6 @@ export default function Header({ onOpenCart }) {
               </p>
             </div>
           </div>
-
         </>
       )}
     </header>

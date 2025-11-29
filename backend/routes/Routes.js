@@ -53,8 +53,8 @@ router.get('/Admin/Pedido/:id', checkAuth, obtenerPedidoAdmin)
         // .patch('/Admin/Pedido', checkAuth, actualizarPedidoAdmin);
 
 // Rutas de Usuario Publicas
-router.get('/Productos', obtenerProductos);
 router.get('/Productos/:id', obtenerProducto);
+router.post('/Productos', obtenerProductos);
 router.get('/ConfirmarCuenta/:token', confirmarCuenta);
 router.post('/Login', iniciarSesion);
 router.post('/Registrar', registrarUsuario);

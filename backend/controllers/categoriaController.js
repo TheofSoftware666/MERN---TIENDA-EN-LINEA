@@ -28,24 +28,16 @@ const obtenerCategoria = async (req, res) => {
 const obtenerCategorias = async (req, res) => {
     try{
         const { limit } = req.params;
-
-        if(limit == undefined){
-            limit = 20;
-        }
-
+        if(limit == undefined || limit == null) limit = 7;
+    
         const resultado = await categorias(parseInt(limit));
-
-        // console.log(resultado)
         res.status(200).json({ categorias : resultado });
 
     }catch(e){
         const error = new Error("Ocurrio un error al consultar la informacion");
-        console.log(e);
-
-        res.status(400).json({ error : error });        
+        res.status(500).json({ error : error });        
     }
-
-}
+};
 
 const CreateCategory = async (req, res) => {
     try{

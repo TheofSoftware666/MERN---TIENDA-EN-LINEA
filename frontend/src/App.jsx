@@ -56,8 +56,9 @@ function App() {
           <Route path='olvide-password' element={<OlvidePassword/> }/>
           <Route path='olvide-password/:token' element={<RestablecerPassword/> }/>
           <Route path='confirmar' element={<ConfirmarCuenta/> }/>
-          <Route path='error404' element={<Error/> }/>
         </Route>
+        
+        <Route path='*' element={<Error/> }/>
 
       </Routes>
       </AuthProvider>
