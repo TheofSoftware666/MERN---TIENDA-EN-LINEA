@@ -24,24 +24,29 @@ const obtenerMarca = async (req, res) => {
 }
 
 const obtenerMarcas = async (req, res) => {
+    try {
+        let limit = req.params.limit || req.query.limit;
+        limit = parseInt(limit, 10);
     
-    try{
-        const { limit } = req.params;
-
-        if(limit == undefined){
+        if (isNaN(limit) || limit <= 0) {
             limit = 20;
         }
 
-        const resultado = await marcas(parseInt(limit));
-        res.status(200).json({ marcas : resultado });
+        const resultado = await marcas(limit);
+        res.status(200).json({
+            ok: true,
+            marcas: resultado
+        });
 
-    }catch(e){
-        const error = new Error("Ocurrio un error al consultar la informacion");
-        console.log(e);
-
-        res.status(400).json({ error : error.message });        
+    } catch (e) {
+        console.error("Error en obtenerMarcas:", e);
+        res.status(500).json({
+            ok: false,
+            error: "Ocurrió un error al consultar la información"
+        });
     }
-}
+};
+
 
 const createBrand = async (req, res) => {
     try{

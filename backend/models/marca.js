@@ -29,24 +29,26 @@ const SearchBrandByName = async (nameBrand) => {
   }
 };
 
+const marcas = async (limit = 50) => {
+  let conexion;
 
-const marcas = async (limit) => {
-
-    const conexion = await db();
-
-    if(typeof limit != 'number'){
-
-        return "No es un numero";
+  try {
+    if (!Number.isInteger(limit) || limit <= 0) {
+      limit = 50;
     }
-    
-    const limite = limit > 0 ? limit : 50;         
 
-    const query = `SELECT * FROM marca LIMIT ${limite}`;
-
-    const [ results , fields] = await conexion.query(query);
+    conexion = await db();
+    const query = `SELECT marcaId, nombre FROM marca LIMIT ?`;
+    const [results] = await conexion.query(query, [limit]);
 
     return results;
-}
+  } catch (error) {
+    console.error("Error al obtener marcas:", error);
+    return [];
+  } finally {
+    if (conexion) conexion.end();
+  }
+};
 
 const createBrandModel = async (nombre) => {
   let conexion;

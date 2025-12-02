@@ -19,7 +19,10 @@ export default function Header({ onOpenCart }) {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (!search.trim()) return;
+    if (!search.trim()) {
+      navigate("/Productos");
+      return;
+    }
 
     navigate(`/Productos?q=${encodeURIComponent(search.trim())}`);
   };
