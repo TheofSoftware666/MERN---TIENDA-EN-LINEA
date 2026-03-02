@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from 'axios';
+import clientAxios from "../config/axios.jsx";
 import AdminAddProducto from "../components/AdminAgregarProducto.jsx";
 import Spinner from '../components/Spinner.jsx';
 
@@ -55,9 +55,8 @@ const AdminProductos = () => {
         return [];
       }
 
-      const urlProductos = `http://localhost:3001/tienda/api/Admin/GetProducts/${limit}`;
-
-      const response = await axios.get(urlProductos, {
+      const urlProductos = `/Admin/GetProducts/${limit}`;
+      const response = await clientAxios.get(urlProductos, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -71,52 +70,9 @@ const AdminProductos = () => {
 
     } catch (err) {
       console.error("Error al intentar buscar los productos:", err.response?.data || err.message);
-      return []; // Retornar array vacío en caso de error
+      return []; 
     }
   };
-
-  // const UpdateProductAdmin = async (idProducto) => {
-  //  try{
-  //    SetSpinnerKit(true);
-  //   const producto = await GetProductByIdAdmin(idProducto)
-    
-  //   if(producto == null || producto == undefined || producto.length <= 0){
-  //     SetSpinnerKit(true);
-  //     console.log("No se encontro el producto");
-  //     return ;
-  //   }
-    
-  //   console.log(producto);
-  //   SetProducto({
-  //     nombre: producto.Producto.NombreProducto || "",
-  //     descripcion : producto.Producto.Descripcion || "",
-  //     descuento: producto.Producto.Descuento || 0,
-  //     precio: producto.Producto.Precio || 0,
-  //     productoId: producto.Producto.ProductoId || 0,
-  //     sku : producto.Producto.SKU || "",
-  //     stock: producto.Producto.Disponible || 0,
-  //     activo : producto.Producto.Activo == 1 ? true : false,
-  //     marcaId : producto.Producto.Marca,
-  //     categoriaId : producto.Producto.Categoria,
-  //     largo : producto.Producto.Largo,
-  //     ancho : producto.Producto.Ancho,
-  //     alto : producto.Producto.Alto,
-  //     peso : producto.Producto.Peso,
-  //     variantes : producto.Producto.Variantes || [],
-  //     etiquetas : producto.Producto.Etiquetas || [],
-  //     faqs : producto.Producto.Faqs || [],
-  //     imagenes : producto.Producto.Imagenes || []
-  //   });
-
-  //   SetSpinnerKit(false);
-  //   setModalFormProduct(true);
-  //  }catch(ex){
-  //     SetSpinnerKit(false);
-  //     setModalFormProduct(true);
-  //     console.log("Erro inesperado" + ex.Message);
-  //  }
-
-  // }
 
   const GetProductByIdAdmin = async (idProducto) => {
     try {
@@ -126,8 +82,8 @@ const AdminProductos = () => {
         return [];
       }
 
-      const urlProductos = `http://localhost:3001/tienda/api/Admin/GetProducto/${idProducto}`;
-      const response = await axios.get(urlProductos, {
+      const urlProductos = `/Admin/GetProducto/${idProducto}`;
+      const response = await clientAxios.get(urlProductos, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -149,12 +105,12 @@ const AdminProductos = () => {
     try{
       setLoading(true);
 
-      const urlMarcas = `http://localhost:3001/tienda/api/Admin/Marcas/10`;
-      const urlCategorias = `http://localhost:3001/tienda/api/Admin/Categorias/10`;
+      const urlMarcas = `/Admin/Marcas/10`;
+      const urlCategorias = `/Admin/Categorias/10`;
 
       const [response1, response2] = await Promise.all([
-        axios.get(urlMarcas),
-        axios.get(urlCategorias),
+        clientAxios.get(urlMarcas),
+        clientAxios.get(urlCategorias),
       ]);
 
       SetSelectMarca(response1.data.marcas);
@@ -228,7 +184,6 @@ const AdminProductos = () => {
       formData.append("etiquetas", JSON.stringify(Producto.etiquetas));
       formData.append("faqs", JSON.stringify(Producto.faqs));
 
-      // ✅ Imágenes múltiples
       Producto.imagenes.forEach((file) => {
         formData.append("imagenes", file);
       });
@@ -245,16 +200,13 @@ const AdminProductos = () => {
           return;
         }
 
-        const res = await axios.post("http://localhost:3001/tienda/api/Admin/AgregarProducto", formData, {
+        const res = await clientAxios.post('/Admin/AgregarProducto', formData, {
           headers: { 
             "Content-Type": "multipart/form-data",
             Authorization : `Bearer ${token}`
           },
         });
-
-        console.log("✅ Producto creado:", res.data);
         
-                // 🔄 Resetear formulario
         SetProducto({
           nombre: "",
           descripcion: "",
@@ -302,7 +254,7 @@ const AdminProductos = () => {
       return;
     }
 
-    const url = `http://localhost:3001/tienda/api/Admin/AgregarMarcas`;
+    const url = `/Admin/AgregarMarcas`;
     try{
       const token = localStorage.getItem('ape_token');
 
@@ -313,7 +265,7 @@ const AdminProductos = () => {
         return;
       }
 
-      const response = await axios.post(url, { "nombre" : TextBrand }, {
+      const response = await clientAxios.post(url, { "nombre" : TextBrand }, {
         headers : {
           Authorization : `Bearer ${token}`
         }
@@ -445,9 +397,9 @@ const AdminProductos = () => {
       }
 
       try{
-        const url = `http://localhost:3001/tienda/api/Admin/AgregarCategoria`;
+        const url = `/Admin/AgregarCategoria`;
 
-        const response = await axios.post(url, formData, {
+        const response = await clientAxios.post(url, formData, {
           headers : {
             Authorization : `Bearer ${token}`,
             "Content-Type": "multipart/form-data",

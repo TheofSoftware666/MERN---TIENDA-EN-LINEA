@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import clientAxios from '../config/axios.jsx';
 import useAuth from '../hooks/useAuth.jsx';
 
 const FormLogin = () => {
@@ -22,40 +22,23 @@ const FormLogin = () => {
             return;
         }
 
-        // if(password.length < 6){
-        //     console.log("password invalido");
-        //     return;
-        // }
-
         try{
-            // Petición
-            const url = "http://localhost:3001/tienda/api/Login";
-            const response = await axios.post(url, { email, password });
-            console.log(response.data.token);
-
+            const response = await clientAxios.post('/Login', { email, password });
             localStorage.setItem('ape_token', response.data.token);
 
             setTimeout(() => {
                 console.log("Bienvenido");
-                Navigation('/');
+                Navigation('/Productos');
             }, 1700);
 
         }catch(error){
-            
-            console.log(error.response.data.msg);
-
+            console.warn(error.response.data.msg);
             if(error.response.data.msg.includes('verificada')){
-                
                 setTimeout(() => {
-
                     Navigation('/Auth/confirmar');
-
                 }, 1500);
-
                 return;
             }
-
-            console.log(error.response.data.msg);
         }
     }
 

@@ -8,6 +8,7 @@ import { BuscarProductos
   , SetAddProductAdmin
   , comprobarExistencias
   , comprobarExistenciasFiles
+  , GetProductsTop
   , SetUpdateProductAdmin 
 } from "../models/productos.js";
 
@@ -44,6 +45,31 @@ const obtenerProductos = async (req, res) => {
   }
 };
 
+const getTopPRoduct = async (req, res) => {
+   try {
+    const producto = await GetProductsTop();
+
+    if (!producto || producto.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        message: "No se encontraron productos destacados"
+      });
+    }
+
+    return res.status(200).json({
+      ok: true,
+      data: producto,
+      message: "Productos destacados obtenidos correctamente"
+    });
+
+  } catch (e) {
+    console.error("❌ Error al obtener productos top 3:", e);
+    return res.status(500).json({
+      ok: false,
+      message: "Error interno del servidor"
+    });
+  }
+}
 
 const obtenerProducto = async (req, res) => {
    try {
@@ -406,4 +432,5 @@ export {
   , obtenerProductoAdmin
   , registrarProducto
   , actualizarProducto 
+  , getTopPRoduct
 };

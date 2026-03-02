@@ -1,18 +1,21 @@
 import express from "express";
 import { createMulter } from "./../helpers/upload.js";
 import { subirArchivo } from "../helpers/uploadFile.js";
-import { UpdateConfigEco, GetConfigEco, SetConfigEco } from "../controllers/tiendaController.js";
-import { obtenerProductos, obtenerProducto, obtenerProductosAdmin, obtenerProductoAdmin,registrarProducto, actualizarProducto } from "../controllers/productosController.js";
-import { iniciarSesion, registrarUsuario, confirmarCuenta, mostrarPerfil, CambiarPasswordToken, ComprobarTokenPassword, ActualizarPassword } from "../controllers/usuarioController.js";
+import { UpdateConfigEco, GetConfigEco, GetConfigEcoPublic, SetConfigEco } from "../controllers/tiendaController.js";
+import { obtenerProductos, obtenerProducto, obtenerProductosAdmin, obtenerProductoAdmin,registrarProducto, actualizarProducto, getTopPRoduct } from "../controllers/productosController.js";
+import { iniciarSesion, registrarUsuario, confirmarCuenta, GetProfileByUserId, CambiarPasswordToken, ComprobarTokenPassword, ActualizarPassword, GetShippingAddressByUserId, SetShippingAddress } from "../controllers/usuarioController.js";
 import { obtenerCategoria, obtenerCategorias, CreateCategory, editarCategoria } from "../controllers/categoriaController.js";
 import { obtenerMarca, obtenerMarcas, createBrand, editarMarca } from "../controllers/marcaController.js";
 import { obtenerPedidoAdmin, obtenerPedidosAdmin } from "../controllers/pedidoAdminController.js";
-import { obtenerCarrito, addProductoCarrito, modificarCarrito, elimarItemsCarrito } from "../controllers/carritoController.js";
-import { obtenerPedido, obtenerPedidos, capturarPedido } from "../controllers/pedidoController.js";
-import { obtenerDevolucion, obtenerDevoluciones, GenerarDevolucion} from '../controllers/devolucionController.js';
+import { obtenerCarrito, addProductoCarrito, getCartItemsByUserId , getCountItemsByUserId, RemoveCartItemByProducto , modificarCarrito, elimarItemsCarrito } from "../controllers/carritoController.js";
+import { obtenerPedido, obtenerPedidos, capturarPedido, getOrdersAdmin, getOrdersByUserId, SetChangeOrderStatus } from "../controllers/pedidoController.js";
+import { obtenerDevolucion, getReturnsByUserId, CreateReturn, GetOrdersDeliveredByUserId, getReturnsAdmin} from '../controllers/devolucionController.js';
 import { getFileImage, DeleteFileImage } from "../controllers/imageController.js";
 import { GetCodePostal } from "../controllers/codigoPostalController.js";
-import { Enviar } from "../controllers/correoController.js";
+import { checkPreviousPayment, ProcessPayment } from "../controllers/paymentsController.js";
+import { enviarVerificacion } from "../controllers/correoController.js";
+// import { sendMailAdmintNewOrderByUser } from "../helpers/mails/admin/mailAdminController.js";
+// import { sendMailClientNewOrderByUser } from "../helpers/mails/client/mailClientController.js";
 import checkAuth from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -24,6 +27,7 @@ const uploadConfigEco = createMulter("ecommerceLogo");
 
 // Rutas de Administrador
 router.get('/Admin/GetConfiguracion', checkAuth, GetConfigEco)
+        .get('/Admin/GetConfigEcoPublic', GetConfigEcoPublic)
         .post('/Admin/SetConfiguracionEco', checkAuth, subirArchivo(uploadConfigEco, "logo"), SetConfigEco)
         .patch('/Admin/UpdateConfiguracionEco', checkAuth, subirArchivo(uploadConfigEco, "logo") , UpdateConfigEco);
 
@@ -49,11 +53,23 @@ router.get('/Admin/Marca/:id', obtenerMarca)
 
 router.get('/Admin/Pedido/:id', checkAuth, obtenerPedidoAdmin)
         .get('/Admin/Pedidos', checkAuth, obtenerPedidosAdmin)
-        //.patch('/Admin/Pedido', checkAuth, ActualizarPedido);
+        //.patch('/Admin/Pedido', checkAuth, ActualizarPedido)
+        // .patch('/Admin/Pedido', checkAuth, actualizarPedidoAdmin);
+
+// ! Rutas de Realizacion de Pedidos Admin
+router.get('/GetOrder/:id', checkAuth, obtenerPedido)
+        .get('/Admin/GetOrders', checkAuth, getOrdersAdmin)   
+        .post('/CreateOrder', checkAuth, capturarPedido)
+        .post('/ChangeOrderStatus', checkAuth, SetChangeOrderStatus);
+        // .patch('/Pedidos', checkAuth, actualizarPedido)
+
+router.get('/Admin/Returns', checkAuth, getReturnsAdmin)
+        //.patch('/Admin/Pedido', checkAuth, ActualizarPedido)
         // .patch('/Admin/Pedido', checkAuth, actualizarPedidoAdmin);
 
 // Rutas de Usuario Publicas
 router.get('/Productos/:id', obtenerProducto);
+router.get('/ProductosTop', getTopPRoduct);
 router.post('/Productos', obtenerProductos);
 router.get('/ConfirmarCuenta/:token', confirmarCuenta);
 router.post('/Login', iniciarSesion);
@@ -63,28 +79,42 @@ router.post('/ActualizarPassword', ActualizarPassword);
 router.get('/ActualizarPassword/:id', ComprobarTokenPassword);
 
 // Ruta de Usuario publica /privada
-router.get('/MiCarrito', checkAuth, obtenerCarrito)
-        .post('/agregarCarrito/:idProducto', checkAuth, addProductoCarrito)
-        .patch('/ActualizarCarrito', checkAuth ,modificarCarrito)
-        .delete('/EliminarItemCarrito/:id', checkAuth, elimarItemsCarrito);
+router.get('/GetCart', checkAuth, obtenerCarrito)
+        .get('/GetCartItemsByUserId', checkAuth, getCartItemsByUserId)
+        .get('/getCountItemsByUserId', checkAuth, getCountItemsByUserId)
+        .post('/SetCartItem/:id', checkAuth, addProductoCarrito)
+        .patch('/UpdateCart', checkAuth ,modificarCarrito)
+        .post('/DeleteItemCart', checkAuth, elimarItemsCarrito)
+        .post('/DeleteCartByProducto', checkAuth, RemoveCartItemByProducto);
 
 // Rutas de Usuario Privadas
-router.get('/Perfil', checkAuth, mostrarPerfil);
+router.get('/GetProfileByUserId', checkAuth, GetProfileByUserId)
+      .get('/GetShippingAddress', checkAuth, GetShippingAddressByUserId)
+      .post('/SaveShippingAddress', checkAuth, SetShippingAddress);
         // .post('/Perfil/Configuracion/' , completarPerfil)
         // .patch('/Perfil/Configuracion/', actualizarPerfil);
 
-// Rutas de Realizacion de Pedidos
-router.get('/Pedidos/:id', checkAuth, obtenerPedido)
-        .get('/Pedidos', checkAuth, obtenerPedidos)   
-        .post('/Pedidos', checkAuth, capturarPedido);
-        // .patch('/Pedidos', checkAuth, actualizarPedido)
-
 // Rutas de Devoluciones
 router.get('/Devoluciones/:id', checkAuth, obtenerDevolucion)
-        .get('/Devoluciones', checkAuth,   obtenerDevoluciones)   
-        .post('/Devoluciones', checkAuth, GenerarDevolucion);
+        .get('/Returns', checkAuth, getReturnsByUserId)   
+        .get('/GetOptionsOrderDeliveredByUserId', checkAuth, GetOrdersDeliveredByUserId)
+        .get('/GetOrdersDeliveredByUserId', checkAuth, GetOrdersDeliveredByUserId)
+        .post('/SetReturns', checkAuth, CreateReturn);
 
-// Rutas de EnviarCorreos 
-router.post('/Email', checkAuth, Enviar);
+// ? Rutas de Pedidos Usuario
+router.get('/Pedido/:id', checkAuth, obtenerPedidoAdmin)
+        .get('/Pedidos', checkAuth, getOrdersByUserId)
+        //.patch('/Admin/Pedido', checkAuth, ActualizarPedido);
+        // .patch('/Admin/Pedido', checkAuth, actualizarPedidoAdmin);
+
+// Rutas de Procesar Pago
+router.post('/CheckPaymentCart', checkAuth, checkPreviousPayment)
+        .post('/Payment', checkAuth, ProcessPayment)
+
+// Rutas de EnviarCorreos Client
+router.post('/Email', enviarVerificacion);
+
+// Rutas de EnviarCorreo Admin
+// router.get('/EmailAdmin', sendMailAdmintNewOrderByUser);
 
 export default router;

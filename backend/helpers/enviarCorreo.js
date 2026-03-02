@@ -13,6 +13,42 @@ function conexionEmail() {
         });
 }
 
+const sendMailClientNewOrderByUser = async (nameAdmin, subject, nameClient, correoDestino ) => {
+  try {
+      const transporter = conexionEmail();
+      const mailOptions = {
+        from: '"Building Technology" <marcoricovaladez172@gmail.com>',
+        to: correoDestino,
+        subject: '¡Nuevo Pedido!',
+        html: verificarCuenta(nombre, pedido),
+      };
+
+      const info = await transporter.sendMail(mailOptions);
+      
+      return 'Correo enviado: ' + info.response;
+    } catch (error) {
+      return 'Error al enviar: ' + error.message;
+    }
+}
+
+const sendMailAdminNewOrderByUser = async (nameAdmin, subject, nameClient, correoDestino ) => {
+  try {
+      const transporter = conexionEmail();
+      const mailOptions = {
+        from: '"Building Technology" <marcoricovaladez172@gmail.com>',
+        to: correoDestino,
+        subject: '¡Nuevo Pedido!',
+        html: verificarCuenta(nombre, pedido),
+      };
+
+      const info = await transporter.sendMail(mailOptions);
+      
+      return 'Correo enviado: ' + info.response;
+    } catch (error) {
+      return 'Error al enviar: ' + error.message;
+    }
+}
+
 const sendMailEstatusPedidos = async (correoDestino, nombre, pedido, estatus, direccion) => {
     try {
         const transporter = conexionEmail();

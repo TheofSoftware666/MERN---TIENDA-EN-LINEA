@@ -1,4 +1,14 @@
-import { carrito, carritoDetalles, carritoEstado, addNewCarrito, agregarProductoCarrito, obtenerProductoCarrito, eliminarProductoCarrito } from "../models/carrito.js";
+import { ok } from "assert";
+import { carrito
+    , getCartItemsByIdUserModel
+    , getCartTotalItemsByUserIdModel
+    , carritoEstado
+    , DeleteCartItemByIdProductModel
+    , SetAddCartItemModel
+    , obtenerProductoCarrito
+    , RemoveCartItemByIdProductModel
+    } from "../models/carrito.js";
+
 
 const obtenerCarrito = async (req, res) => {
     const { usuario } = req; 
@@ -32,57 +42,133 @@ const obtenerCarrito = async (req, res) => {
     return res.status(200).json({ msg : detallesCarrito});
 };
 
-const obtenerDetallesCarrito = async (req, res) => {
-    const { usuario } = req; 
-    const { usuarioId} = usuario[0];
+const getCountItemsByUserId = async (req, res) => {
+   try {
+        const userId = req.usuario?.[0]?.UserId_New || null;
 
-    const resultado = await carritoDetalles(usuarioId);
+        if (!userId) {
+            return res.status(400).json({
+                ok: false,
+                message: "No se pudo identificar al usuario."
+            });
+        }
 
-    if(resultado.length == 0){
-        // const carritoVacio = {
-        //     msg : "Aun no has agregado productos a tu carrito",
-        //     img : "carrito-vacio"
-        // };  
-        const error = new Error("Aun no has agregado productos a tu carrito");
-        return res.status(404).json({ error : error.message});
+        const response = await getCartTotalItemsByUserIdModel(userId);
+
+        if (!response || response.length === 0) {
+            return res.status(404).json({
+                ok: false,
+                message: "Aún no has agregado productos a tu carrito.",
+                data: []
+            });
+        }
+
+        return res.status(200).json({
+            ok: true,
+            message: "Carrito obtenido correctamente.",
+            data: response
+        });
+
+    } catch (error) {
+        console.error("Error en getCartItemsByUserId:", error);
+
+        return res.status(500).json({
+            ok: false,
+            message: "Error interno del servidor.",
+            error: error.message
+        });
     }
+};
 
-    return res.status(200).json({ msg : resultado});
+const getCartItemsByUserId = async (req, res) => {
+    try {
+        const userId = req.usuario?.[0]?.UserId_New || null;
+
+        if (!userId) {
+            return res.status(400).json({
+                ok: false,
+                message: "No se pudo identificar al usuario."
+            });
+        }
+
+        const response = await getCartItemsByIdUserModel(userId);
+
+        if (!response || response.length === 0) {
+            return res.status(404).json({
+                ok: false,
+                message: "Aún no has agregado productos a tu carrito.",
+                data: []
+            });
+        }
+
+        return res.status(200).json({
+            ok: true,
+            message: "Carrito obtenido correctamente.",
+            data: response
+        });
+
+    } catch (error) {
+        console.error("Error en getCartItemsByUserId:", error);
+
+        return res.status(500).json({
+            ok: false,
+            message: "Error interno del servidor.",
+            error: error.message
+        });
+    }
 };
 
 const addProductoCarrito = async (req, res) => {
-    const { usuario } = req;
-    const { idProducto } = req.params;
-    const { usuarioId } = usuario[0];    
+    try {
+        const userId = req.usuario?.[0]?.UserId_New || null;
+        const idProducto = Number(req.params?.id) || 0;
+        const idVariante = null; 
+        const quantity = Number(req.body?.quantity) || 1;
 
-    if(!usuario){
-        const e = new Error("USUARIO : no existe");
-        return res.status(202).json({ error : e.message});
-    }
-
-    if(!idProducto){
-        const e = new Error("PRODUCTO : no existe");
-        return res.status(202).json({ error : e.message});
-    }
-
-    // Comprobar que exista carrito 
-    const resultado = await carrito(usuarioId);
-
-    if(resultado.length == 0){
-        const carrito = await addNewCarrito(usuarioId);
-        
-        // Comprobar que exista carrito 
-        const validarCarrito = await carrito(usuarioId);
-    
-        if(validarCarrito.length == 0){
-            const e = new Error(" Error  : al crear el carrito ");
-            return res.status(202).json({ error : e.message});
+        if (!userId) {
+            return res.status(400).json({
+                ok: false,
+                message: "No se pudo identificar al usuario."
+            });
         }
-    }
 
-    const message = await agregarProductoCarrito(usuarioId, idProducto);
-     
-    return res.status(202).json({ success : message});
+        if (!idProducto || idProducto <= 0) {
+            return res.status(400).json({
+                ok: false,
+                message: "ID de producto inválido."
+            });
+        }
+
+        if (quantity <= 0) {
+            return res.status(400).json({
+                ok: false,
+                message: "La cantidad debe ser mayor a 0."
+            });
+        }
+
+        const data = await SetAddCartItemModel(userId, idProducto, idVariante, quantity);
+
+        if (!data) {
+            return res.status(500).json({
+                ok: false,
+                message: "No se pudo agregar el producto al carrito.",
+                data: []
+            });
+        }
+
+        return res.status(201).json({
+            ok: true,
+            message: "Producto agregado correctamente al carrito.",
+            data
+        });
+    } catch (error) {
+        console.error("Error en addProductoCarrito:", error);
+        return res.status(500).json({
+            ok: false,
+            message: "Error interno al agregar producto al carrito.",
+            error: error.message
+        });
+    }
 };
 
 const modificarCarrito = async (req, res) => {
@@ -115,17 +201,85 @@ const modificarCarrito = async (req, res) => {
 };
 
 const elimarItemsCarrito = async (req, res) => {
-    
-    const { usuario } = req;
-    const { usuarioId } = usuario[0];   
-    const id = req.params.id;
+    try{
+        const userId = req.usuario?.[0]?.UserId_New || null;
+        const { productId, idVariant, quantity } = req.body;
 
-    const resultado = await eliminarProductoCarrito(usuarioId, id);
+        if(!userId || userId === null || userId.trim() === ''){
+            const error = new Error("ID de producto invalido.");
+            return res.status(400).json({ ok: false, error : error.message});
+        }
 
-    console.log(resultado[0]);
-    
-    return res.status(200).json({ success : "Se elimino el producto correctamente"});
+        // if(!idVariant || idVariant <= 0){
+        //     const error = new Error("ID de variante invalido.");
+        //     return res.status(400).json({ ok: false, error : error.message});
+        // }
 
+        if(!productId || productId <= 0){
+            const error = new Error("ID de producto invalido.");
+            return res.status(400).json({ ok: false, error : error.message});
+        }
+
+        if(!quantity || quantity <= 0){
+            const error = new Error("La cantidad debe ser mayor a 0.");
+            return res.status(400).json({ ok: false, error : error.message});
+        }
+
+        const response = await DeleteCartItemByIdProductModel(userId, productId, idVariant, quantity);
+
+        if(!response || response.length === 0){
+            const error = new Error("No se pudo eliminar el producto del carrito.");
+            return res.status(403).json({ ok: false, error : error.message});
+        }
+        
+        return res.status(200).json({ ok: true, message : "Se elimino el producto correctamente"});
+    }catch(error){
+        console.error("Error en elimarItemsCarrito:", error);
+        return res.status(500).json({
+            ok: false,
+            message: "Error interno al eliminar el producto del carrito.",
+            error: error.message
+        });
+    }
 };
 
-export {obtenerCarrito, obtenerDetallesCarrito, addProductoCarrito, modificarCarrito, elimarItemsCarrito};
+const RemoveCartItemByProducto = async (req, res) => {
+    try{
+        const userId = req.usuario?.[0]?.UserId_New || null;
+        const { cartItemId } = req.body;
+
+        if(!userId || userId === null || userId.trim() === ''){
+            const error = new Error("ID de producto invalido.");
+            return res.status(400).json({ ok: false, error : error.message});
+        }
+
+        if(!cartItemId || cartItemId <= 0){
+            const error = new Error("ID de producto invalido.");
+            return res.status(400).json({ ok: false, error : error.message});
+        }
+
+        console.log("Usuario y cartItemId para eliminar:");
+        console.log(userId, cartItemId);
+        const error = new Error("ID de producto invalido.");
+        return res.status(400).json({ ok: false, error : error.message});
+
+        const response = await RemoveCartItemByIdProductModel(userId, cartItemId);
+
+        if(response == null || response.length === 0){
+            const error = new Error("No se pudo eliminar el producto del carrito.");
+            return res.status(403).json({ ok: false, error : error.message});
+        }
+
+        return res.status(200).json({ ok: true, message : "Se elimino el producto correctamente"});
+
+    }catch(error){
+        console.error("Error en DeleteCartByProducto:", error);
+        return res.status(500).json({
+            ok: false,
+            message: "Error interno al eliminar el producto del carrito.",
+            error: error.message
+        });
+    }
+}
+
+export {obtenerCarrito, getCartItemsByUserId, getCountItemsByUserId , addProductoCarrito, modificarCarrito, elimarItemsCarrito, RemoveCartItemByProducto};

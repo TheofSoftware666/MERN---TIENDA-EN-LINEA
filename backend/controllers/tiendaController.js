@@ -2,6 +2,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import fs from 'fs';
 import { GetConfigEcoModel
+  , GetConfigEcoPublicModel
   , SetConfigEcoModel
   , UpdateConfigEcoModel
   , SetSocialMediaModel
@@ -35,6 +36,29 @@ const GetConfigEco = async (req, res) => {
 
         // Consultar la tienda
         const response = await GetConfigEcoModel();
+
+        return res.json({ tienda : response});
+
+    }catch(e){
+        const error = new Error("Tienda no encontrada");
+        return res.status(404).json({ msg : error.message })
+    }   
+}
+
+const GetConfigEcoPublic = async (req, res) => {
+    try{
+        // const { usuario } = req;
+        
+        // validar usuario
+        // const usuarioAdmin = await comprobarUsuarioAdmin(usuario[0].usuarioId);
+        
+        // if(usuarioAdmin[0].usuarioAdmin == 0){
+        //     const error = new Error("El token caduco o no es valido. ");
+        //     return res.status(404).json({ msg : error.message })
+        // }
+
+        // Consultar la tienda
+        const response = await GetConfigEcoPublicModel();
 
         return res.json({ tienda : response});
 
@@ -325,4 +349,4 @@ const UpdateConfigEco = async (req, res) => {
   }
 };
 
-export { GetConfigEco, SetConfigEco, UpdateConfigEco };
+export { GetConfigEco, GetConfigEcoPublic, SetConfigEco, UpdateConfigEco };

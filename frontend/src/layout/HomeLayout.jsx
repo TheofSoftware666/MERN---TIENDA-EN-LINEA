@@ -1,17 +1,23 @@
+import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { X } from "lucide-react";
-import Header from '../components/header.jsx';
+import clientAxios from '../config/axios.jsx';
+
+// Compoenents
+import Header from '../components/Header.jsx';
 import Footer from '../components/Footer.jsx';
-import LighBox from '../components/LighBox.jsx';
 import SideCarrito from '../components/SideCarrito.jsx';
 import SideCheckOut from '../components/SideCheckOut.jsx';
-import { useState, useEffect } from 'react';
+
+// Extra
+import { CheckCircle } from "lucide-react";  
 
 const AuthLayout = () => {
   const [ ShowPromocion, setShowPromocion ] = useState(false);
   const [ ShowCart, setShowCart ] = useState(false);
   const [ ShowSide, setSide ] = useState(false);
   const [ ShowCheckout, setShowCheckout ] = useState(false);
+  const [orderSuccess, setOrderSuccess] = useState(null); 
 
   useEffect(() => {
     
@@ -28,15 +34,9 @@ const AuthLayout = () => {
     localStorage.setItem('eco_promo', '333');
   }
 
-  function HandleSide(  ){
-    
-    // if(cartOrCheckout){
-      setShowCart(true);
-    // }else {
-    //   setShowCart(false);
-    // }
-    
-    return setSide(true);
+  function HandleSide(){
+    setShowCart(true);    
+    setSide(true);
   }
 
   function HandleClosePromo () {
@@ -52,11 +52,74 @@ const AuthLayout = () => {
 
   function HandleCheckOut() {
     setShowCart(false);
-    return setShowCheckout(true);
+    setShowCheckout(true);
   }
+
+  function HandleCart() {
+    setShowCart(true);
+    setShowCheckout(false);
+    setOrderSuccess(null);
+  }
+
+  const HandlePayment = (orderNumber) => {
+    console.log(orderNumber)
+    setSide(false);
+    setShowCart(false);
+    setShowCheckout(false);
+    setOrderSuccess({
+      message: "¡Se completó tu pedido!",
+      orderNumber: orderNumber
+    });
+  };
 
   return (
     <>
+        {/* Modal de confirmación de pedido */}
+        {orderSuccess && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl animate-fadeIn">
+              <div className="text-center">
+                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                  <CheckCircle className="h-10 w-10 text-green-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                  ¡Pedido Completado!
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  {orderSuccess.message}
+                </p>
+                {/* <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                  <p className="text-sm text-gray-500 mb-1">Número de pedido:</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {orderSuccess.orderNumber}
+                  </p>
+                </div> */}
+                <p className="text-sm text-gray-500 mb-6">
+                  Te hemos enviado un correo con los detalles de tu compra.
+                </p>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => {
+                      setOrderSuccess(null);
+                      // Opcional: Redirigir a la página de inicio o pedidos
+                      // window.location.href = "/mis-pedidos";
+                    }}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors"
+                  >
+                    Ver mis pedidos
+                  </button>
+                  <button
+                    onClick={() => setOrderSuccess(null)}
+                    className="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-3 px-4 rounded-xl transition-colors"
+                  >
+                    Continuar comprando
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {ShowPromocion && (
           <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center h-screen px-3 sm:px-6">
           <div className="w-full max-w-sm sm:max-w-md">
@@ -104,8 +167,8 @@ const AuthLayout = () => {
                 <X size={20} />
               </button>
             </div>
-            {ShowCart && (<SideCarrito onOpenCheck={() => HandleCheckOut}/>)}
-            {ShowCheckout &&  (<SideCheckOut/>)}
+            {ShowCart && (<SideCarrito onOpenCheck={() => HandleCheckOut()}/>)}
+            {ShowCheckout &&  (<SideCheckOut onBack={() => HandleCart()} onProcess={() => HandlePayment()}/>)}
           </div>
         </div>
       </div>)}

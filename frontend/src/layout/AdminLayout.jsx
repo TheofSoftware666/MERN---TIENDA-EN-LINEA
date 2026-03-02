@@ -15,7 +15,7 @@ const AdminLayout = () => {
             <span className="text-gray-700 font-medium">Estamos preparando todo para ti...</span>
         </div>
     </div>
-);
+  );
 
   return (
     <div className="flex w-full h-screen overflow-hidden">
@@ -39,10 +39,10 @@ const AdminLayout = () => {
       </div>
 
       {/* Contenido principal */}
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 min-w-0"> {/* CAMBIO IMPORTANTE: agregué min-w-0 */}
         <AdminHeader onToggleSidebar={() => setSidebarOpen(true)} />
         <main className="flex-1 overflow-y-auto bg-gray-100 px-5 py-3">
-          {Auth[0]?.usuarioId ? <Outlet/>  : <Navigate to="/" />}
+          {Auth[0]?.usuarioId ? <Outlet/>  : <Navigate to="/Error404" />}
         </main>
       </div>
     </div>

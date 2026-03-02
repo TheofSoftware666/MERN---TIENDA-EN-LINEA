@@ -28,6 +28,7 @@ export const useToast = () => {
   toast.error = (message) => addToast(message, 'error');
   toast.warning = (message) => addToast(message, 'warning');
   toast.info = (message) => addToast(message, 'info');
+  toast.cart = (message) => addToast(message, 'cart');
 
   return { toasts, toast, removeToast };
 };

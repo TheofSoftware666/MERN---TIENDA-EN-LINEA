@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import axios from 'axios';
+import clientAxios from "../config/axios.jsx";
 import Alerta from "./Alerta.jsx";
 
 const FormRegistrarte = () => {
@@ -33,9 +33,7 @@ const FormRegistrarte = () => {
         setAlerta({msg: 'Estamos preparando todo para ti...', tipo: 'Info'});
 
         try{
-            const url = 'http://localhost:3001/tienda/api/Registrar'
-            const respuesta = await axios.post(url, {nombre ,email, password, repetir });
-            
+            const respuesta = await clientAxios.post('/Registrar', {nombre ,email, password, repetir });
             setTimeout(() => {
                 setAlerta({msg : respuesta.data.msg + nombre, tipo: 'Exito'});
             navigate('/Auth/confirmar');

@@ -1,18 +1,56 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import clientAxios from "../config/axios.jsx";
 import Carousel from "../components/Carousel.jsx"
 
+import {
+  FaStar,
+  FaBolt,
+  FaFire,
+  FaCheck,
+  FaCartShopping
+} from "react-icons/fa6";
+
 const Home = () => {
+  const [productos, setProductos] = useState([]);
+
   useEffect(() => {
-    const token = localStorage.getItem("ape_tokens")
-    console.log(token)
+    // const token = localStorage.getItem("ape_tokens")
+    getProducts();
   }, [])
+
+  const getProducts = async () => {
+    try {
+      const response = await clientAxios.get("/ProductosTop");
+      
+      const adaptados = response.data.data.map((p) => ({
+        id: p.id,
+        nombre: p.Name,
+        marca: p.Brand,
+        precio: Number(p.Price) * (1 - Number(p.Discount) / 100),
+        precioOriginal: Number(p.Price),
+        descuento: Number(p.Discount),
+        stock: p.stock,
+        vendidos: p.Sell,
+        rating: (Math.random() * 0.8 + 4.2).toFixed(1),
+        img: p.Images?.length > 0 ? p.Images[0].url : "/no-image.png",
+      }));
+
+      setProductos(adaptados || []);
+    } catch (ex) {
+      console.error("Error:", ex);
+      
+    } finally {
+      //setLoading(false);
+    }
+  };
 
   return (
     <>
       {/* Hero con CTA principal */}
       <section className="relative w-full h-[500px] bg-gray-900 text-white flex items-center justify-center">
         <img
-          src="https://images.unsplash.com/photo-1607082349566-187342f25d7e"
+          src="https://images.unsplash.com/photo-1761839257661-c2392c65ea72?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           alt="Banner Principal"
           className="absolute inset-0 w-full h-full object-cover opacity-70"
         />
@@ -59,65 +97,70 @@ const Home = () => {
   </h2>
 
   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-    {[1, 2, 3].map((item) => (
+    {productos.map((p) => (
       <div
-        key={item}
-        className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition group relative flex flex-col"
-      >
-        {/* Imagen */}
-        <div className="relative">
-          <img
-            src="https://images.unsplash.com/photo-1585386959984-a4155223f9f3"
-            alt="Producto en Promoción"
-            className="w-full h-56 object-cover group-hover:scale-105 transition-transform"
-            loading="lazy"
-          />
-          {/* Etiqueta de descuento */}
-          <span className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1 rounded-md text-sm font-bold shadow">
-            -20% OFF
-          </span>
-          {/* Etiqueta de marketing */}
-          <span className="absolute top-3 right-3 bg-yellow-400 text-gray-900 px-2 py-1 rounded-md text-xs font-semibold shadow">
-            ⭐ Más vendido
-          </span>
-          {/* Vista rápida */}
-          <button className="absolute bottom-3 right-3 bg-white text-gray-800 px-3 py-1 rounded-md text-sm font-semibold shadow hover:bg-gray-100">
-            👁 Vista rápida
-          </button>
-        </div>
+                    key={p.id}
+                    className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition border border-gray-100 hover:border-blue-200 flex flex-col relative"
+                  >
+                    <Link to={`/Producto/${p.id}`}>
+                      <img
+                        src={import.meta.env.VITE_BACKEND_URL_IMAGENES + p.img}
+                        alt={p.Name}
+                        className="w-full h-36 sm:h-44 md:h-48 object-cover hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
 
-        {/* Contenido */}
-        <div className="p-4 flex flex-col flex-grow justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-1">
-              Producto destacado {item}
-            </h3>
-            <p className="text-gray-500 text-sm mb-2">
-              🔥 Solo quedan {4 - item} en stock
-            </p>
-          </div>
+                      {p.descuento > 0 && (
+                        <span className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-lg text-[10px] font-bold shadow-md flex items-center gap-1">
+                          <FaFire /> -{p.descuento}% OFF
+                        </span>
+                      )}
 
-          {/* Precios */}
-          <div className="mt-2">
-            <span className="text-xl font-bold text-gray-900">$899</span>
-            <span className="text-sm text-gray-400 line-through ml-2">
-              $1,099
-            </span>
-            <p className="text-xs text-green-600 font-medium">Ahorras $200</p>
-          </div>
+                      {p.stock < 3 && (
+                        <span className="absolute top-2 right-2 bg-amber-500 text-white px-2 py-1 rounded-lg text-[10px] font-bold shadow-md flex items-center gap-1">
+                          <FaBolt /> Solo {p.stock}
+                        </span>
+                      )}
+                    </Link>
 
-          {/* Microcopy de confianza */}
-          <div className="flex flex-wrap text-xs text-gray-500 gap-3 mt-3">
-            <span>🚚 Entrega en 24h</span>
-            <span>💳 3 meses sin interés</span>
-          </div>
+                    <div className="p-3 flex flex-col flex-grow">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-1">
+                          <FaStar className="text-amber-500 text-xs" />
+                          <span className="text-[11px] font-bold">{p.rating}</span>
+                        </div>
 
-          {/* CTA */}
-          <button className="bg-blue-600 hover:bg-blue-700 w-full text-white py-3 mt-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition">
-            🛒 Agregar al carrito
-          </button>
-        </div>
-      </div>
+                        <span className="text-[10px] text-gray-500">
+                          {p.vendidos}+ vendidos
+                        </span>
+                      </div>
+
+                      <h3 className="text-[13px] sm:text-sm font-semibold text-gray-800 line-clamp-2 leading-tight">
+                        {p.nombre}
+                      </h3>
+
+                      <p className="text-[11px] text-gray-500 mt-1">{p.marca}</p>
+
+                      <div className="mt-2">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-base sm:text-lg font-bold text-gray-900">
+                            ${p.precio}
+                          </span>
+                          <span className="text-[10px] sm:text-xs line-through text-gray-400">
+                            ${p.precioOriginal}
+                          </span>
+                        </div>
+
+                        <p className="text-[11px] font-bold text-green-600 flex items-center gap-1 mt-1">
+                          <FaCheck className="text-[10px]" /> Ahorras ${p.descuento}
+                        </p>
+                      </div>
+
+                      <button onClick={() => handleAddToCart(p.id)} className="mt-auto bg-blue-600 hover:bg-blue-700 text-white py-2 sm:py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow hover:shadow-lg text-[12px] sm:text-sm">
+                        <FaCartShopping /> Agregar
+                      </button>
+                    </div>
+                  </div>
     ))}
   </div>
 </section>
@@ -136,7 +179,7 @@ const Home = () => {
                 className="relative block rounded-2xl overflow-hidden shadow hover:shadow-lg transition"
               >
                 <img
-                  src="https://source.unsplash.com/random/400x300/?product"
+                  src="https://images.unsplash.com/photo-1472141521881-95d0e87e2e39?q=80&w=1172&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                   alt={cat}
                   className="w-full h-40 object-cover"
                 />

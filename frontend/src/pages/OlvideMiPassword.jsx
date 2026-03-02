@@ -1,4 +1,4 @@
-import axios from "axios";
+import clientAxios from "../config/axios";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -23,12 +23,11 @@ const OlvideMiPassword = () => {
     }
 
     try{
-      const url = "http://localhost:3001/tienda/api/TokenPassword";
-      const response = await axios.post(url, { email });
+      const response = await clientAxios.post("/TokenPassword", { email });
       console.log(response);
 
     }catch(e){
-      console.log(e)
+      console.warn(e);
     }
   }
 

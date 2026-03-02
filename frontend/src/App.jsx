@@ -14,8 +14,10 @@ import ConfirmarCuenta from './pages/ConfirmarCuenta.jsx'
 import AdminDashBoard from './pages/AdminDashBoard.jsx';
 import Productos from './pages/Productos.jsx';
 import Producto from './pages/Producto.jsx';
+import UserPedidos from './pages/Pedidos.jsx';
 import AdminPedidos from './pages/AdminPedidos.jsx';
 import AdminDevoluciones from './pages/AdminDevoluciones.jsx';
+import UserDevoluciones from './pages/Devoluciones.jsx';
 // import AdminAddProducto from './pages/AdminAddProducto.jsx';
 import AdminProductos from './pages/AdminProductos.jsx';
 import AdminEmailMarketing from './pages/AdminEmailMarketing.jsx';
@@ -37,6 +39,8 @@ function App() {
           <Route index element={<Home/> }/>
           <Route path='Productos' element={<Productos/> }/>
           <Route path='Producto/:id' element={<Producto/> }/>
+          <Route path='Pedidos' element={<UserPedidos/> }/>
+          <Route path='Devoluciones' element={<UserDevoluciones/> }/>
         </Route>
         
         <Route path="/Admin" element={<AdminLayout />}>

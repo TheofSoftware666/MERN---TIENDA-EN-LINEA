@@ -86,6 +86,71 @@ const GetConfigEcoModel = async () => {
   }
 };
 
+const GetConfigEcoPublicModel = async () => {
+  try {
+    const connection = await db();
+
+    // Obtener la configuración principal de la tienda
+    const [config] = await connection.query(
+      `    
+        SELECT 
+          nombre_tienda
+          , descripcion
+          , correo_contacto
+          , telefono
+          , direccion
+          , codigo_postal
+          , municipio
+          , colonia
+          , estado
+          , color_primario
+          , logo_url
+          , costo_envio
+        FROM ecommerce_configuracion
+        LIMIT 1;
+      `
+    );
+
+    if (!config.length) return null; // No hay configuración aún
+
+    const idConfiguracion = config[0].id_configuracion;
+
+    // Obtener redes sociales
+    const [socialMedia] = await connection.query(
+      `SELECT 
+        nombre_red
+        , url 
+       FROM ecommerce_redes_sociales
+       LIMIT 5
+       `, 
+      [idConfiguracion]
+    );
+
+    // Obtener métodos de pago
+    const [metodosPago] = await connection.query(
+      `SELECT 
+        nombre_metodo
+        , activo 
+       FROM ecommerce_metodos_pago 
+       WHERE activo = 1`, 
+      [idConfiguracion]
+    );
+
+    // Armar objeto completo para frontend
+    const result = {
+      config: config[0],
+      socialMedia,
+      metodosPago
+    };
+
+    return result;
+
+  } catch (e) {
+    console.error("❌ Error al obtener la configuración del ecommerce:", e);
+    throw e;
+  }
+};
+
 const SetConfigEcoModel = async (
   nombreTienda,
   correoContacto,
@@ -429,6 +494,7 @@ const DeletePaymentMethodModel = async (idConfiguracion) => {
 
 export { GetIdConfigModel
   , GetConfigEcoModel
+  , GetConfigEcoPublicModel
   , SetConfigEcoModel
   , UpdateConfigEcoModel
   , SetSocialMediaModel

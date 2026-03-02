@@ -1,7 +1,9 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import clientAxios from "../config/axios.jsx";
-import { Search } from "lucide-react";
+import { Search, Type } from "lucide-react";
+import { useToast } from './../hooks/useToast.jsx';
+import ToastContainer from '../components/ToastContainer.jsx';
 
 import {
   FaFilter,
@@ -24,14 +26,13 @@ const Productos = () => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const { toasts, toast, removeToast } = useToast();
   
-  // NUEVO: Estado para el término de búsqueda móvil
   const [searchTermMobile, setSearchTermMobile] = useState("");
   
   const [categoriasAPI, setCategoriasAPI] = useState([]);
   const [marcasAPI, setMarcasAPI] = useState([]);
 
-  // NUEVO: estados para colapsar secciones
   const [collapseCategorias, setCollapseCategorias] = useState(true);
   const [collapseMarcas, setCollapseMarcas] = useState(true);
 
@@ -56,19 +57,15 @@ const Productos = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // NUEVO: Función para manejar búsqueda móvil
   const handleMobileSearch = (e) => {
     e.preventDefault();
     if (searchTermMobile.trim()) {
-      // Actualizar URL con parámetro de búsqueda
       navigate(`?q=${encodeURIComponent(searchTermMobile.trim())}`);
     }
   };
 
-  // NUEVO: Función para limpiar búsqueda móvil
   const clearMobileSearch = () => {
     setSearchTermMobile("");
-    // Remover parámetro de búsqueda de la URL
     const queryParams = new URLSearchParams(location.search);
     queryParams.delete("q");
     navigate(`?${queryParams.toString()}`);
@@ -81,9 +78,32 @@ const Productos = () => {
     }));
   };
 
-  /* =====================================================
-        GET PRODUCTS
-  ====================================================== */
+  const handleAddToCart = async (productId) => {
+    try{
+      const token = localStorage.getItem("ape_token");
+      const body = {
+        quantity: 1,
+        variantId: null
+      };
+
+      if(!token){
+        return;
+      }
+
+      const response = await clientAxios.post(`/SetCartItem/${productId}`, body, {
+        headers: {
+          Authorization : `Bearer ${token}`
+      }});
+
+      toast.cart("Producto agregado al carrito");
+      console.log("Producto agregado al carrito:", response.data);      
+      
+    }catch(ex){
+      console.error("Error al agregar producto al carrito:", ex.response.data.message);
+      toast.error(ex.response.data.message || "Error al agregar el producto al carrito");
+    }
+  }
+
   const getProducts = async () => {
     try {
       setLoading(true);
@@ -93,7 +113,6 @@ const Productos = () => {
       const q = queryParams.get("q");
       const categoriaURL = queryParams.get("categoria");
 
-      // NUEVO: Sincronizar searchTermMobile con la URL
       if (q) {
         setSearchTermMobile(q);
       }
@@ -115,16 +134,14 @@ const Productos = () => {
         limit: 20,
       };
 
-      console.log("Body enviado a la API:", body); // Para debugging
-
       const response = await clientAxios.post("/Productos", body);
 
       const adaptados = response.data.data.map((p) => ({
         id: p.id,
         nombre: p.Name,
         marca: p.Brand,
-        precio: Number(p.Price),
-        precioOriginal: Number(p.Price) + Number(p.Discount),
+        precio: Number(p.Price) * (1 - Number(p.Discount) / 100),
+        precioOriginal: Number(p.Price),
         descuento: Number(p.Discount),
         stock: p.stock,
         vendidos: p.Sell,
@@ -142,9 +159,6 @@ const Productos = () => {
     }
   };
 
-  /* =====================================================
-        GET CATEGORIES
-  ====================================================== */
   const getCategories = async () => {
     try {
       const data = await clientAxios("/Admin/Categorias/10000");
@@ -160,9 +174,6 @@ const Productos = () => {
     }
   };
 
-  /* =====================================================
-        GET BRANDS
-  ====================================================== */
   const getBrands = async () => {
     try {
       const data = await clientAxios("/Admin/Marcas/10000");
@@ -183,10 +194,8 @@ const Productos = () => {
     getProducts();
     getCategories();
     getBrands();
-    // eslint-disable-next-line
   }, [location.search, selectedFilters]);
 
-  // NUEVO: Efecto para sincronizar searchTermMobile con la URL al cargar
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const q = queryParams.get("q");
@@ -197,7 +206,7 @@ const Productos = () => {
 
   return (
     <div className="container mx-auto px-4 lg:px-20 py-8 bg-gray-50 min-h-screen">
-      
+      <ToastContainer toasts={toasts} removeToast={removeToast}/>
       <div className="lg:hidden mb-6">
   <form onSubmit={handleMobileSearch} className="relative">
     <div className="relative bg-white rounded-2xl shadow-xl border border-gray-200 hover:border-blue-300 transition-all duration-300 hover:shadow-2xl overflow-hidden">
@@ -628,7 +637,7 @@ const Productos = () => {
                         </p>
                       </div>
 
-                      <button className="mt-auto bg-blue-600 hover:bg-blue-700 text-white py-2 sm:py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow hover:shadow-lg text-[12px] sm:text-sm">
+                      <button onClick={() => handleAddToCart(p.id)} className="mt-auto bg-blue-600 hover:bg-blue-700 text-white py-2 sm:py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow hover:shadow-lg text-[12px] sm:text-sm">
                         <FaCartShopping /> Agregar
                       </button>
                     </div>

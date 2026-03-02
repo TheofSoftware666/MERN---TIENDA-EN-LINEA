@@ -133,6 +133,55 @@ const Producto = async (idProducto) => {
     }
 }
 
+const GetProductsTop = async () => {
+    const con = await db();
+
+    try {
+        const query = `
+        SELECT 
+          PD.productoId AS id,
+          PD.nombre AS Name,
+          PD.descripcion AS Description,
+          MC.nombre AS Brand,
+          CT.nombre AS Categorie,
+          PD.stock,
+          PD.monto AS Price,
+          PD.descuento1 AS Discount,
+          PD.vendidos AS Sell,
+          PD.SKU AS SKU,
+          (
+            SELECT JSON_ARRAYAGG(JSON_OBJECT('name', PE2.Etiqueta))
+            FROM productoetiquetas PE2
+            WHERE PE2.ProductoId = PD.productoId
+          ) AS KeyWords,
+          (
+            SELECT JSON_ARRAYAGG(JSON_OBJECT('url', PI2.URL, 'orden', PI2.Orden))
+            FROM productoimagenes PI2
+            WHERE PI2.ProductoId = PD.productoId
+            ORDER BY PI2.Orden
+          ) AS Images
+        FROM productos PD
+        LEFT JOIN marca MC ON MC.marcaId = PD.marcaId
+        LEFT JOIN categoria CT ON CT.categoriaId = PD.categoriaId
+        WHERE PD.estatusProducto = 1
+          AND PD.monto > 0
+        `;
+        const [results] = await con.query(query);
+        
+        // console.log(results);
+        const rawJson = results;
+        if (!rawJson || rawJson === "{}") {
+            return null;
+        }
+        const producto = typeof rawJson == "string" ? JSON.parse(rawJson) : rawJson;
+        return producto;
+    } catch (error) {
+        console.error("Error obteniendo productos top:", error);
+        throw new Error("No se pudo obtener el producto");
+    } finally {
+        if (con) await con.end();
+    }
+}
 
 const ProductosAdmin = async (limit = 50) => {
   const conection = await db();
@@ -382,4 +431,5 @@ export { BuscarProductos
   , comprobarExistencias
   , comprobarExistenciasFiles
   , SetUpdateProductAdmin
+  , GetProductsTop
  };

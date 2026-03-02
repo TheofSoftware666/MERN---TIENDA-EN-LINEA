@@ -18,7 +18,8 @@ const Toast = ({ toast, onClose }) => {
       success: "bg-green-25 border-green-200 text-green-800",
       error: "bg-red-25 border-red-200 text-red-800",
       warning: "bg-yellow-25 border-yellow-200 text-yellow-800",
-      info: "bg-blue-25 border-blue-200 text-blue-800"
+      info: "bg-blue-25 border-blue-200 text-blue-800",
+      cart: "bg-white/70 backdrop-blur-md border border-gray-200 text-gray-800 shadow-lg"
     };
 
     return `${baseStyles} ${typeStyles[type] || typeStyles.info}`;
@@ -44,6 +45,11 @@ const Toast = ({ toast, onClose }) => {
       info: (
         <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
           <span className="text-white text-xs">i</span>
+        </div>
+      ),
+      cart: (
+        <div className="w-6 h-6 bg-black/20 rounded-md flex items-center justify-center">
+          <span className="text-white text-sm">🛍️</span>
         </div>
       )
     };
