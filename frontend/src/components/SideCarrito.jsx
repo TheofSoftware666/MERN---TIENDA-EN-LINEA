@@ -3,6 +3,7 @@ import { Truck } from "lucide-react";
 import clientAxios from '../config/axios';
 
 const SideCarrito = ({ onOpenCheck }) => {
+  const [configEco, setConfigEco] = useState(null);
   const [cartData, setCartData] = useState({
     items: [],
     cartInfo: null,
@@ -10,11 +11,32 @@ const SideCarrito = ({ onOpenCheck }) => {
     error: null
   });
 
-  const envioGratis = 1000; 
-
   useEffect(() => {
-    getCartItems();
+    const loadData = async () => {
+      await Promise.all([
+        getCartItems(),
+        GetCostShipping()
+      ]);
+    };
+
+    loadData();
   }, []);
+
+  const GetCostShipping = async () => {
+    try{
+      const token = localStorage.getItem('ape_token');
+      if(!token || token === null || token === '') return;
+      const response = await clientAxios.get('/Admin/GetConfigEcoPublic', {
+        headers: {
+          'Content-Type': 'application/json', 
+          'Authorization': `Bearer ${token}`
+      }});
+
+      setConfigEco(response.data.tienda.config || null);
+    }catch(ex){
+      console.warn(ex.data || ex || "Ocurrio un error inesperado al intentar consultar el costo de envio");
+    }
+  };  
 
   const getCartItems = async () => {
     try {
@@ -25,7 +47,7 @@ const SideCarrito = ({ onOpenCheck }) => {
           'Authorization': `Bearer ${token}`
         }
       });
-
+      
       if (response.data && response.data.data) {
         // Transformar los datos de la API
         const items = response.data.data.map(item => ({
@@ -174,30 +196,30 @@ const SideCarrito = ({ onOpenCheck }) => {
     }
   };
 
-  // const handleVaciarCarrito = async () => {
-  //   try {
-  //     const token = localStorage.getItem('ape_token');
-  //     // await clientAxios.post('/ClearCart');
-      
-  //     setCartData({
-  //       items: [],
-  //       cartInfo: null,
-  //       loading: false,
-  //       error: null
-  //     });
-  //   } catch (error) {
-  //     console.error('Error al vaciar carrito:', error);
-  //   }
-  // };
-
   // Calcular valores basados en datos reales
+  // const subtotal = cartData.cartInfo?.subtotal || 0;
+  // const totalItems = cartData.cartInfo?.totalItems || 0;
+  // const totalSavings = cartData.cartInfo?.totalSavings || 0;
+  // const faltante = Math.max(0, 1000 - subtotal);
+  // const porcentajeCompletado = Math.min((subtotal / 1000) * 100, 100);
+  // const tieneEnvioGratis = subtotal >= 1000;
+  // const costoEnvio = tieneEnvioGratis ? 0 : 150;
+  // const totalFinal = subtotal + costoEnvio;
+
   const subtotal = cartData.cartInfo?.subtotal || 0;
   const totalItems = cartData.cartInfo?.totalItems || 0;
   const totalSavings = cartData.cartInfo?.totalSavings || 0;
-  const faltante = Math.max(0, envioGratis - subtotal);
-  const porcentajeCompletado = Math.min((subtotal / envioGratis) * 100, 100);
-  const tieneEnvioGratis = subtotal >= envioGratis;
-  const costoEnvio = tieneEnvioGratis ? 0 : 150;
+
+  // costo de envío desde configuración
+  const costoEnvioGratis = Number(configEco?.costo_envio);
+  const faltante = Math.max(0, costoEnvioGratis - subtotal);
+  const porcentajeCompletado =
+    costoEnvioGratis > 0
+      ? Math.min((subtotal / costoEnvioGratis) * 100, 100)
+      : 0;
+
+  const tieneEnvioGratis = subtotal >= costoEnvioGratis;
+  const costoEnvio = tieneEnvioGratis ? 0 : Number(configEco?.costo_envio);
   const totalFinal = subtotal + costoEnvio;
 
   if (cartData.loading) {
@@ -231,7 +253,7 @@ const SideCarrito = ({ onOpenCheck }) => {
   return (
     <div className="flex flex-col h-full">
       {/* Barra de progreso para envío gratis */}
-      {totalItems > 0 && (
+      {configEco?.costo_envio && totalItems > 0 && (
         <div className="px-4 pt-4">
           <div className="bg-gray-100 rounded-full h-2 mb-2 overflow-hidden">
             <div 
@@ -245,7 +267,7 @@ const SideCarrito = ({ onOpenCheck }) => {
               <span className="px-2 font-medium"> Envío gratis</span>
             </div>
             <span className="font-semibold">
-              {tieneEnvioGratis ? '🎉 ¡Listo!' : `$${faltante} faltantes`}
+              {tieneEnvioGratis ? '🎉 ¡Listo!' : `$${faltante.toFixed(2)} faltantes`}
             </span>
           </div>
           {faltante > 0 && (

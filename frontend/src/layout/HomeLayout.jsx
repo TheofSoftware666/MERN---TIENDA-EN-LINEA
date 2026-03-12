@@ -17,11 +17,12 @@ const AuthLayout = () => {
   const [ ShowCart, setShowCart ] = useState(false);
   const [ ShowSide, setSide ] = useState(false);
   const [ ShowCheckout, setShowCheckout ] = useState(false);
-  const [orderSuccess, setOrderSuccess] = useState(null); 
+  const [ orderSuccess, setOrderSuccess] = useState(null); 
+  const [ emailSuscription, setEmailSuscription ] = useState(""); 
 
   useEffect(() => {
     
-    if(!localStorage.getItem('eco_promo')){
+    if(!localStorage.getItem('ecommerce_promo') || localStorage.getItem('ecommerce_promo') != new Date().toISOString().split('T')[0] && !localStorage.getItem('ape_token')){
       setTimeout(() => {
         HandlePromo();
       }, 30000);
@@ -31,7 +32,7 @@ const AuthLayout = () => {
 
   function HandlePromo () {
     setShowPromocion(true);
-    localStorage.setItem('eco_promo', '333');
+    localStorage.setItem('ecommerce_promo', new Date().toISOString().split('T')[0]);
   }
 
   function HandleSide(){
@@ -39,16 +40,36 @@ const AuthLayout = () => {
     setSide(true);
   }
 
-  function HandleClosePromo () {
-    setShowPromocion(false);
-    setShowCart(false);
-    setShowCheckout(false);
+  const SetSuscriptionByUser = async (email) => {
+    try{
+      const payload = {
+        email: email
+      }
+
+      const response = await clientAxios.post('/SetMessageEcommercePromo', payload, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      setShowPromocion(false);
+      setShowCart(false);
+      setShowCheckout(false);
+    }catch(ex){
+      console.warn(ex.data || ex || "Ocurrio un error inesperado al intentar consultar el costo de envio");
+    }
   }
 
-  function HandleCloseSide() {
-    setShowCheckout(false);
-    setSide(false);
-  }
+  // function HandleClosePromo () {
+  //   setShowPromocion(false);
+  //   setShowCart(false);
+  //   setShowCheckout(false);
+  // }
+
+  // function HandleCloseSide() {
+  //   setShowCheckout(false);
+  //   setSide(false);
+  // }
 
   function HandleCheckOut() {
     setShowCart(false);
@@ -62,7 +83,6 @@ const AuthLayout = () => {
   }
 
   const HandlePayment = (orderNumber) => {
-    console.log(orderNumber)
     setSide(false);
     setShowCart(false);
     setShowCheckout(false);
@@ -134,15 +154,21 @@ const AuthLayout = () => {
 
               <input
                 type="email"
+                value={emailSuscription}
+                onChange={(e) => setEmailSuscription(e.target.value)}
                 placeholder="Tu correo electrónico..."
                 className="border border-gray-300 p-2 sm:p-3 rounded-lg w-full mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
               />
 
               <div className="flex flex-col gap-3">
-                <button className="bg-blue-600 text-white w-full px-4 sm:px-5 py-2 sm:py-3 rounded-lg font-medium hover:bg-blue-700 text-sm transition duration-200 shadow">
+                <button onClick={() => SetSuscriptionByUser(emailSuscription)} className="bg-blue-600 text-white w-full px-4 sm:px-5 py-2 sm:py-3 rounded-lg font-medium hover:bg-blue-700 text-sm transition duration-200 shadow">
                   Quiero mi descuento 🎉
                 </button>
-                <button onClick={HandleClosePromo} className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg px-4 sm:px-5 py-2 sm:py-3 text-xs transition duration-200">
+                <button onClick={() => {
+                  setShowPromocion(false);
+                  setShowCart(false);
+                  setShowCheckout(false);
+                }} className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg px-4 sm:px-5 py-2 sm:py-3 text-xs transition duration-200">
                   No gracias, prefiero pagar más y perderme ofertas 🔒
                 </button>
               </div>
@@ -163,7 +189,10 @@ const AuthLayout = () => {
           <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-2xl z-50 flex flex-col">
             <div className="flex justify-between items-center p-4 border-b">
               <h2 className="text-lg font-bold">Tu Carrito</h2>
-              <button onClick={HandleCloseSide}>
+              <button onClick={() => {
+                setShowCheckout(false);
+                setSide(false);
+              }}>
                 <X size={20} />
               </button>
             </div>

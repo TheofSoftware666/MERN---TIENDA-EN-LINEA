@@ -104,7 +104,7 @@ export default function Header({ onOpenCart }) {
         </button>
 
         {/* Logo o Nombre */}
-        <div className="flex-1 md:flex-none text-center md:text-left">
+        <Link to="/" className="flex-1 md:flex-none text-center md:text-left">
           {configEco?.logo_url ? (
             <img
               src={`${import.meta.env.VITE_BACKEND_URL_IMAGENES}${configEco.logo_url}`}
@@ -123,7 +123,7 @@ export default function Header({ onOpenCart }) {
           >
             {configEco?.nombre_tienda || "Ecommerce"}
           </h1>
-        </div>
+        </Link>
 
         {/* Búsqueda - SOLO DESKTOP */}
         <form
@@ -166,12 +166,15 @@ export default function Header({ onOpenCart }) {
               </Link>
             </>
           ) : (
-            <button className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-100 transition">
+            <Link
+              to="/Auth/inicio-sesion"
+              className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-100 transition"
+            >
               <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
                 <User size={14} />
               </div>
               <span className="text-sm font-medium text-gray-700 hidden lg:inline">Mi cuenta</span>
-            </button>
+            </Link>
           )}
         </div>
 
@@ -258,9 +261,9 @@ export default function Header({ onOpenCart }) {
               <Link to="/" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100" onClick={() => setMenuOpen(false)}>
                 <Home size={18} className="text-gray-500" /> Inicio
               </Link>
-              <Link to="/ofertas" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100" onClick={() => setMenuOpen(false)}>
+              {/* <Link to="/ofertas" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100" onClick={() => setMenuOpen(false)}>
                 <Flame size={18} className="text-gray-500" /> Ofertas
-              </Link>
+              </Link> */}
 
               <div className="pt-2">
                 <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider px-3 mb-1">Categorías</h3>
@@ -281,7 +284,7 @@ export default function Header({ onOpenCart }) {
                 </div>
               </div>
 
-              <Link to="/contacto" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100" onClick={() => setMenuOpen(false)}>
+              <Link to="" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100" onClick={() => setMenuOpen(false)}>
                 <Phone size={18} className="text-gray-500" /> Contacto / Ayuda
               </Link>
 
@@ -308,12 +311,12 @@ export default function Header({ onOpenCart }) {
                 </>
               ) : (
                 <Link
-                  to="/perfil"
+                  to="/Auth/inicio-sesion"
                   className="w-full flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2.5 rounded-lg font-medium transition"
                   onClick={() => setMenuOpen(false)}
                 >
                   <User size={18} />
-                  Mi cuenta
+                  Iniciar sesión
                 </Link>
               )}
             </div>

@@ -12,8 +12,10 @@ import { existeUsuario
     , actualizarCodigo
     , GetShippingAddressByUserIdModel
     , SetShippingAddressModel 
+    , GetSuscripcionByUser
+    , SetSuscripcionByUser
 } from "../models/usuario.js"; 
-import { sendMailVerificar, sendMailCuentaVerificada, sendMailTokenPassword } from "../helpers/enviarCorreo.js";
+import { sendMailVerificar, sendMailCuentaVerificada, sendMailTokenPassword, sendMailEcommerceSuscription } from "../helpers/enviarCorreo.js";
 
 const iniciarSesion = async (req , res ) => {
     const { email, password } = req.body;
@@ -476,6 +478,44 @@ const SetShippingAddress = async (req, res) => {
     }
 }
 
+const SetEcommercePromo = async (req, res) => {
+    try{
+        const email = req.body.email || null;
+
+        if(!email || email === null || email.trim() === ''){
+            const error = new Error("Correo electronico invalido.");
+            return res.status(400).json({ ok: false, error : error.message});
+        }
+
+        const response = await GetSuscripcionByUser(email);
+
+        if(!response || response.data >= 0){
+            const error = new Error("No fue posible obtener la suscripción del usuario.");
+            return res.status(400).json({ ok: false, error : response.message || error.message});
+        }
+
+        // Enviar correo de promocion
+        const mailResponse = await sendMailEcommerceSuscription(email);
+
+        if(!mailResponse || mailResponse.ok === false){
+            const error = new Error("Ocurrio un error inesperado al enviar el correo de suscripción.");
+            return res.status(400).json({ ok: false, error : mailResponse.message || error.message});
+        }
+
+        // Setear en base de datos que se envio la promocion al usuario
+        const setResponse = await SetSuscripcionByUser(email);
+        if(!setResponse || setResponse.length <= 0 || setResponse.ok === false){
+            const error = new Error("No fue posible actualizar la suscripción del usuario.");
+            return res.status(400).json({ ok: false, error : setResponse.message || error.message});
+        }
+
+        return res.status(200).json({ msg : "Te enviamos un mensaje a tu correo electronico con nuestras promociones del dia."});
+    }catch(error){
+        res.status(500).json({ error : error});
+        console.error('Error al obtener el perfil del usuario:', error);
+    }
+}
+
 export { iniciarSesion
     , registrarUsuario
     , confirmarCuenta
@@ -486,4 +526,5 @@ export { iniciarSesion
     , GetShippingAddressByUserId
     , GetShippingAddressByShippingAddress
     , SetShippingAddress
+    , SetEcommercePromo
 }; 

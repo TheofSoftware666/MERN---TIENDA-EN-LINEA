@@ -24,7 +24,7 @@ const PAYMENT_METHODS = [
 ];
 
 const BENEFITS = [
-  { icon: FaTruck, text: "Llega mañana", subtext: "Envío gratis en pedidos > $900" },
+  { icon: FaTruck, text: "Llega mañana", subtext: "Envíos a toda la república" },
   { icon: FaShieldAlt, text: "Garantía 30 días", subtext: "Satisfacción o reembolso" },
   { icon: FaHeadset, text: "Soporte 24/7", subtext: "Asistencia inmediata" },
   { icon: FaExchangeAlt, text: "Devoluciones", subtext: "Fáciles y rápidas" },
@@ -346,7 +346,7 @@ const ProductoDetalle = ({
           )}
 
           {/* Selector de Cantidad */}
-          <div className="mb-6">
+          {/* <div className="mb-6">
             <label className="block text-sm font-semibold text-gray-900 mb-3">
               Cantidad
             </label>
@@ -374,10 +374,11 @@ const ProductoDetalle = ({
                 Máximo {maxCantidad} por pedido
               </span>
             </div>
-          </div>
+          </div> */}
 
           {/* Botones de Acción */}
-          <div className="flex flex-col sm:flex-row gap-3 mb-8">
+          {stockDisponible > 0 && (
+            <div className="flex flex-col sm:flex-row gap-3 mb-8">
             <button
               onClick={manejarAgregarCarrito}
               disabled={estaAgotado || cargando}
@@ -399,6 +400,7 @@ const ProductoDetalle = ({
               Comprar Ahora
             </button>
           </div>
+          )}
 
           {/* Beneficios */}
           <div className="grid grid-cols-2 gap-4 mb-8">
@@ -414,7 +416,7 @@ const ProductoDetalle = ({
           </div>
 
           {/* Métodos de Pago */}
-          <div className="border-t border-gray-200 pt-8">
+          {/* <div className="border-t border-gray-200 pt-8">
             <p className="text-sm font-semibold text-gray-900 mb-4 text-center">
               Métodos de pago aceptados
             </p>
@@ -432,7 +434,7 @@ const ProductoDetalle = ({
             <p className="text-center text-sm text-gray-500 mt-3">
               Compra 100% segura y protegida
             </p>
-          </div>
+          </div> */}
         </div>
       </div>
 

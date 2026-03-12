@@ -2,9 +2,9 @@ import express from "express";
 import { createMulter } from "./../helpers/upload.js";
 import { subirArchivo } from "../helpers/uploadFile.js";
 import { UpdateConfigEco, GetConfigEco, GetConfigEcoPublic, SetConfigEco } from "../controllers/tiendaController.js";
-import { obtenerProductos, obtenerProducto, obtenerProductosAdmin, obtenerProductoAdmin,registrarProducto, actualizarProducto, getTopPRoduct } from "../controllers/productosController.js";
-import { iniciarSesion, registrarUsuario, confirmarCuenta, GetProfileByUserId, CambiarPasswordToken, ComprobarTokenPassword, ActualizarPassword, GetShippingAddressByUserId, SetShippingAddress } from "../controllers/usuarioController.js";
-import { obtenerCategoria, obtenerCategorias, CreateCategory, editarCategoria } from "../controllers/categoriaController.js";
+import { obtenerProductos, obtenerProducto, obtenerProductosAdmin, obtenerProductoAdmin,registrarProducto, actualizarProducto, getTopPRoduct, SetProductoVisit, SetTestimonialsByProduct } from "../controllers/productosController.js";
+import { iniciarSesion, registrarUsuario, confirmarCuenta, GetProfileByUserId, CambiarPasswordToken, ComprobarTokenPassword, ActualizarPassword, GetShippingAddressByUserId, SetShippingAddress, SetEcommercePromo } from "../controllers/usuarioController.js";
+import { obtenerCategoria, obtenerCategorias, CreateCategory, editarCategoria, GetCategorysByTop } from "../controllers/categoriaController.js";
 import { obtenerMarca, obtenerMarcas, createBrand, editarMarca } from "../controllers/marcaController.js";
 import { obtenerPedidoAdmin, obtenerPedidosAdmin } from "../controllers/pedidoAdminController.js";
 import { obtenerCarrito, addProductoCarrito, getCartItemsByUserId , getCountItemsByUserId, RemoveCartItemByProducto , modificarCarrito, elimarItemsCarrito } from "../controllers/carritoController.js";
@@ -77,6 +77,11 @@ router.post('/Registrar', registrarUsuario);
 router.post('/TokenPassword', CambiarPasswordToken);
 router.post('/ActualizarPassword', ActualizarPassword);
 router.get('/ActualizarPassword/:id', ComprobarTokenPassword);
+router.get('/GetCategorysByTop', GetCategorysByTop);
+router.post('/SetMessageEcommercePromo', SetEcommercePromo);
+router.post('/SetProductoVisit/:id', SetProductoVisit);
+// router.get('/GetTestimonialsByProduct/:id', SetProductoVisit);
+router.post('/SetTestimonialsByProduct/:id', checkAuth, SetTestimonialsByProduct);
 
 // Ruta de Usuario publica /privada
 router.get('/GetCart', checkAuth, obtenerCarrito)

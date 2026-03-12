@@ -1,7 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import clientAxios from "../config/axios.jsx";
+
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import Carousel from "../components/Carousel.jsx"
+
+// Estilos base de Swiper
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
 import {
   FaStar,
@@ -13,11 +21,30 @@ import {
 
 const Home = () => {
   const [productos, setProductos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [categorias, setCategorias] = useState([]);
+  const [isAuth, setIsAuth] = useState(false);
 
   useEffect(() => {
-    // const token = localStorage.getItem("ape_tokens")
+    const token = localStorage.getItem("ape_token")
+
+    if (token) {
+      setIsAuth(true);
+    }
     getProducts();
+    getCategorias();
   }, [])
+
+  const getCategorias = async () => {
+    try {
+      const response = await clientAxios.get("/GetCategorysByTop");
+
+      setCategorias(response.data.categorias.data || []);
+      // console.log(response.data.categorias.data);
+    } catch (ex) {
+      console.error("Error:", ex);
+    }
+  };
 
   const getProducts = async () => {
     try {
@@ -171,24 +198,48 @@ const Home = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">
             Explora por Categorías
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {["Tecnología", "Moda", "Hogar", "Libros"].map((cat) => (
-              <a
-                key={cat}
-                href="#"
-                className="relative block rounded-2xl overflow-hidden shadow hover:shadow-lg transition"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1472141521881-95d0e87e2e39?q=80&w=1172&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                  alt={cat}
-                  className="w-full h-40 object-cover"
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                  <span className="text-white text-lg font-semibold">{cat}</span>
-                </div>
-              </a>
+
+          <Swiper
+            modules={[Navigation, Pagination, Autoplay]}
+            spaceBetween={20}
+            slidesPerView={2}
+            navigation
+            pagination={{ clickable: true }}
+            autoplay={{ delay: 3000, disableOnInteraction: false }}
+            breakpoints={{
+              640: {
+                slidesPerView: 3,
+                spaceBetween: 20,
+              },
+              768: {
+                slidesPerView: 4,
+                spaceBetween: 30,
+              },
+              1024: {
+                slidesPerView: 5,
+                spaceBetween: 30,
+              },
+            }}
+            className="mySwiper"
+          >
+            {categorias.map((cat) => (
+              <SwiperSlide key={cat.categoriaId}>
+                <a
+                  href="#"
+                  className="relative block rounded-2xl overflow-hidden shadow hover:shadow-lg transition group"
+                >
+                  <img
+                    src={import.meta.env.VITE_BACKEND_URL_IMAGENES + cat.imagen || "/no-image.png"}
+                    alt={cat.nombre}
+                    className="w-full h-40 object-cover group-hover:scale-105 transition duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                    <span className="text-white text-lg font-semibold">{cat.nombre}</span>
+                  </div>
+                </a>
+              </SwiperSlide>
             ))}
-          </div>
+          </Swiper>
         </div>
       </section>
 
@@ -224,20 +275,25 @@ const Home = () => {
       </section>
 
       {/* Call-to-action final */}
-      <section className="bg-blue-600 text-white py-16 text-center">
-        <h2 className="text-3xl font-bold mb-4">No te pierdas nuestras ofertas</h2>
-        <p className="mb-6">Recibe promociones exclusivas directamente en tu correo.</p>
-        <form className="flex justify-center gap-3 max-w-md mx-auto">
-          <input
-            type="email"
-            placeholder="Ingresa tu correo"
-            className="w-full px-4 py-3 rounded-lg text-gray-800"
-          />
-          <button className="bg-gray-900 px-6 py-3 rounded-lg font-semibold hover:bg-black transition">
-            Suscribirme
-          </button>
-        </form>
-      </section>
+      {
+        !isAuth && (
+          <section className="bg-blue-600 text-white py-16 text-center">
+            <h2 className="text-3xl font-bold mb-4">No te pierdas nuestras ofertas</h2>
+            <p className="mb-6">Recibe promociones exclusivas directamente en tu correo.</p>
+            <form className="flex justify-center gap-3 max-w-md mx-auto">
+              <input
+                type="email"
+                placeholder="Ingresa tu correo"
+                className="w-full px-4 py-3 rounded-lg text-gray-800"
+              />
+              <button className="bg-gray-900 px-6 py-3 rounded-lg font-semibold hover:bg-black transition">
+                Suscribirme
+              </button>
+            </form>
+          </section>
+        )
+      }
+      
     </>
   )
 }

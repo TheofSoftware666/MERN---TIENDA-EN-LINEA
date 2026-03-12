@@ -7,7 +7,7 @@ const CardTestimonios = ({ testimonio }) => {
 
       {/* Estrellas */}
       <div className="flex text-yellow-500 text-sm mt-1">
-        {[...Array(testimonio.Calificacion)].map((_, i) => (
+        {[...Array(testimonio.Rating)].map((_, i) => (
           <FaStar key={i} />
         ))}
       </div>

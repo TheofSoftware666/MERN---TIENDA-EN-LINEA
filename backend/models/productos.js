@@ -279,6 +279,85 @@ const ProductoAdmin = async (idProducto) => {
   }
 };
 
+const SetProductoVisitModel = async (idProducto, ip, userId, sessionId) => {
+  const response = { 
+    success: false
+    , message: "No se pudo registrar la visita" 
+    , data: null
+  };
+
+  const conexion = await db();
+  try {
+    const query = `
+      INSERT INTO ProductoVisitas (
+      ProductoId
+      , IP
+      , UsuarioId
+      , SessionId
+      ) VALUES (
+       ?, ?, ?, ?);  
+    `;
+    const [results] = await conexion.query(query, [idProducto, ip, userId, sessionId]);
+    response.success = results.length > 0 || results.affectedRows > 0 ? true : false;
+    response.message = results.length > 0 ? "Visita registrada exitosamente" : "No se pudo registrar la visita  ";
+    response.data = { visitId: results.insertId || null };
+    return response;
+  }
+  catch (error) {
+    console.error("Error en SetProductoVisitModel:", error);
+    response.success = false;
+    response.message = error.sqlMessage || error.message;
+    return response;
+  }
+  finally {
+        await conexion.end();
+  }
+};
+
+const SetCommentByProductModel = async (UserId, ProductId, Rating, Comment, IsApproved ,CustomerImage = "") => {
+  const response = { 
+    success: false
+    , message: "No se pudo registrar la visita" 
+    , data: null
+  };
+
+  const conexion = await db();
+  try {
+    const query = `
+      INSERT INTO Testimonials (
+          UserId,
+          ProductId,
+          Rating,
+          Comment,
+          IsApproved,
+          CustomerImage
+      ) VALUES (
+        ?
+        , ?
+        , ?
+        , ?
+        , ?
+        , ?
+      );  
+    `;
+
+    const [results] = await conexion.query(query, [UserId, ProductId, Rating, Comment, IsApproved, CustomerImage]);
+    response.success = results.length > 0 || results.affectedRows > 0 ? true : false;
+    response.message = results.length > 0 ? "Comentario registrado exitosamente" : "No se pudo registrar el comentario";
+    response.data = { commentId: results.insertId || null };
+    return response;
+  }
+  catch (error) {
+    console.error("Error en SetCommentByProductModel:", error);
+    response.success = false;
+    response.message = error.sqlMessage || error.message;
+    return response;
+  }
+  finally {
+        await conexion.end();
+  }
+};
+
 const SetAddProductAdmin = async (
   name,
   description,
@@ -432,4 +511,6 @@ export { BuscarProductos
   , comprobarExistenciasFiles
   , SetUpdateProductAdmin
   , GetProductsTop
+  , SetProductoVisitModel
+  , SetCommentByProductModel
  };

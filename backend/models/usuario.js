@@ -204,7 +204,53 @@ const checkUserByIdModel = async (usuario) => {
         response.exception = ex;
         return response;
     }
-    };
+};
+
+const checkUserBuyByIdModel = async (idUsuario, status, productId) => {
+    const response = {
+        ok: false,
+        message: '',
+        data: null,
+        exception: null
+    }  
+    let conexion;
+
+    try{
+        conexion = await db();
+
+        const query = `
+            SELECT 	
+                *
+            FROM Orders O
+            INNER JOIN OrderItems OI
+            ON O.OrderId = OI.OrderId
+            WHERE O.UserId = ?
+            AND O.Status = ?
+            AND OI.ProductId = ?     
+            LIMIT 1;
+        `;
+
+        const [ results, fields ] = await conexion.query(query, [idUsuario, status, productId]);
+
+        if(!results || results.length === 0){
+            response.ok = false;
+            response.message = 'No se encontró una compra válida para este producto.';
+            response.data = null;
+            return response;
+        }
+
+        response.ok = true;
+        response.message = 'Se encontro una compra válida para este producto.';
+        response.data = results[0];
+        return response;
+    }catch(ex){
+        response.ok = false;
+        response.message = 'Error al comprobar la compra del producto.';
+        response.data = null;
+        response.exception = ex;
+        return response;
+    }
+};
 
 const comprobarUsuario = async (usuario) => {
       
@@ -535,7 +581,79 @@ const GetAdminProfile = async () => {
     finally{
         if(conexion) await conexion.end(); 
     }
-};       
+};      
+
+const GetSuscripcionByUser = async (email) => {
+    const response = {
+        ok: false,
+        message: '',
+        data: null,
+        exception: null
+    }
+    const conexion = await db();
+    try{
+        const query = `
+            SELECT 
+                * 
+            FROM ecommerce_suscriptores
+            WHERE email = ?
+            LIMIT 1;
+        `;
+
+        const [results] = await conexion.execute(query, [email]);
+
+        response.ok = true;
+        response.message = 'Detalles de la suscripción obtenidos correctamente.';
+        response.data = results[0];
+        response.exception= null;
+
+        return response;
+    }catch(error)
+    {
+        response.ok = false;
+        response.message = 'Error al obtener la suscripción.' + error.message;
+        response.data = null;
+        response.exception= error;
+        return response;
+    }
+    finally{
+        if(conexion) await conexion.end(); 
+    }
+};
+
+const SetSuscripcionByUser = async (email, ip) => {
+    const response = {
+        ok: false,
+        message: '',
+        data: null,
+        exception: null
+    }
+    const conexion = await db();
+    try{
+        const query = `
+            INSERT INTO ecommerce_suscriptores (email, ip_registro)
+            VALUES (?, ?);
+        `;
+
+        const [results] = await conexion.execute(query, [email, ip]);
+        response.ok = true;
+        response.message = 'Suscripción registrada correctamente.';
+        response.data = {
+            id: results.insertId
+        };
+        return response;
+    }catch(error){
+        if(error.code === 'ER_DUP_ENTRY'){
+            response.message = 'Este correo ya está suscrito.';
+        }else{
+            response.message = 'Error al registrar la suscripción: ' + error.message;
+        }
+        response.exception = error;
+        return response;
+    }finally{
+        if(conexion) await conexion.end();
+    }
+};
 
 export { existeUsuario
     , comprobarUsuario 
@@ -556,4 +674,7 @@ export { existeUsuario
     , SetShippingAddressModel
     , GetAdminProfile
     , checkUserByIdModel
+    , GetSuscripcionByUser
+    , SetSuscripcionByUser
+    , checkUserBuyByIdModel
 };

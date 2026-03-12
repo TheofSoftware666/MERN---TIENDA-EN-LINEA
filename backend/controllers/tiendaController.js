@@ -20,7 +20,6 @@ import { GetConfigEcoModel
   , DeletePaymentMethodModel
   } from '../models/tienda.js';
 import { comprobarUsuarioAdmin, consultarUsuarioAdmin } from '../models/usuario.js';
-import { error } from "console";
 
 const GetConfigEco = async (req, res) => {
     try{

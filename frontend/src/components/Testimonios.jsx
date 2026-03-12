@@ -1,24 +1,21 @@
 import { useState } from "react";
 import CardTestimonios from "./CardTestimonios.jsx";
 import ModalAgregarComentario from "./ModalAgregarComentario.jsx";
+import clientAxios from "../config/axios.jsx";
 
 const Testimonios = ({ producto }) => {
 
   const [showModal, setShowModal] = useState(false);
   const [isLogged, setIsLogged] = useState(false); 
 
-  if (!producto) return null;
-
-  const genericTestimonios = [
-    { Nombre: "Carlos M.", Comentario: "Excelente producto, justo lo que esperaba.", Calificacion: 5 },
-    { Nombre: "Ana Gómez", Comentario: "Muy buena calidad y envío rápido.", Calificacion: 5 },
-    { Nombre: "Luis Herrera", Comentario: "Me encantó, definitivamente volveré a comprar.", Calificacion: 4 }
-  ];
-
   const testimoniosToShow =
-    producto?.Testimonios?.length > 0
-      ? producto.Testimonios
-      : genericTestimonios;
+  producto?.Testimonios?.length > 0
+  ? producto.Testimonios
+  : [];
+  
+  // if(!producto || !producto.Testimonios || producto.Testimonios.length === 0){
+  //   return null;
+  // };
 
   return (
     <>
@@ -27,11 +24,17 @@ const Testimonios = ({ producto }) => {
       {/* Título */}
       <div className="text-center mb-8">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
-          Opiniones de nuestros clientes
+          {!producto || !producto.Testimonios || producto.Testimonios.length === 0 ? "Agrega tu opinión" : "Opiniones de nuestros clientes"}
         </h2>
         <div className="flex flex-col md:flex-row items-center justify-center gap-2 mt-2 text-sm text-gray-600">
           <div className="flex gap-1 text-yellow-500 text-lg">
-            ⭐⭐⭐⭐⭐
+            {producto?.Testimonios?.length > 0 ? Array.from({ length: Math.round(
+                  producto.Testimonios.reduce((acc, t) => acc + t.Rating, 0) / producto.Testimonios.length
+                ) }, (_, i) => (
+                  <span>⭐</span>
+                )) : (
+                  <span>⭐</span>
+                )}
           </div>
           <span className="text-sm text-gray-500">
             ({testimoniosToShow.length} calificaciones)
@@ -66,7 +69,7 @@ const Testimonios = ({ producto }) => {
             <FormularioComentario close={() => setShowModal(false)} />
           )
         : (
-            <ModalAgregarComentario close={() => setShowModal(false)} />
+            <ModalAgregarComentario close={() => setShowModal(false)} productId={producto.Producto.ProductoId} />
           )
     )}
 

@@ -21,7 +21,6 @@ const Producto = () => {
     try {
       const { data } = await clientAxios.get(`/Productos/${idProducto}`);
       setProduct(data.data); 
-      console.log(data.data);
     } catch (error) {
       console.error("Error obteniendo producto:", error);
       navigate("/error");

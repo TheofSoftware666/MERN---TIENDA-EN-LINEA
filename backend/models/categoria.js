@@ -47,6 +47,77 @@ const categorias = async (limit) => {
     return results;
 };
 
+const GetCategorysByTopModel = async () => {
+  const response = {
+    ok: false,
+    message: 'Ocurrio un error al obtener las categorías top de la tienda. ',
+    data: null,
+  };
+
+  let conexion;
+
+    try{
+      conexion = await db();
+
+      let query = `
+        SELECT 
+          * 
+        FROM categoria 
+        WHERE categoriaId IN(
+          SELECT 
+            DISTINCT categoriaId 
+          FROM productos
+          WHERE vendidos > 0
+          AND estatusProducto = 1
+        )
+      `;
+
+      const [results] = await conexion.query(query);
+
+      if(results.length === 0){
+        response.ok = false;
+        response.message = 'No se encontraron categorías top en la tienda.';
+        response.data = [];
+        return response;
+      }
+
+      if(results.length < 4){
+        query = `
+          SELECT 
+            *
+          FROM categoria
+        `;
+
+        const [results] = await conexion.query(query);
+
+        if(results.length === 0){
+          response.ok = false;
+          response.message = 'No se encontraron categorías top en la tienda.';
+          response.data = [];
+          return response;
+        }
+
+        response.ok = true;
+        response.message = 'Categorías obtenidas correctamente.';
+        response.data = results;
+        return response;
+      }
+
+      response.ok = true;
+      response.message = 'Categorías obtenidas correctamente.';
+      response.data = results;
+      return response;
+    }catch(e){
+      console.error('Error al obtener las categorías top:', e);
+      response.ok = false;
+      response.message += e.message || 'Error desconocido.';
+      response.data = null;
+      return response;
+    }finally{
+      if(conexion) await conexion.end();
+    }
+};
+
 const CreateCategoryModel = async (nombre, imagen) => {
   const conexion = await db();
 
@@ -90,4 +161,9 @@ const actualizarCategoria = async (id, nombre) => {
     return results;
 }
 
-export { categoria, categorias, CreateCategoryModel, actualizarCategoria, SearchCategoryByName };
+export { categoria
+  , categorias
+  , CreateCategoryModel
+  , GetCategorysByTopModel
+  , actualizarCategoria
+  , SearchCategoryByName };

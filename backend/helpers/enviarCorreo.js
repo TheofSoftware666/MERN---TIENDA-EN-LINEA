@@ -2,6 +2,8 @@ import nodemailer from 'nodemailer';
 import { verificarCuenta } from '../utils/mailVerificarCuenta.js';
 import { cuentaValidada } from '../utils/mailCuentaValidada.js';
 import { restablecerPassword } from '../utils/mailRestablecePassword.js'
+import { suscriptionMail } from '../utils/mails/mailSuscripcion.js';
+import { response } from 'express';
 
 function conexionEmail() {
   return nodemailer.createTransport({
@@ -133,4 +135,34 @@ const sendMailTokenPassword = async (correoDestino, nombre, token) => {
     }
 }
 
-export { sendMailEstatusPedidos, sendMailVerificar, sendMailCuentaVerificada, sendMailTokenPassword};
+const sendMailEcommerceSuscription = async (correoDestino) => {
+  const response = {
+    ok: true,
+    message: "Correo de promoción enviado correctamente"
+  };
+  
+  try {
+      // From, Subject - Base de datos 
+      const subject = `Bienvenid@ 🙌 Ya formas parte de nuestra comunidad`;
+      const transporter = conexionEmail();
+      const mailOptions = {
+        from: '"Altisys" <marcoricovaladez172@gmail.com>',
+        to: correoDestino,
+        subject: subject,
+        html: suscriptionMail(),
+      };
+
+      const info = await transporter.sendMail(mailOptions);
+      response.ok = true;
+      response.message = 'Correo enviado: ' + info.response;
+      return response;
+
+    } catch (error) {
+        response.ok = false;
+        response.message = 'Error al enviar: Ocurrio un error al inesperado al enviar el correo' + error;
+        return response;
+    }
+}
+
+
+export { sendMailEstatusPedidos, sendMailVerificar, sendMailCuentaVerificada, sendMailTokenPassword, sendMailEcommerceSuscription};

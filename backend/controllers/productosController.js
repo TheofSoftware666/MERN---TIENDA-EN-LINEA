@@ -10,7 +10,10 @@ import { BuscarProductos
   , comprobarExistenciasFiles
   , GetProductsTop
   , SetUpdateProductAdmin 
+  , SetProductoVisitModel
+  , SetCommentByProductModel
 } from "../models/productos.js";
+import { checkUserBuyByIdModel } from "../models/usuario.js";
 
 const obtenerProductos = async (req, res) => {
   try {
@@ -425,6 +428,118 @@ const registrarProducto = async (req, res) => {
   }
 };
 
+const SetProductoVisit = async (req, res) => {
+  try {
+    const idProducto = req.params?.id?.trim();
+
+    if (!idProducto || isNaN(Number(idProducto))) {
+      return res.status(400).json({
+        status: "ERROR",
+        message: "El ID de producto es inválido"
+      });
+    }
+
+    const producto = await SetProductoVisitModel(idProducto, '', '', '');
+
+    if (!producto) {
+      return res.status(404).json({
+        status: "ERROR",
+        message: `No se encontró el producto con ID ${idProducto}`
+      });
+    }
+
+    return res.status(200).json({
+      productoVisitado: producto
+    });
+
+  } catch (e) {
+    console.error("❌ Error al obtener producto:", e);
+    return res.status(500).json({
+      status: "ERROR",
+      message: "Error interno del servidor"
+    });
+  }
+};
+
+const GetTestimonialsByProduct = async (req, res) => {
+  try {
+    const idProducto = req.params?.id?.trim();
+
+    if (!idProducto || isNaN(Number(idProducto))) {
+      return res.status(400).json({
+        status: "ERROR",
+        message: "El ID de producto es inválido"
+      });
+    }
+
+    const producto = await SetProductoVisitModel(idProducto, '', '', '');
+
+    if (!producto) {
+      return res.status(404).json({
+        status: "ERROR",
+        message: `No se encontró el producto con ID ${idProducto}`
+      });
+    }
+
+    return res.status(200).json({
+      productoVisitado: producto
+    });
+
+  } catch (e) {
+    console.error("❌ Error al obtener producto:", e);
+    return res.status(500).json({
+      status: "ERROR",
+      message: "Error interno del servidor"
+    });
+  }
+};
+
+const SetTestimonialsByProduct = async (req, res) => {
+  try {
+    const idProducto = req.params?.id;
+    const { usuario } = req;
+    console.log("Usuario en SetTestimonialsByProduct:", usuario);
+
+    if (!idProducto || isNaN(Number(idProducto))) {
+      return res.status(400).json({
+        status: "ERROR",
+        message: "El ID de producto es inválido"
+      });
+    }
+
+    console.log("ID del producto para comentario:", req.body.rating);
+    const responseCheckUserBuy = await checkUserBuyByIdModel(usuario[0].usuarioId, 'delivered', idProducto);
+
+    if (!responseCheckUserBuy || responseCheckUserBuy.length === 0) {
+      return res.status(403).json({
+        status: "ERROR",
+        message: "No puedes dejar un comentario si no has comprado este producto."
+      });
+    }
+
+    const responseComment = await SetCommentByProductModel(usuario[0].usuarioId, idProducto, req.body.rating, req.body.comment, 1, null);
+
+    if(!responseComment || responseComment.success === false){
+      return res.status(400).json({
+        status: "ERROR",
+        message: responseComment.message || "No se pudo agregar el comentario."
+      });
+    }
+
+    return res.status(200).json({
+      status: "OK",
+      message: "Comentario agregado correctamente."
+    });
+
+  } catch (e) {
+    console.error("❌ Error al obtener producto:", e);
+    return res.status(500).json({
+      status: "ERROR",
+      message: "Error interno del servidor"
+    });
+  }
+};
+
 export { 
   obtenerProductos
   , obtenerProducto
@@ -433,4 +548,6 @@ export {
   , registrarProducto
   , actualizarProducto 
   , getTopPRoduct
+  , SetProductoVisit
+  , SetTestimonialsByProduct
 };

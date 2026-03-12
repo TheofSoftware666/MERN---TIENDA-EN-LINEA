@@ -190,6 +190,14 @@ const Productos = () => {
     }
   };
 
+   const registerVisit = async (productId) => {
+    try {
+      await clientAxios.post(`/SetProductoVisit/${productId}`);
+    } catch (error) {
+      console.warn("No se pudo registrar la visita");
+    }
+  };
+
   useEffect(() => {
     getProducts();
     getCategories();
@@ -583,7 +591,8 @@ const Productos = () => {
                     key={p.id}
                     className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition border border-gray-100 hover:border-blue-200 flex flex-col relative"
                   >
-                    <Link to={`/Producto/${p.id}`}>
+                    <Link to={`/Producto/${p.id}`}
+                          onClick={() => registerVisit(p.id)}>
                       <img
                         src={import.meta.env.VITE_BACKEND_URL_IMAGENES + p.img}
                         alt={p.nombre}

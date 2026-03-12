@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import clientAxios from "../config/axios.jsx";
 
 import {
@@ -74,7 +75,9 @@ const Footer = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10">
           {/* 1. Logo y descripción */}
           <div>
-            <img src={import.meta.env.VITE_BACKEND_URL_IMAGENES + configEco?.logo_url} alt={configEco?.nombre || "Logo"} className="w-32 mb-4" />
+            <Link to="/">
+              <img src={import.meta.env.VITE_BACKEND_URL_IMAGENES + configEco?.logo_url} alt={configEco?.nombre || "Logo"} className="w-32 mb-4" />
+            </Link>
             <p className="text-gray-400 text-sm leading-relaxed">
               {configEco?.descripcion || "Tu tienda en línea de confianza. Encuentra los mejores productos con envío rápido y seguro. ¡Compra ahora y disfruta de una experiencia de compra única!"}
             </p>

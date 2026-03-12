@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { categoria, categorias, actualizarCategoria, CreateCategoryModel, SearchCategoryByName } from "../models/categoria.js";
+import { categoria, categorias, actualizarCategoria, CreateCategoryModel, SearchCategoryByName, GetCategorysByTopModel } from "../models/categoria.js";
 
 const obtenerCategoria = async (req, res) => {
     try{
@@ -22,8 +22,7 @@ const obtenerCategoria = async (req, res) => {
 
         res.status(400).json({ error : error });        
     }
-
-}
+};
 
 const obtenerCategorias = async (req, res) => {
     try{
@@ -31,6 +30,22 @@ const obtenerCategorias = async (req, res) => {
         if(limit == undefined || limit == null) limit = 7;
     
         const resultado = await categorias(parseInt(limit));
+        res.status(200).json({ categorias : resultado });
+
+    }catch(e){
+        const error = new Error("Ocurrio un error al consultar la informacion");
+        res.status(500).json({ error : error });        
+    }
+};
+
+const GetCategorysByTop = async (req, res) => {
+    try{    
+        const resultado = await GetCategorysByTopModel();
+
+        if(resultado.ok === false){
+            return res.status(400).json({ error : resultado.message });
+        }
+
         res.status(200).json({ categorias : resultado });
 
     }catch(e){
@@ -134,4 +149,9 @@ const editarCategoria = async (req, res) => {
 
 }
 
-export { obtenerCategoria, obtenerCategorias, CreateCategory, editarCategoria};
+export { obtenerCategoria
+    , obtenerCategorias
+    , CreateCategory
+    , editarCategoria
+    , GetCategorysByTop
+};

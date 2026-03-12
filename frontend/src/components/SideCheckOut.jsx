@@ -449,93 +449,95 @@ const SideCheckOut = ({ onBack, onProcess }) => {
 
         {/* Resto del código permanece igual... */}
         {/* Información de Contacto */}
-        {showInfoContact && (
+        {showInfoContact && form.nombre.length === 0 || form.tel.length === 0 && (
           <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
             <div className="flex items-center gap-2 mb-4">
               <User size={18} className="text-blue-600" />
               <h3 className="font-semibold text-gray-800">Información de Contacto</h3>
             </div>
             
-            <div className="space-y-3">
-              <div>
+            {form.nombre.length === 0 || form.tel.length === 0 && (
+                <div className="space-y-3">
+                <div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Nombre completo *
+                    </label>
+                    <div className="relative">
+                      <User size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <input
+                        name="nombre"
+                        type="text"
+                        placeholder="Juan Pérez"
+                        className={`w-full pl-10 pr-3 py-2.5 text-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                          errors.nombre ? "border-red-500 focus:ring-red-500" : "border-gray-300"
+                        }`}
+                        value={form.nombre}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    {errors.nombre && (
+                      <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                        <AlertCircle size={12} />
+                        {errors.nombre}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Email *
+                    </label>
+                    <div className="relative">
+                      <Mail size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <input
+                        name="email"
+                        type="email"
+                        placeholder="juan@ejemplo.com"
+                        className={`w-full pl-10 pr-3 py-2.5 text-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all pointer-events-none opacity-70 ${
+                          errors.email ? "border-red-500 focus:ring-red-500" : "border-gray-300"
+                        }`}
+                        value={form.email}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    {errors.email && (
+                      <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                        <AlertCircle size={12} />
+                        {errors.email}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Nombre completo *
+                    Teléfono *
                   </label>
                   <div className="relative">
-                    <User size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <Phone size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                     <input
-                      name="nombre"
-                      type="text"
-                      placeholder="Juan Pérez"
+                      name="tel"
+                      type="tel"
+                      placeholder="55 1234 5678"
                       className={`w-full pl-10 pr-3 py-2.5 text-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
-                        errors.nombre ? "border-red-500 focus:ring-red-500" : "border-gray-300"
+                        errors.tel ? "border-red-500 focus:ring-red-500" : "border-gray-300"
                       }`}
-                      value={form.nombre}
+                      value={form.tel}
                       onChange={handleChange}
                     />
                   </div>
-                  {errors.nombre && (
+                  {errors.tel && (
                     <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
                       <AlertCircle size={12} />
-                      {errors.nombre}
+                      {errors.tel}
                     </p>
                   )}
                 </div>
               </div>
-
-              <div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Email *
-                  </label>
-                  <div className="relative">
-                    <Mail size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      name="email"
-                      type="email"
-                      placeholder="juan@ejemplo.com"
-                      className={`w-full pl-10 pr-3 py-2.5 text-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all pointer-events-none opacity-70 ${
-                        errors.email ? "border-red-500 focus:ring-red-500" : "border-gray-300"
-                      }`}
-                      value={form.email}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  {errors.email && (
-                    <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
-                      <AlertCircle size={12} />
-                      {errors.email}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Teléfono *
-                </label>
-                <div className="relative">
-                  <Phone size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
-                    name="tel"
-                    type="tel"
-                    placeholder="55 1234 5678"
-                    className={`w-full pl-10 pr-3 py-2.5 text-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
-                      errors.tel ? "border-red-500 focus:ring-red-500" : "border-gray-300"
-                    }`}
-                    value={form.tel}
-                    onChange={handleChange}
-                  />
-                </div>
-                {errors.tel && (
-                  <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
-                    <AlertCircle size={12} />
-                    {errors.tel}
-                  </p>
-                )}
-              </div>
-            </div>
+            )}
           </div>
         )}
 
