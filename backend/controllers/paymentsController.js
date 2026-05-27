@@ -279,7 +279,7 @@ const ProcessPayment = async (req, res) => {
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(
+    event = getStripe().webhooks.constructEvent(
       req.body,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
