@@ -130,8 +130,8 @@ const checkPreviousPayment = async (req, res) => {
         payment_method_types: ['card'],
         line_items,
         mode: 'payment',
-        success_url: `${process.env.DOMAIN}/Payment/Success/{CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.DOMAIN}/Payment/Failure`,
+        success_url: `${process.env.DOMAIN_FRONTEND}/Payment/Success/{CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.DOMAIN_FRONTEND}/Payment/Failure`,
         metadata: {
             userId,
             cartId,
