@@ -352,7 +352,7 @@ const AdminPedidos = () => {
                       <span className="text-sm text-gray-700">{order.paymentMethod}</span>
                     </div>
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium mt-2`}>
-                      {paymentStatusConfig[order.paymentStatus].text}
+                      {paymentStatusConfig?.[order.paymentStatus]?.text}
                     </span>
                     {order.paid && (
                       <div className="flex items-center gap-1 mt-1">

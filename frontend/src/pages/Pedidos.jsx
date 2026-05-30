@@ -2,25 +2,10 @@ import React, { useState, useEffect } from 'react';
 import clientAxios from '../config/axios';
 
 import {
-  Package,
-  Clock,
-  CheckCircle,
-  XCircle,
-  Truck,
-  RefreshCw,
-  Eye,
-  Search,
-  Calendar,
-  CreditCard,
-  MapPin,
-  User,
-  Phone,
-  Mail,
-  ShoppingBag,
-  ChevronRight,
-  Star,
-  AlertCircle,
-  DollarSign
+  Package, Clock, CheckCircle, XCircle, Truck,
+  RefreshCw, Eye, Search, Calendar, CreditCard,
+  MapPin, User, Phone, Mail, ShoppingBag,
+  ChevronRight, Star, AlertCircle, DollarSign
 } from 'lucide-react';
 
 const UserPedidos = () => {
@@ -30,12 +15,10 @@ const UserPedidos = () => {
   const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
   const [mostrarModal, setMostrarModal] = useState(false);
 
-  // Filtrar pedidos
   const pedidosFiltrados = pedidos.filter(pedido => {
     const coincideBusqueda =
       pedido.id.toLowerCase().includes(busqueda.toLowerCase()) ||
       pedido.cliente.toLowerCase().includes(busqueda.toLowerCase());
-
     if (filtroEstado === 'todos') return coincideBusqueda;
     return coincideBusqueda && pedido.estado === filtroEstado;
   });
@@ -47,27 +30,14 @@ const UserPedidos = () => {
   const getOrderByUserId = async () => {
     try {
       const token = localStorage.getItem('ape_token');
-
-      if (!token) {
-        throw new Error('No se encontró token de autenticación');
-      }
+      if (!token) throw new Error('No se encontró token de autenticación');
 
       const response = await clientAxios.get(`/Pedidos`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
       });
 
-      if (!response.data.data.ok) {
-        console.log('Error al obtener los pedidos: ', response.data.data.message);
-        return [];
-      }
-
-      if (!response.data.data.data || response.data.data.data.length === 0) {
-        console.log('No se encontraron pedidos para el usuario.');
-        return [];
-      }
+      if (!response.data.data.ok) { console.log('Error:', response.data.data.message); return []; }
+      if (!response.data.data.data || response.data.data.data.length === 0) return [];
 
       const pedidosNormalizados = response.data.data.data.map(p => ({
         ...p,
@@ -76,8 +46,7 @@ const UserPedidos = () => {
         estado:
           p.estado === 'processing' ? 'procesando' :
           p.estado === 'shipped' ? 'en_camino' :
-          p.estado === 'delivered' ? 'entregado' :
-          p.estado,
+          p.estado === 'delivered' ? 'entregado' : p.estado,
         direccionTexto: p.direccion
           ? `${p.direccion.street ?? ''}, ${p.direccion.city ?? ''}, ${p.direccion.state ?? ''}, ${p.direccion.postalCode ?? 'CP: N/D'}`
           : 'No disponible',
@@ -93,440 +62,322 @@ const UserPedidos = () => {
     }
   };
 
-  // Función para formatear fecha
-  const formatearFecha = (fecha) => {
-    return new Date(fecha).toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric'
-    });
-  };
+  const formatearFecha = (fecha) => new Date(fecha).toLocaleDateString('es-ES', {
+    day: '2-digit', month: 'long', year: 'numeric'
+  });
 
-  // Función para obtener detalles del estado (adaptado a colores cosméticos)
   const getEstadoInfo = (estado) => {
     switch (estado) {
-      case 'entregado':
-        return {
-          color: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-          icon: <CheckCircle size={16} />,
-          texto: 'Entregado',
-          bgIcon: 'bg-emerald-50'
-        };
-      case 'en_camino':
-        return {
-          color: 'bg-rose-100 text-rose-800 border-rose-200',
-          icon: <Truck size={16} />,
-          texto: 'En camino',
-          bgIcon: 'bg-rose-50'
-        };
-      case 'procesando':
-        return {
-          color: 'bg-pink-100 text-pink-800 border-pink-200',
-          icon: <RefreshCw size={16} />,
-          texto: 'Procesando',
-          bgIcon: 'bg-pink-50'
-        };
-      case 'pendiente':
-        return {
-          color: 'bg-amber-100 text-amber-800 border-amber-200',
-          icon: <Clock size={16} />,
-          texto: 'Pendiente',
-          bgIcon: 'bg-amber-50'
-        };
-      case 'cancelado':
-        return {
-          color: 'bg-red-100 text-red-800 border-red-200',
-          icon: <XCircle size={16} />,
-          texto: 'Cancelado',
-          bgIcon: 'bg-red-50'
-        };
-      default:
-        return {
-          color: 'bg-gray-100 text-gray-800 border-gray-200',
-          icon: <Package size={16} />,
-          texto: 'Desconocido',
-          bgIcon: 'bg-gray-50'
-        };
+      case 'entregado':   return { color: 'border-[#7abf8a]/40 text-[#7abf8a] bg-[#7abf8a]/5', icon: <CheckCircle size={13} />, texto: 'Entregado' };
+      case 'en_camino':   return { color: 'border-[#c9a84c]/40 text-[#c9a84c] bg-[#c9a84c]/5', icon: <Truck size={13} />, texto: 'En camino' };
+      case 'procesando':  return { color: 'border-blue-500/30 text-blue-400 bg-blue-500/5', icon: <RefreshCw size={13} />, texto: 'Procesando' };
+      case 'pendiente':   return { color: 'border-amber-500/30 text-amber-400 bg-amber-500/5', icon: <Clock size={13} />, texto: 'Pendiente' };
+      case 'cancelado':   return { color: 'border-red-500/30 text-red-400 bg-red-500/5', icon: <XCircle size={13} />, texto: 'Cancelado' };
+      default:            return { color: 'border-[#e8e8e8] text-[#888] bg-white', icon: <Package size={13} />, texto: 'Desconocido' };
     }
   };
 
-  // Calcular estadísticas (opcional, podríamos mostrarlas)
-  const estadisticas = {
-    totalPedidos: pedidos.length,
-    entregados: pedidos.filter(p => p.estado === 'entregado').length,
-    enProceso: pedidos.filter(p => ['en_camino', 'procesando'].includes(p.estado)).length,
-    gastoTotal: pedidos.reduce((sum, p) => sum + p.total, 0)
-  };
-
-  // Manejar clic en pedido
   const handleVerDetalle = (pedido) => {
     setPedidoSeleccionado(pedido);
     setMostrarModal(true);
   };
 
-  // Generar estrellas para calificación
-  const renderEstrellas = (calificacion) => {
-    return (
-      <div className="flex items-center gap-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            size={16}
-            className={star <= calificacion ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}
-          />
-        ))}
-      </div>
-    );
-  };
+  // ── Filtros config ──
+  const filtros = [
+    { id: 'todos',      label: 'Todos' },
+    { id: 'entregado',  label: 'Entregados' },
+    { id: 'en_camino',  label: 'En camino' },
+    { id: 'pendiente',  label: 'Pendientes' },
+  ];
 
   return (
-    <section className="w-full min-h-screen bg-gradient-to-b from-rose-50 to-white p-4 lg:p-6">
+    <section className="w-full min-h-screen bg-white p-4 lg:p-8">
       <div className="mx-auto w-full max-w-7xl">
-        {/* Header con gradiente rosa */}
-        <div className="mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4">
-            <div>
-              <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-pink-600 to-rose-500 bg-clip-text text-transparent">
-                Mis Pedidos
-              </h1>
-              <p className="text-gray-500 text-sm mt-1">
-                Revisa el historial y estado de todos tus pedidos
-              </p>
+
+        {/* ── Header ── */}
+        <div className="mb-10">
+          <p className="text-[#c9a84c] tracking-[0.3em] uppercase text-[10px] font-semibold mb-2">
+            Mi cuenta
+          </p>
+          <h1 className="text-3xl font-light text-[#1a1a1a] mb-1">Mis Pedidos</h1>
+          <p className="text-[#aaa] text-xs tracking-wide">
+            Revisa el historial y estado de todos tus pedidos
+          </p>
+        </div>
+
+        {/* ── Filtros y búsqueda ── */}
+        <div className="bg-white border border-[#e8e8e8] p-5 mb-8">
+          <div className="flex flex-col md:flex-row gap-4">
+
+            {/* Búsqueda */}
+            <div className="flex-1 relative">
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#bbb]" />
+              <input
+                type="text"
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                placeholder="Buscar por ID o nombre..."
+                className="w-full bg-white border border-[#e8e8e8] focus:border-[#c9a84c] text-[#1a1a1a] placeholder-[#bbb] pl-9 pr-4 py-2.5 text-sm outline-none transition-colors"
+              />
             </div>
-          </div>
 
-          {/* Filtros y búsqueda con estilo rosa */}
-          <div className="bg-white/80 backdrop-blur-sm border border-rose-200 rounded-2xl p-4 mb-6 shadow-sm">
-            <div className="flex flex-col md:flex-row gap-4">
-              {/* Barra de búsqueda */}
-              <div className="flex-1">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search size={20} className="text-rose-400" />
-                  </div>
-                  <input
-                    type="text"
-                    value={busqueda}
-                    onChange={(e) => setBusqueda(e.target.value)}
-                    placeholder="Buscar por ID o nombre del cliente..."
-                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-rose-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300 placeholder:text-gray-400"
-                  />
-                </div>
-              </div>
-
-              {/* Filtros por estado */}
-              <div className="flex flex-wrap gap-2">
+            {/* Botones de filtro */}
+            <div className="flex flex-wrap gap-2">
+              {filtros.map(f => (
                 <button
-                  onClick={() => setFiltroEstado('todos')}
-                  className={`px-4 py-2 rounded-xl font-medium transition-all ${
-                    filtroEstado === 'todos'
-                      ? 'bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-md'
-                      : 'bg-white text-gray-700 hover:bg-rose-50 border border-rose-200'
+                  key={f.id}
+                  onClick={() => setFiltroEstado(f.id)}
+                  className={`px-4 py-2 text-xs font-bold tracking-widest uppercase transition-all ${
+                    filtroEstado === f.id
+                      ? 'bg-[#c9a84c] text-[#0d0d0d]'
+                      : 'border border-[#e8e8e8] text-[#888] hover:border-[#c9a84c] hover:text-[#c9a84c]'
                   }`}
                 >
-                  Todos
+                  {f.label}
                 </button>
-                <button
-                  onClick={() => setFiltroEstado('entregado')}
-                  className={`px-4 py-2 rounded-xl font-medium transition-all ${
-                    filtroEstado === 'entregado'
-                      ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-md'
-                      : 'bg-white text-gray-700 hover:bg-rose-50 border border-rose-200'
-                  }`}
-                >
-                  Entregados
-                </button>
-                <button
-                  onClick={() => setFiltroEstado('en_camino')}
-                  className={`px-4 py-2 rounded-xl font-medium transition-all ${
-                    filtroEstado === 'en_camino'
-                      ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-md'
-                      : 'bg-white text-gray-700 hover:bg-rose-50 border border-rose-200'
-                  }`}
-                >
-                  En camino
-                </button>
-                <button
-                  onClick={() => setFiltroEstado('pendiente')}
-                  className={`px-4 py-2 rounded-xl font-medium transition-all ${
-                    filtroEstado === 'pendiente'
-                      ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-md'
-                      : 'bg-white text-gray-700 hover:bg-rose-50 border border-rose-200'
-                  }`}
-                >
-                  Pendientes
-                </button>
-              </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Lista de pedidos */}
-        <div className="space-y-4">
+        {/* ── Lista de pedidos ── */}
+        <div className="space-y-3">
           {pedidosFiltrados.map((pedido) => {
             const estadoInfo = getEstadoInfo(pedido.estado);
-
             return (
               <div
                 key={pedido.id}
-                className="bg-white/80 backdrop-blur-sm border border-rose-200 rounded-2xl p-5 hover:shadow-lg transition-all duration-300 cursor-pointer"
+                className="bg-white border border-[#e8e8e8] hover:border-[#c9a84c]/40 p-5 transition-all duration-200 cursor-pointer group"
                 onClick={() => handleVerDetalle(pedido)}
               >
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                  {/* Información principal */}
+
                   <div className="flex-1">
-                    <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-start justify-between mb-4">
                       <div>
-                        <h3 className="text-lg font-bold text-gray-800 mb-1">{pedido.id}</h3>
-                        <p className="text-sm text-gray-500">{formatearFecha(pedido.fecha)}</p>
+                        <h3 className="text-sm font-semibold text-[#1a1a1a] tracking-wide mb-0.5">{pedido.id}</h3>
+                        <p className="text-[11px] text-[#aaa] tracking-wide">{formatearFecha(pedido.fecha)}</p>
                       </div>
-                      <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium border ${estadoInfo.color}`}>
-                        <span className={estadoInfo.bgIcon + " p-1 rounded-full"}>
-                          {estadoInfo.icon}
-                        </span>
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 border text-[10px] font-bold tracking-widest uppercase ${estadoInfo.color}`}>
+                        {estadoInfo.icon}
                         {estadoInfo.texto}
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div className="flex items-center gap-2">
-                        <User size={16} className="text-rose-400" />
-                        <span className="text-sm text-gray-600">{pedido.cliente}</span>
+                        <User size={13} className="text-[#c9a84c]" />
+                        <span className="text-xs text-[#888]">{pedido.cliente}</span>
                       </div>
-
                       <div className="flex items-center gap-2">
-                        <ShoppingBag size={16} className="text-rose-400" />
-                        <span className="text-sm text-gray-600">
+                        <ShoppingBag size={13} className="text-[#c9a84c]" />
+                        <span className="text-xs text-[#888]">
                           {pedido.productos} producto{pedido.productos !== 1 ? 's' : ''}
                         </span>
                       </div>
-
                       <div className="flex items-center gap-2">
-                        <DollarSign size={16} className="text-rose-400" />
-                        <span className="text-sm font-bold text-gray-800">
+                        <DollarSign size={13} className="text-[#c9a84c]" />
+                        <span className="text-xs font-bold text-[#1a1a1a]">
                           ${pedido.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Acciones */}
-                  <div className="flex items-center gap-3">
-                    <button className="flex items-center gap-2 text-rose-500 hover:text-rose-700 text-sm font-medium transition">
-                      <Eye size={16} />
-                      Ver detalles
-                      <ChevronRight size={16} />
-                    </button>
+                  <div className="flex items-center gap-1.5 text-[#aaa] group-hover:text-[#c9a84c] transition-colors">
+                    <Eye size={14} />
+                    <span className="text-[10px] tracking-widest uppercase font-semibold">Ver detalles</span>
+                    <ChevronRight size={14} />
                   </div>
                 </div>
               </div>
             );
           })}
 
+          {/* Estado vacío */}
           {pedidosFiltrados.length === 0 && (
-            <div className="text-center py-12 bg-white/80 backdrop-blur-sm border border-rose-200 rounded-2xl">
-              <Package className="w-16 h-16 text-rose-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-800 mb-2">No hay pedidos</h3>
-              <p className="text-gray-500 mb-6">
+            <div className="text-center py-16 bg-white border border-[#e8e8e8]">
+              <div className="w-14 h-14 border border-[#e8e8e8] flex items-center justify-center mx-auto mb-5">
+                <Package size={22} className="text-[#bbb]" />
+              </div>
+              <p className="text-[#aaa] text-xs tracking-widest uppercase mb-1">Sin resultados</p>
+              <p className="text-[#bbb] text-xs mb-6">
                 {busqueda ? 'No se encontraron pedidos con esa búsqueda' : 'Aún no has realizado ningún pedido'}
               </p>
-              <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 text-white rounded-xl font-medium transition-all shadow-md">
+              <button className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#c9a84c] hover:bg-[#e0be6a] text-[#0d0d0d] font-bold text-xs tracking-[0.2em] uppercase transition-all">
                 Ir a comprar
               </button>
             </div>
           )}
         </div>
 
-        {/* Modal de detalle del pedido */}
+        {/* ── Modal detalle ── */}
         {mostrarModal && pedidoSeleccionado && (
-          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50 px-4 py-6">
-            <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-rose-100">
+          <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 px-4 py-6">
+            <div className="relative bg-white border border-[#e8e8e8] w-full max-w-4xl max-h-[90vh] overflow-y-auto">
 
-              {/* Header del Modal */}
-              <div className="sticky top-0 bg-gradient-to-r from-pink-50 to-rose-50 border-b border-rose-100 px-6 py-4 rounded-t-3xl">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-800">Detalle del Pedido</h2>
-                    <p className="text-sm text-rose-500">{pedidoSeleccionado.id}</p>
-                  </div>
-                  <button
-                    onClick={() => setMostrarModal(false)}
-                    className="p-2 hover:bg-white/50 rounded-full transition-colors"
-                  >
-                    <XCircle className="text-rose-400 hover:text-rose-600" size={24} />
-                  </button>
+              {/* Header modal */}
+              <div className="sticky top-0 bg-white border-b border-[#e8e8e8] px-6 py-4 flex items-center justify-between z-10">
+                <div>
+                  <p className="text-[#c9a84c] tracking-[0.3em] uppercase text-[10px] font-semibold mb-0.5">
+                    Detalle del pedido
+                  </p>
+                  <h2 className="text-sm font-semibold text-[#1a1a1a] tracking-wide">
+                    {pedidoSeleccionado.id}
+                  </h2>
                 </div>
+                <button
+                  onClick={() => setMostrarModal(false)}
+                  className="w-8 h-8 flex items-center justify-center border border-[#e8e8e8] hover:border-[#c9a84c] text-[#888] hover:text-[#c9a84c] transition-all"
+                  aria-label="Cerrar"
+                >
+                  <XCircle size={15} />
+                </button>
               </div>
 
-              {/* Contenido del Modal */}
-              <div className="p-6">
-                {/* Estado del pedido */}
-                <div className="mb-8">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      {(() => {
-                        const estadoInfo = getEstadoInfo(pedidoSeleccionado.estado);
-                        return (
-                          <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${estadoInfo.color}`}>
-                            {estadoInfo.icon}
-                            {estadoInfo.texto}
-                          </span>
-                        );
-                      })()}
+              {/* Contenido modal */}
+              <div className="p-6 space-y-6">
 
-                      {pedidoSeleccionado.tracking && (
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-rose-50 text-rose-700 rounded-xl">
-                          <Truck size={16} />
-                          <span className="text-sm font-medium">Tracking: {pedidoSeleccionado.tracking}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-gray-800">
-                        ${pedidoSeleccionado.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                      </p>
-                      <p className="text-sm text-gray-500">Total del pedido</p>
-                    </div>
-                  </div>
-
-                  {/* Información del cliente */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div className="bg-rose-50/50 p-4 rounded-xl">
-                      <h3 className="font-medium text-gray-800 mb-3 flex items-center gap-2">
-                        <User size={18} className="text-rose-500" />
-                        Información del cliente
-                      </h3>
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <User size={16} className="text-rose-400" />
-                          <span className="text-sm text-gray-600">{pedidoSeleccionado.cliente}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Mail size={16} className="text-rose-400" />
-                          <span className="text-sm text-gray-600">{pedidoSeleccionado.email}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Phone size={16} className="text-rose-400" />
-                          <span className="text-sm text-gray-600">{pedidoSeleccionado.telefono}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-rose-50/50 p-4 rounded-xl">
-                      <h3 className="font-medium text-gray-800 mb-3 flex items-center gap-2">
-                        <MapPin size={18} className="text-rose-500" />
-                        Dirección de entrega
-                      </h3>
-                      <div className="flex items-start gap-2">
-                        <MapPin size={16} className="text-rose-400 mt-0.5" />
-                        <span className="text-sm text-gray-600">
-                          {pedidoSeleccionado.direccionTexto}
+                {/* Estado + total */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {(() => {
+                      const estadoInfo = getEstadoInfo(pedidoSeleccionado.estado);
+                      return (
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 border text-[10px] font-bold tracking-widest uppercase ${estadoInfo.color}`}>
+                          {estadoInfo.icon}
+                          {estadoInfo.texto}
+                        </span>
+                      );
+                    })()}
+                    {pedidoSeleccionado.tracking && (
+                      <div className="flex items-center gap-2 border border-[#e8e8e8] px-3 py-1.5">
+                        <Truck size={13} className="text-[#c9a84c]" />
+                        <span className="text-[10px] text-[#999] tracking-wide">
+                          Tracking: {pedidoSeleccionado.tracking}
                         </span>
                       </div>
-
-                      <div className="mt-4">
-                        <h4 className="font-medium text-gray-800 mb-2 flex items-center gap-2">
-                          <CreditCard size={16} className="text-rose-500" />
-                          Método de pago
-                        </h4>
-                        <p className="text-sm text-gray-600">{pedidoSeleccionado.metodoPago}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Productos del pedido */}
-                  <div className="mb-8">
-                    <h3 className="font-medium text-gray-800 mb-4 flex items-center gap-2">
-                      <ShoppingBag size={18} className="text-rose-500" />
-                      Productos ({pedidoSeleccionado.productos})
-                    </h3>
-
-                    <div className="bg-white border border-rose-200 rounded-xl overflow-hidden">
-                      <div className="divide-y divide-rose-100">
-                        {pedidoSeleccionado.productosDetalle.map((producto, index) => (
-                          <div key={index} className="p-4 hover:bg-rose-50/30 transition-colors">
-                            <div className="flex justify-between items-center">
-                              <div>
-                                <h4 className="font-medium text-gray-800">{producto.nombre}</h4>
-                                <p className="text-sm text-gray-500">Cantidad: {producto.cantidad}</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="font-medium text-gray-800">
-                                  ${producto.precio.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                  Total: ${(producto.cantidad * producto.precio).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Resumen */}
-                      <div className="bg-rose-50/50 p-4 border-t border-rose-200">
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium text-gray-800">Total del pedido</span>
-                          <span className="text-xl font-bold text-gray-800">
-                            ${pedidoSeleccionado.total.toLocaleString('es-MX', {
-                              minimumFractionDigits: 2
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Fechas importantes */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {pedidoSeleccionado.fecha && (
-                      <div className="bg-rose-100/50 p-4 rounded-xl">
-                        <div className="flex items-center gap-3">
-                          <Calendar size={20} className="text-rose-600" />
-                          <div>
-                            <p className="text-sm font-medium text-gray-800">Fecha del pedido</p>
-                            <p className="text-sm text-gray-600">{formatearFecha(pedidoSeleccionado.fecha)}</p>
-                          </div>
-                        </div>
-                      </div>
                     )}
-
-                    {pedidoSeleccionado.fechaEntrega && (
-                      <div className="bg-emerald-100/50 p-4 rounded-xl">
-                        <div className="flex items-center gap-3">
-                          <CheckCircle size={20} className="text-emerald-600" />
-                          <div>
-                            <p className="text-sm font-medium text-gray-800">Fecha de entrega</p>
-                            <p className="text-sm text-gray-600">{formatearFecha(pedidoSeleccionado.fechaEntrega)}</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-[#c9a84c]">
+                      ${pedidoSeleccionado.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-[10px] text-[#aaa] tracking-wider uppercase">Total del pedido</p>
                   </div>
                 </div>
+
+                {/* Info cliente + dirección */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-white border border-[#e8e8e8] p-5">
+                    <p className="text-[10px] text-[#c9a84c] tracking-widest uppercase font-semibold mb-4">
+                      Información del cliente
+                    </p>
+                    <div className="space-y-2.5">
+                      {[
+                        { icon: <User size={13} />, value: pedidoSeleccionado.cliente },
+                        { icon: <Mail size={13} />, value: pedidoSeleccionado.email },
+                        { icon: <Phone size={13} />, value: pedidoSeleccionado.telefono },
+                      ].map((item, i) => (
+                        <div key={i} className="flex items-center gap-2.5">
+                          <span className="text-[#c9a84c]">{item.icon}</span>
+                          <span className="text-xs text-[#888]">{item.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-[#e8e8e8] p-5">
+                    <p className="text-[10px] text-[#c9a84c] tracking-widest uppercase font-semibold mb-4">
+                      Dirección de entrega
+                    </p>
+                    <div className="flex items-start gap-2.5 mb-4">
+                      <MapPin size={13} className="text-[#c9a84c] mt-0.5 flex-shrink-0" />
+                      <span className="text-xs text-[#888] leading-relaxed">
+                        {pedidoSeleccionado.direccionTexto}
+                      </span>
+                    </div>
+                    <div className="pt-3 border-t border-[#e8e8e8] flex items-center gap-2.5">
+                      <CreditCard size={13} className="text-[#c9a84c]" />
+                      <span className="text-xs text-[#888]">{pedidoSeleccionado.metodoPago}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Productos */}
+                <div>
+                  <p className="text-[10px] text-[#c9a84c] tracking-widest uppercase font-semibold mb-4 flex items-center gap-2">
+                    <ShoppingBag size={13} />
+                    Productos ({pedidoSeleccionado.productos})
+                  </p>
+                  <div className="border border-[#e8e8e8] overflow-hidden">
+                    <div className="divide-y divide-[#f0f0f0]">
+                      {pedidoSeleccionado.productosDetalle.map((producto, index) => (
+                        <div key={index} className="flex justify-between items-center px-5 py-4 hover:bg-white transition-colors">
+                          <div>
+                            <p className="text-xs font-semibold text-[#1a1a1a]">{producto.nombre}</p>
+                            <p className="text-[10px] text-[#aaa] tracking-wide mt-0.5">Cantidad: {producto.cantidad}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs font-bold text-[#1a1a1a]">
+                              ${producto.precio.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                            </p>
+                            <p className="text-[10px] text-[#aaa]">
+                              Total: ${(producto.cantidad * producto.precio).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex justify-between items-center px-5 py-4 bg-white border-t border-[#e8e8e8]">
+                      <span className="text-xs font-semibold text-[#1a1a1a] tracking-widest uppercase">Total del pedido</span>
+                      <span className="text-lg font-bold text-[#c9a84c]">
+                        ${pedidoSeleccionado.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Fechas */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {pedidoSeleccionado.fecha && (
+                    <div className="bg-white border border-[#e8e8e8] p-4 flex items-center gap-3">
+                      <Calendar size={16} className="text-[#c9a84c] flex-shrink-0" />
+                      <div>
+                        <p className="text-[10px] text-[#c9a84c] tracking-widest uppercase font-semibold">Fecha del pedido</p>
+                        <p className="text-xs text-[#888] mt-0.5">{formatearFecha(pedidoSeleccionado.fecha)}</p>
+                      </div>
+                    </div>
+                  )}
+                  {pedidoSeleccionado.fechaEntrega && (
+                    <div className="bg-white border border-[#7abf8a]/20 p-4 flex items-center gap-3">
+                      <CheckCircle size={16} className="text-[#7abf8a] flex-shrink-0" />
+                      <div>
+                        <p className="text-[10px] text-[#7abf8a] tracking-widest uppercase font-semibold">Fecha de entrega</p>
+                        <p className="text-xs text-[#888] mt-0.5">{formatearFecha(pedidoSeleccionado.fechaEntrega)}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
               </div>
 
-              {/* Botones del Modal */}
-              <div className="sticky bottom-0 bg-white border-t border-rose-100 px-6 py-4">
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <button
-                    className="flex-1 bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 text-white px-6 py-3 rounded-xl font-medium transition-all shadow-md"
-                  >
-                    Descargar factura
-                  </button>
-
-                  <button
-                    onClick={() => setMostrarModal(false)}
-                    className="flex-1 bg-rose-50 hover:bg-rose-100 text-rose-700 px-6 py-3 rounded-xl font-medium transition-colors"
-                  >
-                    Cerrar
-                  </button>
-                </div>
+              {/* Footer modal */}
+              <div className="sticky bottom-0 bg-white border-t border-[#e8e8e8] px-6 py-4 flex flex-col sm:flex-row gap-3">
+                <button className="flex-1 bg-[#c9a84c] hover:bg-[#e0be6a] text-[#0d0d0d] py-3 font-bold text-xs tracking-[0.2em] uppercase transition-all">
+                  Descargar factura
+                </button>
+                <button
+                  onClick={() => setMostrarModal(false)}
+                  className="flex-1 border border-[#e8e8e8] hover:border-[#c9a84c] text-[#888] hover:text-[#c9a84c] py-3 font-bold text-xs tracking-[0.2em] uppercase transition-all"
+                >
+                  Cerrar
+                </button>
               </div>
             </div>
           </div>
         )}
+
       </div>
     </section>
   );

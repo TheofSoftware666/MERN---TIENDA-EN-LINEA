@@ -2,40 +2,13 @@ import React, { useState, useEffect } from 'react';
 import clientAxios from '../config/axios';
 
 import {
-  Package,
-  Clock,
-  CheckCircle,
-  XCircle,
-  Truck,
-  RefreshCw,
-  Eye,
-  Download,
-  Filter,
-  Search,
-  Calendar,
-  CreditCard,
-  MapPin,
-  User,
-  Phone,
-  Mail,
-  ShoppingBag,
-  ChevronRight,
-  AlertCircle,
-  DollarSign,
-  ArrowLeft,
-  RotateCcw,
-  Shield,
-  FileText,
-  Check,
-  X,
-  HelpCircle,
-  ArrowUpRight,
-  Box,
-  Tag,
-  CalendarClock,
-  Receipt,
-  Heart,
-  Sparkles
+  Package, Clock, CheckCircle, XCircle, Truck,
+  RefreshCw, Eye, Download, Search, Calendar,
+  CreditCard, MapPin, User, Phone, Mail, ShoppingBag,
+  ChevronRight, AlertCircle, DollarSign, ArrowLeft,
+  RotateCcw, Shield, FileText, Check, X, HelpCircle,
+  ArrowUpRight, Box, Tag, CalendarClock, Receipt,
+  Heart, Sparkles
 } from 'lucide-react';
 
 const UserDevoluciones = () => {
@@ -47,10 +20,7 @@ const UserDevoluciones = () => {
   const [mostrarFormSolicitud, setMostrarFormSolicitud] = useState(false);
   const [pedidosParaDevolver, setPedidosParaDevolver] = useState([]);
   const [form, setForm] = useState({
-    orderId: "",
-    generalComment: "",
-    refundMethod: "original",
-    items: []
+    orderId: "", generalComment: "", refundMethod: "original", items: []
   });
 
   const updateItem = (index, field, value) => {
@@ -63,437 +33,225 @@ const UserDevoluciones = () => {
 
   const handleSubmit = async () => {
     const selectedItems = form.items.filter(i => i.selected);
-
     if (!form.orderId || selectedItems.length === 0) {
       alert("Selecciona un pedido y al menos un producto");
       return;
     }
-
     const payload = {
-      order_id: form.orderId,
-      refund_method: form.refundMethod,
-      reason: "Customer return",
-      reason_detail: form.generalComment,
+      order_id: form.orderId, refund_method: form.refundMethod,
+      reason: "Customer return", reason_detail: form.generalComment,
       items: selectedItems.map(item => ({
-        product_name: item.name,
-        product_id: item.productId,
-        quantity: item.quantity,
-        reason: item.reason,
-        detail: item.detail
+        product_name: item.name, product_id: item.productId,
+        quantity: item.quantity, reason: item.reason, detail: item.detail
       }))
     };
-
     try {
       const token = localStorage.getItem('ape_token');
-      if (!token || token.length === 0) {
-        alert("Token inválido.");
-        return;
-      }
-
+      if (!token || token.length === 0) { alert("Token inválido."); return; }
       const response = await clientAxios.post(`/SetReturns`, payload, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
       });
-
-      if (response.data.Success.ok) {
-        setMostrarFormSolicitud(false);
-        getDevolucionesByUserId();
-      } else {
-        alert("Ocurrió un error al crear la devolución. " + response.data.Success.message);
-      }
+      if (response.data.Success.ok) { setMostrarFormSolicitud(false); getDevolucionesByUserId(); }
+      else alert("Ocurrió un error al crear la devolución. " + response.data.Success.message);
     } catch (ex) {
-      console.error("Ocurrió un error al intentar crear la devolución. ", ex.response?.data?.Error);
+      console.error("Error al crear la devolución. ", ex.response?.data?.Error);
     }
   };
 
   const handleOrderChange = (orderId) => {
-    const pedidoSeleccionado = pedidosParaDevolver.find(
-      p => p.OrderId === orderId
-    );
-
-    if (!pedidoSeleccionado) {
-      setForm({ ...form, orderId, items: [] });
-      return;
-    }
-
-    const itemsFormateados = pedidoSeleccionado.Items.map(item => ({
-      productId: item.ProductId,
-      name: item.ProductName,
-      sku: item.SKU,
-      price: item.Price,
-      maxQuantity: item.Quantity,
-      quantity: 1,
-      selected: false,
-      reason: "",
-      detail: ""
-    }));
-
+    const pedidoSel = pedidosParaDevolver.find(p => p.OrderId === orderId);
+    if (!pedidoSel) { setForm({ ...form, orderId, items: [] }); return; }
     setForm({
-      ...form,
-      orderId,
-      items: itemsFormateados
+      ...form, orderId,
+      items: pedidoSel.Items.map(item => ({
+        productId: item.ProductId, name: item.ProductName, sku: item.SKU,
+        price: item.Price, maxQuantity: item.Quantity, quantity: 1,
+        selected: false, reason: "", detail: ""
+      }))
     });
   };
 
-  const devolucionesFiltradas = devoluciones.filter(devolucion => {
-    const coincideBusqueda =
-      devolucion.id.toLowerCase().includes(busqueda.toLowerCase()) ||
-      devolucion.pedidoId.toLowerCase().includes(busqueda.toLowerCase()) ||
-      devolucion.cliente.toLowerCase().includes(busqueda.toLowerCase());
-
-    if (filtroEstado === 'todos') return coincideBusqueda;
-    return coincideBusqueda && devolucion.estado === filtroEstado;
+  const devolucionesFiltradas = devoluciones.filter(d => {
+    const coincide = d.id.toLowerCase().includes(busqueda.toLowerCase()) ||
+      d.pedidoId.toLowerCase().includes(busqueda.toLowerCase()) ||
+      d.cliente.toLowerCase().includes(busqueda.toLowerCase());
+    if (filtroEstado === 'todos') return coincide;
+    return coincide && d.estado === filtroEstado;
   });
 
-  useEffect(() => {
-    getDevolucionesByUserId();
-    getPedidosOptions();
-  }, []);
+  useEffect(() => { getDevolucionesByUserId(); getPedidosOptions(); }, []);
 
   const getDevolucionesByUserId = async () => {
     try {
       const token = localStorage.getItem('ape_token');
-      if (!token) throw new Error('No se encontró token de autenticación');
-
+      if (!token) throw new Error('No token');
       const response = await clientAxios.get(`/Returns`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-
       if (response.data.Success.ok) {
-        const devolucionesNormalizadas = response.data.Success.results.map(d => ({
-          ...d,
-          montoTotal: Number(d.montoTotal),
-          montoReembolso: Number(d.montoReembolso),
-          productos: Number(d.productos),
-          estado: d.estado
-        }));
-        setDevoluciones(devolucionesNormalizadas);
+        setDevoluciones(response.data.Success.results.map(d => ({
+          ...d, montoTotal: Number(d.montoTotal),
+          montoReembolso: Number(d.montoReembolso), productos: Number(d.productos)
+        })));
       }
     } catch (error) {
-      if (error.response?.status === 404) {
-        setDevoluciones([]);
-        console.warn('No se encontraron devoluciones para este usuario.');
-        return;
-      }
-      console.error('Ocurrió un error al obtener las devoluciones: ', error);
-    }
-  };
-
-  const formatearFecha = (fecha) => {
-    if (!fecha) return 'Pendiente';
-    return new Date(fecha).toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric'
-    });
-  };
-
-  const getEstadoInfo = (estado) => {
-    switch (estado) {
-      case 'completada':
-        return {
-          color: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-          icon: <CheckCircle size={16} />,
-          texto: 'Completada',
-          bgIcon: 'bg-emerald-50',
-          descripcion: 'Devolución procesada y reembolso completado'
-        };
-      case 'aprobada':
-        return {
-          color: 'bg-pink-100 text-pink-800 border-pink-200',
-          icon: <Check size={16} />,
-          texto: 'Aprobada',
-          bgIcon: 'bg-pink-50',
-          descripcion: 'Devolución aprobada, en espera de recepción'
-        };
-      case 'en_proceso':
-        return {
-          color: 'bg-amber-100 text-amber-800 border-amber-200',
-          icon: <RefreshCw size={16} />,
-          texto: 'En proceso',
-          bgIcon: 'bg-amber-50',
-          descripcion: 'Producto en tránsito o en inspección'
-        };
-      case 'pendiente':
-        return {
-          color: 'bg-gray-100 text-gray-800 border-gray-200',
-          icon: <Clock size={16} />,
-          texto: 'Pendiente',
-          bgIcon: 'bg-gray-50',
-          descripcion: 'Esperando aprobación'
-        };
-      case 'rechazada':
-        return {
-          color: 'bg-red-100 text-red-800 border-red-200',
-          icon: <X size={16} />,
-          texto: 'Rechazada',
-          bgIcon: 'bg-red-50',
-          descripcion: 'Devolución no aprobada'
-        };
-      case 'cancelada':
-        return {
-          color: 'bg-gray-100 text-gray-800 border-gray-200',
-          icon: <XCircle size={16} />,
-          texto: 'Cancelada',
-          bgIcon: 'bg-gray-50',
-          descripcion: 'Devolución cancelada por el usuario'
-        };
-      default:
-        return {
-          color: 'bg-gray-100 text-gray-800 border-gray-200',
-          icon: <Package size={16} />,
-          texto: 'Desconocido',
-          bgIcon: 'bg-gray-50',
-          descripcion: 'Estado no definido'
-        };
-    }
-  };
-
-  const getEstadoProductoInfo = (estado) => {
-    switch (estado) {
-      case 'pending':
-        return { texto: 'Pendiente', color: 'bg-gray-100 text-gray-800' };
-      case 'recibido':
-        return { texto: 'Recibido', color: 'bg-blue-100 text-blue-800' };
-      case 'inspeccion':
-        return { texto: 'En inspección', color: 'bg-amber-100 text-amber-800' };
-      case 'transit':
-        return { texto: 'En tránsito', color: 'bg-purple-100 text-purple-800' };
-      case 'approved':
-        return { texto: 'Aprobado', color: 'bg-emerald-100 text-emerald-800' };
-      case 'rejected':
-        return { texto: 'Rechazado', color: 'bg-red-100 text-red-800' };
-      case 'replaced':
-        return { texto: 'Reemplazado', color: 'bg-green-100 text-green-800' };
-      default:
-        return { texto: 'Desconocido', color: 'bg-gray-100 text-gray-800' };
-    }
-  };
-
-  const estadisticas = {
-    totalDevoluciones: devoluciones.length,
-    completadas: devoluciones.filter(d => d.estado === 'completada').length,
-    enProceso: devoluciones.filter(d => ['en_proceso', 'aprobada'].includes(d.estado)).length,
-    totalReembolsado: devoluciones
-      .filter(d => d.estado === 'completada')
-      .reduce((sum, d) => sum + d.montoReembolso, 0)
-  };
-
-  const handleVerDetalle = (devolucion) => {
-    setDevolucionSeleccionada(devolucion);
-    setMostrarModal(true);
-  };
-
-  const handleDescargarEtiqueta = (url) => {
-    if (url) {
-      window.open(url, '_blank');
-    } else {
-      alert('Etiqueta no disponible');
+      if (error.response?.status === 404) { setDevoluciones([]); return; }
+      console.error('Error obteniendo devoluciones:', error);
     }
   };
 
   const getPedidosOptions = async () => {
     try {
       const token = localStorage.getItem('ape_token');
-      if (!token || token.length === 0) {
-        alert("Token inválido.");
-        return;
-      }
-
+      if (!token) return;
       const response = await clientAxios.get(`/GetOrdersDeliveredByUserId`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
       });
+      if (response.data.Success.ok) setPedidosParaDevolver(response.data.Success.results);
+    } catch (ex) { console.error(ex.response?.data?.Error); }
+  };
 
-      if (response.data.Success.ok) {
-        setPedidosParaDevolver(response.data.Success.results);
-      }
-    } catch (ex) {
-      console.error(ex.response?.data?.Error);
-      console.log(ex.response?.data);
+  const formatearFecha = (fecha) => {
+    if (!fecha) return 'Pendiente';
+    return new Date(fecha).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
+  };
+
+  const getEstadoInfo = (estado) => {
+    switch (estado) {
+      case 'completada':  return { color: 'border-[#7abf8a]/40 text-[#7abf8a] bg-[#7abf8a]/5', icon: <CheckCircle size={13} />, texto: 'Completada', descripcion: 'Devolución procesada y reembolso completado' };
+      case 'aprobada':    return { color: 'border-[#c9a84c]/40 text-[#c9a84c] bg-[#c9a84c]/5', icon: <Check size={13} />, texto: 'Aprobada', descripcion: 'Aprobada, en espera de recepción' };
+      case 'en_proceso':  return { color: 'border-blue-500/30 text-blue-400 bg-blue-500/5', icon: <RefreshCw size={13} />, texto: 'En proceso', descripcion: 'Producto en tránsito o en inspección' };
+      case 'pendiente':   return { color: 'border-[#e8e8e8] text-[#888] bg-white', icon: <Clock size={13} />, texto: 'Pendiente', descripcion: 'Esperando aprobación' };
+      case 'rechazada':   return { color: 'border-red-500/30 text-red-400 bg-red-500/5', icon: <X size={13} />, texto: 'Rechazada', descripcion: 'Devolución no aprobada' };
+      case 'cancelada':   return { color: 'border-[#e8e8e8] text-[#aaa] bg-white', icon: <XCircle size={13} />, texto: 'Cancelada', descripcion: 'Cancelada por el usuario' };
+      default:            return { color: 'border-[#e8e8e8] text-[#888] bg-white', icon: <Package size={13} />, texto: 'Desconocido', descripcion: '' };
     }
   };
 
+  const getEstadoProductoInfo = (estado) => {
+    switch (estado) {
+      case 'pending':     return { texto: 'Pendiente',      color: 'border-[#e8e8e8] text-[#aaa]' };
+      case 'recibido':    return { texto: 'Recibido',        color: 'border-blue-500/30 text-blue-400' };
+      case 'inspeccion':  return { texto: 'En inspección',  color: 'border-amber-500/30 text-amber-400' };
+      case 'transit':     return { texto: 'En tránsito',    color: 'border-purple-500/30 text-purple-400' };
+      case 'approved':    return { texto: 'Aprobado',        color: 'border-[#7abf8a]/40 text-[#7abf8a]' };
+      case 'rejected':    return { texto: 'Rechazado',       color: 'border-red-500/30 text-red-400' };
+      case 'replaced':    return { texto: 'Reemplazado',     color: 'border-[#c9a84c]/40 text-[#c9a84c]' };
+      default:            return { texto: 'Desconocido',     color: 'border-[#e8e8e8] text-[#aaa]' };
+    }
+  };
+
+  const filtros = [
+    { id: 'todos', label: 'Todos' },
+    { id: 'completada', label: 'Completadas' },
+    { id: 'en_proceso', label: 'En proceso' },
+    { id: 'pendiente', label: 'Pendientes' },
+  ];
+
+  // ── Clases reutilizables ──
+  const inputBase = "w-full bg-white border border-[#e8e8e8] focus:border-[#c9a84c] text-[#1a1a1a] placeholder-[#bbb] px-4 py-3 text-sm outline-none transition-colors";
+  const selectBase = "w-full bg-white border border-[#e8e8e8] focus:border-[#c9a84c] text-[#1a1a1a] px-4 py-3 text-sm outline-none transition-colors appearance-none";
+  const labelBase = "block text-[10px] font-semibold text-[#888] mb-1.5 tracking-widest uppercase";
+  const sectionLabel = "text-[10px] font-semibold text-[#c9a84c] tracking-widest uppercase mb-4 flex items-center gap-2";
+
   return (
-    <section className="w-full min-h-screen bg-gradient-to-b from-rose-50 to-pink-50 p-4 lg:p-6">
+    <section className="w-full min-h-screen bg-white p-4 lg:p-8">
       <div className="mx-auto w-full max-w-7xl">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4">
-            <div>
-              <h1 className="text-2xl lg:text-3xl font-light bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-2">
-                <Sparkles className="text-rose-400" size={28} />
-                Mis Devoluciones
-              </h1>
-              <p className="text-gray-600 text-sm mt-1">
-                Solicita y sigue el estado de tus devoluciones y reembolsos
-              </p>
-            </div>
 
-            <button
-              onClick={() => setMostrarFormSolicitud(true)}
-              className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-rose-400 to-pink-500 hover:from-rose-500 hover:to-pink-600 text-white rounded-full font-medium transition-all shadow-md hover:shadow-lg"
-            >
-              <RotateCcw size={18} />
-              Solicitar Devolución
-            </button>
+        {/* ── Header ── */}
+        <div className="mb-10 flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+          <div>
+            <p className="text-[#c9a84c] tracking-[0.3em] uppercase text-[10px] font-semibold mb-2">Mi cuenta</p>
+            <h1 className="text-3xl font-light text-[#1a1a1a] mb-1">Mis Devoluciones</h1>
+            <p className="text-[#aaa] text-xs tracking-wide">Solicita y sigue el estado de tus devoluciones y reembolsos</p>
           </div>
+          <button
+            onClick={() => setMostrarFormSolicitud(true)}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#c9a84c] hover:bg-[#e0be6a] text-[#0d0d0d] font-bold text-xs tracking-[0.2em] uppercase transition-all self-start lg:self-auto"
+          >
+            <RotateCcw size={14} />
+            Solicitar Devolución
+          </button>
+        </div>
 
-          {/* Filtros y búsqueda */}
-          <div className="bg-white/80 backdrop-blur-sm border border-rose-100 rounded-2xl p-4 mb-6 shadow-sm">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search size={20} className="text-rose-300" />
-                  </div>
-                  <input
-                    type="text"
-                    value={busqueda}
-                    onChange={(e) => setBusqueda(e.target.value)}
-                    placeholder="Buscar por ID, pedido o cliente..."
-                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-rose-200 rounded-full focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300 placeholder:text-rose-200"
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => setFiltroEstado('todos')}
-                  className={`px-4 py-2 rounded-full font-medium transition-all ${
-                    filtroEstado === 'todos'
-                      ? 'bg-gradient-to-r from-rose-400 to-pink-400 text-white'
-                      : 'bg-white text-rose-700 hover:bg-rose-50 border border-rose-200'
+        {/* ── Filtros ── */}
+        <div className="bg-white border border-[#e8e8e8] p-5 mb-8">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#bbb]" />
+              <input
+                type="text" value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                placeholder="Buscar por ID, pedido o cliente..."
+                className="w-full bg-white border border-[#e8e8e8] focus:border-[#c9a84c] text-[#1a1a1a] placeholder-[#bbb] pl-9 pr-4 py-2.5 text-sm outline-none transition-colors"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {filtros.map(f => (
+                <button key={f.id} onClick={() => setFiltroEstado(f.id)}
+                  className={`px-4 py-2 text-xs font-bold tracking-widest uppercase transition-all ${
+                    filtroEstado === f.id
+                      ? 'bg-[#c9a84c] text-[#0d0d0d]'
+                      : 'border border-[#e8e8e8] text-[#888] hover:border-[#c9a84c] hover:text-[#c9a84c]'
                   }`}
-                >
-                  Todos
-                </button>
-                <button
-                  onClick={() => setFiltroEstado('completada')}
-                  className={`px-4 py-2 rounded-full font-medium transition-all ${
-                    filtroEstado === 'completada'
-                      ? 'bg-gradient-to-r from-emerald-400 to-green-400 text-white'
-                      : 'bg-white text-rose-700 hover:bg-rose-50 border border-rose-200'
-                  }`}
-                >
-                  Completadas
-                </button>
-                <button
-                  onClick={() => setFiltroEstado('en_proceso')}
-                  className={`px-4 py-2 rounded-full font-medium transition-all ${
-                    filtroEstado === 'en_proceso'
-                      ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-white'
-                      : 'bg-white text-rose-700 hover:bg-rose-50 border border-rose-200'
-                  }`}
-                >
-                  En proceso
-                </button>
-                <button
-                  onClick={() => setFiltroEstado('pendiente')}
-                  className={`px-4 py-2 rounded-full font-medium transition-all ${
-                    filtroEstado === 'pendiente'
-                      ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white'
-                      : 'bg-white text-rose-700 hover:bg-rose-50 border border-rose-200'
-                  }`}
-                >
-                  Pendientes
-                </button>
-              </div>
+                >{f.label}</button>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Lista de devoluciones */}
-        <div className="space-y-4">
+        {/* ── Lista ── */}
+        <div className="space-y-3">
           {devolucionesFiltradas.map((devolucion) => {
             const estadoInfo = getEstadoInfo(devolucion.estado);
-
             return (
-              <div
-                key={devolucion.id}
-                className="bg-white/80 backdrop-blur-sm border border-rose-100 rounded-2xl p-5 hover:shadow-xl transition-all duration-300 cursor-pointer"
-                onClick={() => handleVerDetalle(devolucion)}
+              <div key={devolucion.id}
+                className="bg-white border border-[#e8e8e8] hover:border-[#c9a84c]/40 p-5 transition-all cursor-pointer group"
+                onClick={() => { setDevolucionSeleccionada(devolucion); setMostrarModal(true); }}
               >
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                   <div className="flex-1">
-                    <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-start justify-between mb-4">
                       <div>
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-semibold text-rose-800">{devolucion.id}</h3>
-                          <span className="text-sm text-rose-500 bg-rose-50 px-2 py-1 rounded-full">
+                        <div className="flex items-center gap-3 mb-1">
+                          <h3 className="text-sm font-semibold text-[#1a1a1a] tracking-wide">{devolucion.id}</h3>
+                          <span className="text-[10px] text-[#c9a84c] border border-[#c9a84c]/30 px-2 py-0.5 tracking-wider">
                             Pedido: {devolucion.pedidoId}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-500">{formatearFecha(devolucion.fechaSolicitud)}</p>
+                        <p className="text-[11px] text-[#aaa] tracking-wide">{formatearFecha(devolucion.fechaSolicitud)}</p>
                       </div>
-                      <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium border ${estadoInfo.color}`}>
-                        <span className={estadoInfo.bgIcon + " p-1 rounded-full"}>
-                          {estadoInfo.icon}
-                        </span>
-                        {estadoInfo.texto}
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 border text-[10px] font-bold tracking-widest uppercase ${estadoInfo.color}`}>
+                        {estadoInfo.icon} {estadoInfo.texto}
                       </span>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <div className="flex items-center gap-2">
-                        <Tag size={16} className="text-rose-300" />
-                        <div>
-                          <p className="text-sm text-rose-400">Motivo</p>
-                          <p className="text-sm font-medium text-gray-700">{devolucion.motivo}</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {[
+                        { icon: <Tag size={13} />, label: 'Motivo', value: devolucion.motivo },
+                        { icon: <ShoppingBag size={13} />, label: 'Productos', value: `${devolucion.productos} producto${devolucion.productos !== 1 ? 's' : ''}` },
+                        { icon: <DollarSign size={13} />, label: 'Reembolso', value: `$${devolucion.montoReembolso.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`, bold: true },
+                        { icon: <CalendarClock size={13} />, label: 'Est. Reembolso', value: formatearFecha(devolucion.fechaEstimadaReembolso) },
+                      ].map((item, i) => (
+                        <div key={i} className="flex items-start gap-2">
+                          <span className="text-[#c9a84c] mt-0.5">{item.icon}</span>
+                          <div>
+                            <p className="text-[10px] text-[#aaa] tracking-wider uppercase">{item.label}</p>
+                            <p className={`text-xs mt-0.5 ${item.bold ? 'font-bold text-[#1a1a1a]' : 'text-[#888]'}`}>{item.value}</p>
+                          </div>
                         </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <ShoppingBag size={16} className="text-rose-300" />
-                        <div>
-                          <p className="text-sm text-rose-400">Productos</p>
-                          <p className="text-sm font-medium text-gray-700">
-                            {devolucion.productos} producto{devolucion.productos !== 1 ? 's' : ''}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <DollarSign size={16} className="text-rose-300" />
-                        <div>
-                          <p className="text-sm text-rose-400">Reembolso</p>
-                          <p className="text-sm font-bold text-gray-900">
-                            ${devolucion.montoReembolso.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <CalendarClock size={16} className="text-rose-300" />
-                        <div>
-                          <p className="text-sm text-rose-400">Est. Reembolso</p>
-                          <p className="text-sm font-medium text-gray-700">
-                            {formatearFecha(devolucion.fechaEstimadaReembolso)}
-                          </p>
-                        </div>
-                      </div>
+                      ))}
                     </div>
-
                     {devolucion.trackingDevolucion && (
-                      <div className="mt-3 flex items-center gap-2 text-sm text-rose-500">
-                        <Truck size={14} />
-                        <span>Tracking devolución: {devolucion.trackingDevolucion}</span>
+                      <div className="mt-3 flex items-center gap-2 text-[10px] text-[#aaa] tracking-wide">
+                        <Truck size={11} className="text-[#c9a84c]" />
+                        <span>Tracking: {devolucion.trackingDevolucion}</span>
                       </div>
                     )}
                   </div>
-
-                  <div className="flex items-center gap-3">
-                    <button className="flex items-center gap-2 text-rose-500 hover:text-rose-700 text-sm font-medium">
-                      <Eye size={16} />
-                      Ver detalles
-                      <ChevronRight size={16} />
-                    </button>
+                  <div className="flex items-center gap-1.5 text-[#aaa] group-hover:text-[#c9a84c] transition-colors">
+                    <Eye size={14} />
+                    <span className="text-[10px] tracking-widest uppercase font-semibold">Ver detalles</span>
+                    <ChevronRight size={14} />
                   </div>
                 </div>
               </div>
@@ -501,510 +259,377 @@ const UserDevoluciones = () => {
           })}
 
           {devolucionesFiltradas.length === 0 && (
-            <div className="text-center py-12 bg-white/80 backdrop-blur-sm border border-rose-100 rounded-2xl">
-              <Heart className="w-16 h-16 text-rose-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-rose-800 mb-2">No hay devoluciones</h3>
-              <p className="text-gray-500 mb-6">
+            <div className="text-center py-16 bg-white border border-[#e8e8e8]">
+              <div className="w-14 h-14 border border-[#e8e8e8] flex items-center justify-center mx-auto mb-5">
+                <RotateCcw size={20} className="text-[#bbb]" />
+              </div>
+              <p className="text-[#aaa] text-xs tracking-widest uppercase mb-1">Sin resultados</p>
+              <p className="text-[#bbb] text-xs mb-6">
                 {busqueda ? 'No se encontraron devoluciones con esa búsqueda' : 'Aún no has solicitado ninguna devolución'}
               </p>
-              <button
-                onClick={() => setMostrarFormSolicitud(true)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-rose-400 to-pink-500 hover:from-rose-500 hover:to-pink-600 text-white rounded-full font-medium transition-all"
+              <button onClick={() => setMostrarFormSolicitud(true)}
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#c9a84c] hover:bg-[#e0be6a] text-[#0d0d0d] font-bold text-xs tracking-[0.2em] uppercase transition-all"
               >
-                <RotateCcw size={18} />
-                Solicitar mi primera devolución
+                <RotateCcw size={13} /> Solicitar devolución
               </button>
             </div>
           )}
         </div>
 
-        {/* Modal de detalle de devolución */}
+        {/* ── Modal detalle ── */}
         {mostrarModal && devolucionSeleccionada && (
-          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex justify-center items-center z-50 px-4 py-6">
-            <div className="relative bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-rose-100">
-              <div className="sticky top-0 bg-white/80 backdrop-blur-sm border-b border-rose-100 px-6 py-4 rounded-t-3xl">
+          <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 px-4 py-6">
+            <div className="relative bg-white border border-[#e8e8e8] w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+
+              <div className="sticky top-0 bg-white border-b border-[#e8e8e8] px-6 py-4 flex items-center justify-between z-10">
+                <div>
+                  <p className="text-[#c9a84c] tracking-[0.3em] uppercase text-[9px] font-semibold mb-0.5">Detalle de devolución</p>
+                  <h2 className="text-sm font-semibold text-[#1a1a1a] tracking-wide">{devolucionSeleccionada.id}</h2>
+                </div>
+                <button onClick={() => setMostrarModal(false)}
+                  className="w-8 h-8 flex items-center justify-center border border-[#e8e8e8] hover:border-[#c9a84c] text-[#888] hover:text-[#c9a84c] transition-all"
+                ><XCircle size={15} /></button>
+              </div>
+
+              <div className="p-6 space-y-6">
+
+                {/* Estado + reembolso */}
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xl font-semibold text-rose-800">Detalle de Devolución</h2>
-                    <p className="text-sm text-rose-400">{devolucionSeleccionada.id}</p>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {(() => {
+                      const ei = getEstadoInfo(devolucionSeleccionada.estado);
+                      return (
+                        <>
+                          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 border text-[10px] font-bold tracking-widest uppercase ${ei.color}`}>
+                            {ei.icon} {ei.texto}
+                          </span>
+                          <p className="text-xs text-[#aaa] tracking-wide">{ei.descripcion}</p>
+                        </>
+                      );
+                    })()}
                   </div>
-                  <button
-                    onClick={() => setMostrarModal(false)}
-                    className="p-2 hover:bg-rose-50 rounded-full transition-colors"
-                  >
-                    <XCircle className="text-rose-300 hover:text-rose-500" size={24} />
-                  </button>
+                  <div className="text-right flex-shrink-0 ml-4">
+                    <p className="text-xl font-bold text-[#c9a84c]">
+                      ${devolucionSeleccionada.montoReembolso.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-[10px] text-[#aaa] tracking-wider uppercase">Monto a reembolsar</p>
+                  </div>
                 </div>
-              </div>
 
-              <div className="p-6">
-                {/* Estado de la devolución */}
-                <div className="mb-8">
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4">
+                {/* Info cliente + reembolso */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-white border border-[#e8e8e8] p-5">
+                    <p className={sectionLabel}><User size={13} /> Información del cliente</p>
+                    <div className="space-y-2.5">
+                      {[
+                        { icon: <User size={13} />, value: devolucionSeleccionada.cliente },
+                        { icon: <Mail size={13} />, value: devolucionSeleccionada.email },
+                        { icon: <Phone size={13} />, value: devolucionSeleccionada.telefono },
+                      ].map((item, i) => (
+                        <div key={i} className="flex items-center gap-2.5">
+                          <span className="text-[#c9a84c]">{item.icon}</span>
+                          <span className="text-xs text-[#888]">{item.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="bg-white border border-[#e8e8e8] p-5">
+                    <p className={sectionLabel}><Receipt size={13} /> Información de reembolso</p>
+                    <div className="space-y-2.5">
+                      {[
+                        { label: 'Método', value: devolucionSeleccionada.metodoReembolso },
+                        { label: 'Fecha estimada', value: formatearFecha(devolucionSeleccionada.fechaEstimadaReembolso) },
+                        ...(devolucionSeleccionada.fechaReembolso ? [{ label: 'Fecha real', value: formatearFecha(devolucionSeleccionada.fechaReembolso) }] : [])
+                      ].map((item, i) => (
+                        <div key={i} className="flex justify-between">
+                          <span className="text-[10px] text-[#aaa] tracking-wider uppercase">{item.label}</span>
+                          <span className="text-xs text-[#999]">{item.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Motivo */}
+                <div className="bg-amber-500/5 border border-amber-500/20 p-5">
+                  <p className="text-[10px] text-amber-400 tracking-widest uppercase font-semibold mb-3 flex items-center gap-2">
+                    <HelpCircle size={13} /> Motivo de la devolución
+                  </p>
+                  <div className="flex items-start gap-3">
+                    <AlertCircle size={14} className="text-amber-400 mt-0.5 flex-shrink-0" />
                     <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        {(() => {
-                          const estadoInfo = getEstadoInfo(devolucionSeleccionada.estado);
-                          return (
-                            <>
-                              <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${estadoInfo.color}`}>
-                                {estadoInfo.icon}
-                                {estadoInfo.texto}
-                              </span>
-                              <p className="text-sm text-gray-600">{estadoInfo.descripcion}</p>
-                            </>
-                          );
-                        })()}
-                      </div>
-                      <p className="text-sm text-gray-600">
-                        Pedido original: <span className="font-medium text-rose-600">{devolucionSeleccionada.pedidoId}</span>
-                      </p>
-                    </div>
-
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-rose-700">
-                        ${devolucionSeleccionada.montoReembolso.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                      </p>
-                      <p className="text-sm text-rose-400">Monto a reembolsar</p>
+                      <p className="text-xs font-semibold text-[#1a1a1a] mb-1">{devolucionSeleccionada.motivo}</p>
+                      <p className="text-xs text-[#888] leading-relaxed">{devolucionSeleccionada.motivoDetalle}</p>
                     </div>
                   </div>
-
-                  {/* Información del cliente */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div className="bg-rose-50/50 p-4 rounded-xl border border-rose-100">
-                      <h3 className="font-medium text-rose-800 mb-3 flex items-center gap-2">
-                        <User size={18} />
-                        Información del cliente
-                      </h3>
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <User size={16} className="text-rose-300" />
-                          <span className="text-sm text-gray-700">{devolucionSeleccionada.cliente}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Mail size={16} className="text-rose-300" />
-                          <span className="text-sm text-gray-700">{devolucionSeleccionada.email}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Phone size={16} className="text-rose-300" />
-                          <span className="text-sm text-gray-700">{devolucionSeleccionada.telefono}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-rose-50/50 p-4 rounded-xl border border-rose-100">
-                      <h3 className="font-medium text-rose-800 mb-3 flex items-center gap-2">
-                        <Receipt size={18} />
-                        Información de reembolso
-                      </h3>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm text-gray-500">Método:</span>
-                          <span className="text-sm font-medium text-gray-700">{devolucionSeleccionada.metodoReembolso}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-gray-500">Fecha estimada:</span>
-                          <span className="text-sm font-medium text-gray-700">
-                            {formatearFecha(devolucionSeleccionada.fechaEstimadaReembolso)}
-                          </span>
-                        </div>
-                        {devolucionSeleccionada.fechaReembolso && (
-                          <div className="flex justify-between">
-                            <span className="text-sm text-gray-500">Fecha real:</span>
-                            <span className="text-sm font-medium text-gray-700">
-                              {formatearFecha(devolucionSeleccionada.fechaReembolso)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Motivo de la devolución */}
-                  <div className="mb-8">
-                    <h3 className="font-medium text-rose-800 mb-3 flex items-center gap-2">
-                      <HelpCircle size={18} />
-                      Motivo de la devolución
-                    </h3>
-                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                      <div className="flex items-start gap-3">
-                        <AlertCircle className="text-amber-500 mt-0.5" size={18} />
-                        <div>
-                          <h4 className="font-medium text-gray-900 mb-1">{devolucionSeleccionada.motivo}</h4>
-                          <p className="text-sm text-gray-700">{devolucionSeleccionada.motivoDetalle}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Productos en devolución */}
-                  <div className="mb-8">
-                    <h3 className="font-medium text-rose-800 mb-4 flex items-center gap-2">
-                      <ShoppingBag size={18} />
-                      Productos en devolución ({devolucionSeleccionada.productos})
-                    </h3>
-
-                    <div className="bg-white border border-rose-100 rounded-xl overflow-hidden">
-                      <div className="divide-y divide-rose-50">
-                        {devolucionSeleccionada.productosDetalle.map((producto, index) => {
-                          const productoEstado = getEstadoProductoInfo(producto.estadoProducto);
-                          return (
-                            <div key={index} className="p-4 hover:bg-rose-50/30 transition-colors">
-                              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                <div className="flex-1">
-                                  <h4 className="font-medium text-gray-900">{producto.nombre}</h4>
-                                  <div className="flex items-center gap-4 mt-2">
-                                    <span className="text-sm text-gray-500">Cantidad: {producto.cantidad}</span>
-                                    <span className="text-sm text-gray-500">Motivo: {producto.motivo}</span>
-                                  </div>
-                                </div>
-                                <div className="flex flex-col items-end gap-2">
-                                  <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${productoEstado.color}`}>
-                                    {productoEstado.texto}
-                                  </span>
-                                  <p className="font-medium text-gray-900">
-                                    ${producto.precio.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Información de envío y tracking */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    {devolucionSeleccionada.trackingDevolucion && (
-                      <div className="bg-rose-50 p-4 rounded-xl">
-                        <h3 className="font-medium text-rose-800 mb-3 flex items-center gap-2">
-                          <Truck size={18} />
-                          Tracking Devolución
-                        </h3>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-gray-700">
-                            {devolucionSeleccionada.trackingDevolucion}
-                          </span>
-                          <button className="text-rose-500 hover:text-rose-700 text-sm font-medium">
-                            <ArrowUpRight size={16} />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {devolucionSeleccionada.trackingReemplazo && (
-                      <div className="bg-green-50 p-4 rounded-xl">
-                        <h3 className="font-medium text-rose-800 mb-3 flex items-center gap-2">
-                          <Package size={18} />
-                          Tracking Reemplazo
-                        </h3>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-gray-700">
-                            {devolucionSeleccionada.trackingReemplazo}
-                          </span>
-                          <button className="text-green-500 hover:text-green-700 text-sm font-medium">
-                            <ArrowUpRight size={16} />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Centro de devolución */}
-                  {devolucionSeleccionada.centroDevolucion && (
-                    <div className="mb-6">
-                      <h3 className="font-medium text-rose-800 mb-3 flex items-center gap-2">
-                        <MapPin size={18} />
-                        Centro de Devolución
-                      </h3>
-                      <div className="bg-rose-50 p-4 rounded-xl">
-                        <div className="flex items-start gap-2">
-                          <MapPin size={16} className="text-rose-300 mt-0.5" />
-                          <span className="text-sm text-gray-700">{devolucionSeleccionada.centroDevolucion}</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Instrucciones */}
-                  {devolucionSeleccionada.instrucciones && (
-                    <div className="mb-6">
-                      <h3 className="font-medium text-rose-800 mb-3 flex items-center gap-2">
-                        <FileText size={18} />
-                        Instrucciones de Envío
-                      </h3>
-                      <div className="bg-rose-50 p-4 rounded-xl">
-                        <p className="text-sm text-gray-700">{devolucionSeleccionada.instrucciones}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Razón de rechazo */}
-                  {devolucionSeleccionada.razonRechazo && (
-                    <div className="mb-6">
-                      <h3 className="font-medium text-rose-800 mb-3 flex items-center gap-2">
-                        <AlertCircle size={18} />
-                        Razón de Rechazo
-                      </h3>
-                      <div className="bg-red-50 border border-red-200 p-4 rounded-xl">
-                        <p className="text-sm text-red-700">{devolucionSeleccionada.razonRechazo}</p>
-                      </div>
-                    </div>
-                  )}
                 </div>
+
+                {/* Productos */}
+                <div>
+                  <p className={sectionLabel}><ShoppingBag size={13} /> Productos en devolución ({devolucionSeleccionada.productos})</p>
+                  <div className="border border-[#e8e8e8] overflow-hidden">
+                    <div className="divide-y divide-[#f0f0f0]">
+                      {devolucionSeleccionada.productosDetalle.map((producto, index) => {
+                        const ps = getEstadoProductoInfo(producto.estadoProducto);
+                        return (
+                          <div key={index} className="flex flex-col md:flex-row md:items-center justify-between gap-3 px-5 py-4 hover:bg-white transition-colors">
+                            <div>
+                              <p className="text-xs font-semibold text-[#1a1a1a]">{producto.nombre}</p>
+                              <p className="text-[10px] text-[#aaa] mt-0.5 tracking-wide">
+                                Cantidad: {producto.cantidad} · Motivo: {producto.motivo}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className={`inline-flex px-2 py-0.5 border text-[10px] font-bold tracking-widest uppercase ${ps.color}`}>
+                                {ps.texto}
+                              </span>
+                              <p className="text-xs font-bold text-[#1a1a1a] whitespace-nowrap">
+                                ${producto.precio.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tracking */}
+                {(devolucionSeleccionada.trackingDevolucion || devolucionSeleccionada.trackingReemplazo) && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {devolucionSeleccionada.trackingDevolucion && (
+                      <div className="bg-white border border-[#e8e8e8] p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <Truck size={14} className="text-[#c9a84c]" />
+                          <div>
+                            <p className="text-[10px] text-[#c9a84c] tracking-widest uppercase font-semibold">Tracking devolución</p>
+                            <p className="text-xs text-[#888] mt-0.5">{devolucionSeleccionada.trackingDevolucion}</p>
+                          </div>
+                        </div>
+                        <ArrowUpRight size={14} className="text-[#888]" />
+                      </div>
+                    )}
+                    {devolucionSeleccionada.trackingReemplazo && (
+                      <div className="bg-white border border-[#7abf8a]/20 p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <Package size={14} className="text-[#7abf8a]" />
+                          <div>
+                            <p className="text-[10px] text-[#7abf8a] tracking-widest uppercase font-semibold">Tracking reemplazo</p>
+                            <p className="text-xs text-[#888] mt-0.5">{devolucionSeleccionada.trackingReemplazo}</p>
+                          </div>
+                        </div>
+                        <ArrowUpRight size={14} className="text-[#888]" />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Centro de devolución */}
+                {devolucionSeleccionada.centroDevolucion && (
+                  <div className="bg-white border border-[#e8e8e8] p-4 flex items-start gap-2.5">
+                    <MapPin size={14} className="text-[#c9a84c] mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-[10px] text-[#c9a84c] tracking-widest uppercase font-semibold mb-1">Centro de devolución</p>
+                      <p className="text-xs text-[#888]">{devolucionSeleccionada.centroDevolucion}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Instrucciones */}
+                {devolucionSeleccionada.instrucciones && (
+                  <div className="bg-white border border-[#e8e8e8] p-4">
+                    <p className="text-[10px] text-[#c9a84c] tracking-widest uppercase font-semibold mb-2 flex items-center gap-2">
+                      <FileText size={13} /> Instrucciones de envío
+                    </p>
+                    <p className="text-xs text-[#888] leading-relaxed">{devolucionSeleccionada.instrucciones}</p>
+                  </div>
+                )}
+
+                {/* Razón de rechazo */}
+                {devolucionSeleccionada.razonRechazo && (
+                  <div className="bg-red-500/5 border border-red-500/20 p-4">
+                    <p className="text-[10px] text-red-400 tracking-widest uppercase font-semibold mb-2 flex items-center gap-2">
+                      <AlertCircle size={13} /> Razón de rechazo
+                    </p>
+                    <p className="text-xs text-[#888] leading-relaxed">{devolucionSeleccionada.razonRechazo}</p>
+                  </div>
+                )}
+
               </div>
 
-              {/* Botones del Modal */}
-              <div className="sticky bottom-0 bg-white/80 backdrop-blur-sm border-t border-rose-100 px-6 py-4">
-                <div className="flex flex-col sm:flex-row gap-3">
-                  {devolucionSeleccionada.etiquetaEnvio && (
-                    <button
-                      onClick={() => handleDescargarEtiqueta(devolucionSeleccionada.etiquetaEnvio)}
-                      className="flex-1 inline-flex items-center justify-center gap-2 bg-gradient-to-r from-rose-400 to-pink-500 hover:from-rose-500 hover:to-pink-600 text-white px-6 py-3 rounded-full font-medium transition-all shadow-md hover:shadow-lg"
-                    >
-                      <Download size={18} />
-                      Descargar Etiqueta
-                    </button>
-                  )}
-
-                  {devolucionSeleccionada.facturaDevolucion && (
-                    <button
-                      onClick={() => window.open(devolucionSeleccionada.facturaDevolucion, '_blank')}
-                      className="flex-1 inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-500 hover:to-green-600 text-white px-6 py-3 rounded-full font-medium transition-all shadow-md hover:shadow-lg"
-                    >
-                      <FileText size={18} />
-                      Ver Factura
-                    </button>
-                  )}
-
-                  <button
-                    onClick={() => setMostrarModal(false)}
-                    className="flex-1 bg-rose-50 hover:bg-rose-100 text-rose-700 px-6 py-3 rounded-full font-medium transition-colors"
-                  >
-                    Cerrar
-                  </button>
-                </div>
+              {/* Footer modal */}
+              <div className="sticky bottom-0 bg-white border-t border-[#e8e8e8] px-6 py-4 flex flex-col sm:flex-row gap-3">
+                {devolucionSeleccionada.etiquetaEnvio && (
+                  <button onClick={() => window.open(devolucionSeleccionada.etiquetaEnvio, '_blank')}
+                    className="flex-1 bg-[#c9a84c] hover:bg-[#e0be6a] text-[#0d0d0d] py-3 font-bold text-xs tracking-[0.2em] uppercase transition-all flex items-center justify-center gap-2"
+                  ><Download size={14} /> Descargar Etiqueta</button>
+                )}
+                {devolucionSeleccionada.facturaDevolucion && (
+                  <button onClick={() => window.open(devolucionSeleccionada.facturaDevolucion, '_blank')}
+                    className="flex-1 border border-[#7abf8a]/40 text-[#7abf8a] hover:bg-[#7abf8a]/5 py-3 font-bold text-xs tracking-[0.2em] uppercase transition-all flex items-center justify-center gap-2"
+                  ><FileText size={14} /> Ver Factura</button>
+                )}
+                <button onClick={() => setMostrarModal(false)}
+                  className="flex-1 border border-[#e8e8e8] hover:border-[#c9a84c] text-[#888] hover:text-[#c9a84c] py-3 font-bold text-xs tracking-[0.2em] uppercase transition-all"
+                >Cerrar</button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Formulario de solicitud de devolución */}
+        {/* ── Modal solicitud ── */}
         {mostrarFormSolicitud && (
-          <div className="fixed inset-0 bg-gradient-to-br from-rose-900/20 to-pink-900/20 backdrop-blur-md flex justify-center items-center z-50 px-4 py-6">
-            <div className="relative bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-rose-100">
+          <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 px-4 py-6">
+            <div className="relative bg-white border border-[#e8e8e8] w-full max-w-2xl max-h-[90vh] overflow-y-auto">
 
-              <div className="sticky top-0 z-10 bg-gradient-to-r from-rose-50 to-pink-50 border-b border-rose-100 px-8 py-5 rounded-t-3xl">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-2xl font-light bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
-                      Solicitar Devolución
-                    </h2>
-                    <p className="text-sm text-rose-500 mt-1">Completa los detalles para procesar tu solicitud</p>
-                  </div>
-                  <button
-                    onClick={() => setMostrarFormSolicitud(false)}
-                    className="p-2 hover:bg-rose-100 rounded-full transition-all"
-                  >
-                    <XCircle className="text-rose-300 hover:text-rose-500" size={26} />
-                  </button>
+              <div className="sticky top-0 z-10 bg-white border-b border-[#e8e8e8] px-6 py-5 flex items-center justify-between">
+                <div>
+                  <p className="text-[#c9a84c] tracking-[0.3em] uppercase text-[9px] font-semibold mb-0.5">Nueva solicitud</p>
+                  <h2 className="text-base font-light text-[#1a1a1a]">Solicitar Devolución</h2>
                 </div>
+                <button onClick={() => setMostrarFormSolicitud(false)}
+                  className="w-8 h-8 flex items-center justify-center border border-[#e8e8e8] hover:border-[#c9a84c] text-[#888] hover:text-[#c9a84c] transition-all"
+                ><XCircle size={15} /></button>
               </div>
 
-              <div className="p-8 space-y-8">
+              <div className="p-6 space-y-6">
 
-                {/* Sección: Pedido */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-1.5 h-4 bg-gradient-to-b from-rose-400 to-pink-400 rounded-full"></div>
-                    <label className="block text-sm font-semibold text-rose-800">
-                      Selecciona tu pedido
-                    </label>
-                  </div>
-                  <select
-                    className="w-full px-4 py-3.5 rounded-full border border-rose-200 bg-white focus:border-rose-400 focus:ring-3 focus:ring-rose-200 transition-all duration-200 shadow-sm hover:shadow-md"
-                    value={form.orderId}
-                    onChange={(e) => handleOrderChange(e.target.value)}
-                  >
+                {/* Pedido */}
+                <div>
+                  <label className={labelBase}>Selecciona tu pedido</label>
+                  <select className={selectBase} value={form.orderId} onChange={(e) => handleOrderChange(e.target.value)}>
                     <option value="">Seleccionar pedido...</option>
                     {pedidosParaDevolver.map((pedido) => (
-                      <option key={pedido.OrderId} value={pedido.OrderId} className="py-2">
-                        {pedido.OrderNumber} — ${pedido.Total.toLocaleString('es-MX', { minimumFractionDigits: 2 })} • {formatearFecha(pedido.Fecha)}
+                      <option key={pedido.OrderId} value={pedido.OrderId}>
+                        {pedido.OrderNumber} — ${pedido.Total.toLocaleString('es-MX', { minimumFractionDigits: 2 })} · {formatearFecha(pedido.Fecha)}
                       </option>
                     ))}
                   </select>
                 </div>
 
-                {/* Sección: Productos */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-1.5 h-4 bg-gradient-to-b from-amber-400 to-orange-400 rounded-full"></div>
-                    <label className="block text-sm font-semibold text-rose-800">
-                      Productos a devolver
-                    </label>
-                  </div>
+                {/* Productos */}
+                {form.items.length > 0 && (
+                  <div>
+                    <label className={labelBase}>Productos a devolver</label>
+                    <div className="space-y-3">
+                      {form.items.map((item, index) => (
+                        <div key={item.productId}
+                          className={`border transition-all ${item.selected ? 'border-[#c9a84c]/40 bg-[#c9a84c]/5' : 'border-[#e8e8e8]'} p-4`}
+                        >
+                          <div className="flex items-start gap-3">
+                            {/* Checkbox custom */}
+                            <button
+                              type="button"
+                              onClick={() => updateItem(index, "selected", !item.selected)}
+                              className={`w-4 h-4 border flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${
+                                item.selected ? 'border-[#c9a84c] bg-[#c9a84c]' : 'border-[#333]'
+                              }`}
+                            >
+                              {item.selected && <Check size={10} className="text-[#0d0d0d]" />}
+                            </button>
 
-                  <div className="space-y-4">
-                    {form.items.map((item, index) => (
-                      <div
-                        key={item.productId}
-                        className="group bg-white rounded-2xl border border-rose-100 hover:border-rose-300 hover:shadow-lg transition-all duration-300 overflow-hidden"
-                      >
-                        <div className="p-5">
-                          <div className="flex items-start gap-4">
-                            <input
-                              type="checkbox"
-                              checked={item.selected}
-                              onChange={(e) => updateItem(index, "selected", e.target.checked)}
-                              className="h-5 w-5 rounded-lg border-2 border-rose-300 checked:border-rose-500 checked:bg-rose-500 focus:ring-2 focus:ring-rose-300 transition-all duration-200 cursor-pointer"
-                            />
-
-                            <div className="flex-1 space-y-4">
-                              <div className="flex justify-between">
+                            <div className="flex-1 space-y-3">
+                              <div className="flex justify-between items-start">
                                 <div>
-                                  <p className="font-semibold text-gray-900 text-lg">{item.name}</p>
-                                  <div className="text-sm text-rose-500">
-                                    ${item.price} • SKU: {item.sku}
-                                  </div>
+                                  <p className="text-sm font-semibold text-[#1a1a1a]">{item.name}</p>
+                                  <p className="text-[10px] text-[#aaa] tracking-wide">${item.price} · SKU: {item.sku}</p>
                                 </div>
-                                <span className="text-xs bg-rose-50 text-rose-600 px-3 py-1 rounded-full">
-                                  Disponible: {item.maxQuantity}
+                                <span className="text-[10px] border border-[#e8e8e8] text-[#aaa] px-2 py-0.5 tracking-wider">
+                                  Máx: {item.maxQuantity}
                                 </span>
                               </div>
 
-                              <select
-                                value={item.reason}
-                                onChange={(e) => updateItem(index, "reason", e.target.value)}
-                                className="w-full px-4 py-3 rounded-full border border-rose-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-200"
-                              >
-                                <option value="">Seleccionar motivo</option>
-                                <option value="defective">🎯 Producto defectuoso</option>
-                                <option value="wrong_item">📦 Producto incorrecto</option>
-                                <option value="not_needed">💭 Ya no lo necesito</option>
-                              </select>
+                              {item.selected && (
+                                <div className="space-y-3 pt-2 border-t border-[#e8e8e8]">
+                                  <select value={item.reason} onChange={(e) => updateItem(index, "reason", e.target.value)} className={selectBase}>
+                                    <option value="">Seleccionar motivo</option>
+                                    <option value="defective">Producto defectuoso</option>
+                                    <option value="wrong_item">Producto incorrecto</option>
+                                    <option value="not_needed">Ya no lo necesito</option>
+                                  </select>
 
-                              <input
-                                type="number"
-                                min="1"
-                                max={item.maxQuantity}
-                                value={item.quantity}
-                                onChange={(e) =>
-                                  updateItem(index, "quantity", Number(e.target.value))
-                                }
-                                className="w-full px-4 py-3 rounded-full border border-rose-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-200"
-                              />
+                                  <input type="number" min="1" max={item.maxQuantity} value={item.quantity}
+                                    onChange={(e) => updateItem(index, "quantity", Number(e.target.value))}
+                                    className={inputBase}
+                                    placeholder="Cantidad"
+                                  />
 
-                              <textarea
-                                value={item.detail}
-                                onChange={(e) => updateItem(index, "detail", e.target.value)}
-                                rows={2}
-                                className="w-full px-4 py-3 rounded-xl border border-rose-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-200 resize-none"
-                                placeholder="Detalles adicionales (opcional)"
-                              />
+                                  <textarea value={item.detail} onChange={(e) => updateItem(index, "detail", e.target.value)}
+                                    rows={2} placeholder="Detalles adicionales (opcional)"
+                                    className={`${inputBase} resize-none`}
+                                  />
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
-                      </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Comentarios */}
+                <div>
+                  <label className={labelBase}>Comentarios adicionales</label>
+                  <textarea rows={3} placeholder="¿Algo más que debamos saber? (Opcional)"
+                    className={`${inputBase} resize-none`}
+                    value={form.generalComment}
+                    onChange={(e) => setForm({ ...form, generalComment: e.target.value })}
+                  />
+                </div>
+
+                {/* Método de reembolso */}
+                <div>
+                  <label className={labelBase}>Método de reembolso</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {[
+                      { id: 'original', title: 'Método original', desc: 'Reembolso a tu tarjeta / método original' },
+                      { id: 'store_credit', title: 'Crédito en tienda', desc: '+10% bono adicional sobre el monto' },
+                    ].map((opt) => (
+                      <label key={opt.id}
+                        className={`flex items-start gap-3 p-4 border cursor-pointer transition-all ${
+                          form.refundMethod === opt.id ? 'border-[#c9a84c] bg-[#c9a84c]/5' : 'border-[#e8e8e8] hover:border-[#c9a84c]/40'
+                        }`}
+                      >
+                        <input type="radio" name="refund_method" className="sr-only"
+                          checked={form.refundMethod === opt.id}
+                          onChange={() => setForm({ ...form, refundMethod: opt.id })}
+                        />
+                        <div className={`w-3.5 h-3.5 border flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${
+                          form.refundMethod === opt.id ? 'border-[#c9a84c]' : 'border-[#333]'
+                        }`}>
+                          {form.refundMethod === opt.id && <div className="w-1.5 h-1.5 bg-[#c9a84c]" />}
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-[#1a1a1a] tracking-wide">{opt.title}</p>
+                          <p className="text-[10px] text-[#aaa] mt-0.5">{opt.desc}</p>
+                        </div>
+                      </label>
                     ))}
                   </div>
                 </div>
 
-                {/* Sección: Comentarios generales */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-1.5 h-4 bg-gradient-to-b from-green-400 to-emerald-400 rounded-full"></div>
-                    <label className="block text-sm font-semibold text-rose-800">
-                      Comentarios adicionales
-                    </label>
-                  </div>
-                  <div className="relative">
-                    <textarea
-                      rows={3}
-                      placeholder="¿Algo más que debamos saber sobre esta devolución? (Opcional)"
-                      className="w-full px-4 py-4 rounded-xl border border-rose-200 bg-white focus:border-green-400 focus:ring-3 focus:ring-green-200 transition-all duration-200 resize-none shadow-sm"
-                      value={form.generalComment}
-                      onChange={(e) =>
-                        setForm({ ...form, generalComment: e.target.value })
-                      }
-                    />
-                    <div className="absolute bottom-3 right-3 text-xs text-rose-300">
-                      0/500 caracteres
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sección: Método de reembolso */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-1.5 h-4 bg-gradient-to-b from-purple-400 to-pink-400 rounded-full"></div>
-                    <label className="block text-sm font-semibold text-rose-800">
-                      Método de reembolso preferido
-                    </label>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <label className="relative cursor-pointer">
-                      <input type="radio" name="refund_method" className="sr-only peer" defaultChecked checked={form.refundMethod === "original"} onChange={() => setForm({ ...form, refundMethod: "original" })} />
-                      <div className="p-4 rounded-2xl border-2 border-rose-200 peer-checked:border-rose-400 peer-checked:bg-rose-50 transition-all duration-200 hover:border-rose-300">
-                        <div className="flex items-center gap-3">
-                          <div className="w-6 h-6 rounded-full border-2 border-rose-300 peer-checked:border-rose-500 peer-checked:bg-rose-500 flex items-center justify-center">
-                            <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
-                          </div>
-                          <div>
-                            <p className="font-semibold text-gray-900">Método original</p>
-                            <p className="text-sm text-rose-500">Reembolso a tu tarjeta/original</p>
-                          </div>
-                        </div>
-                      </div>
-                    </label>
-
-                    <label className="relative cursor-pointer">
-                      <input type="radio" name="refund_method" className="sr-only peer" checked={form.refundMethod === "store_credit"} onChange={() => setForm({ ...form, refundMethod: "store_credit" })} />
-                      <div className="p-4 rounded-2xl border-2 border-rose-200 peer-checked:border-purple-400 peer-checked:bg-purple-50 transition-all duration-200 hover:border-purple-300">
-                        <div className="flex items-center gap-3">
-                          <div className="w-6 h-6 rounded-full border-2 border-rose-300 peer-checked:border-purple-500 peer-checked:bg-purple-500 flex items-center justify-center">
-                            <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
-                          </div>
-                          <div>
-                            <p className="font-semibold text-gray-900">Crédito en tienda</p>
-                            <p className="text-sm text-rose-500">+10% bono adicional</p>
-                          </div>
-                        </div>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Botones de acción */}
-                <div className="pt-6 border-t border-rose-100">
-                  <div className="flex flex-col sm:flex-row justify-end gap-3">
-                    <button
-                      onClick={() => setMostrarFormSolicitud(false)}
-                      className="px-6 py-3.5 rounded-full border-2 border-rose-200 text-rose-700 font-medium hover:bg-rose-50 hover:border-rose-300 active:bg-rose-100 transition-all duration-200 shadow-sm hover:shadow-md"
-                    >
-                      Cancelar
-                    </button>
-
-                    <button
-                      className="px-8 py-3.5 rounded-full bg-gradient-to-r from-rose-400 to-pink-500 text-white font-semibold shadow-lg shadow-rose-300/50 hover:shadow-xl hover:shadow-rose-400/50 hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-center gap-2"
-                      onClick={handleSubmit}
-                    >
-                      <span>Enviar solicitud</span>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                      </svg>
-                    </button>
-                  </div>
-
-                  <p className="text-xs text-rose-300 text-center mt-4">
-                    Al enviar esta solicitud, aceptas nuestras
-                    <a href="#" className="text-rose-500 hover:text-rose-700 font-medium ml-1">políticas de devolución</a>
-                  </p>
-                </div>
               </div>
+
+              {/* Footer form */}
+              <div className="sticky bottom-0 bg-white border-t border-[#e8e8e8] px-6 py-4 flex flex-col sm:flex-row gap-3">
+                <button onClick={handleSubmit}
+                  className="flex-1 bg-[#c9a84c] hover:bg-[#e0be6a] text-[#0d0d0d] py-3 font-bold text-xs tracking-[0.2em] uppercase transition-all flex items-center justify-center gap-2"
+                >
+                  Enviar solicitud
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </button>
+                <button onClick={() => setMostrarFormSolicitud(false)}
+                  className="flex-1 border border-[#e8e8e8] hover:border-[#c9a84c] text-[#888] hover:text-[#c9a84c] py-3 font-bold text-xs tracking-[0.2em] uppercase transition-all"
+                >Cancelar</button>
+              </div>
+
             </div>
           </div>
         )}
+
       </div>
     </section>
   );

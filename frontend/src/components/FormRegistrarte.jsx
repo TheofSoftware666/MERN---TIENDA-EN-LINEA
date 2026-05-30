@@ -43,129 +43,157 @@ const FormRegistrarte = () => {
     }
   };
 
+  const inputBase = "w-full bg-white border border-[#e8e8e8] focus:border-[#c9a84c] text-[#1a1a1a] placeholder-[#bbb] px-4 py-3 text-sm outline-none transition-colors";
+  const labelBase = "block text-[10px] font-semibold text-[#888] mb-1.5 tracking-widest uppercase";
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-rose-50 to-pink-100 px-4 py-8">
-      <div className="flex flex-col lg:flex-row bg-white shadow-2xl rounded-3xl overflow-hidden max-w-5xl w-full border border-pink-100">
-        
-        {/* Sección izquierda - Beneficios cosméticos */}
-        <div className="flex flex-col justify-between bg-gradient-to-br from-pink-50 to-rose-50 p-8 lg:max-w-sm w-full">
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-pink-100 rounded-full mb-4">
-              <FaGem className="text-pink-500 text-2xl" />
+    <div className="flex items-center justify-center min-h-screen bg-white px-4 py-12">
+      <div className="flex flex-col lg:flex-row overflow-hidden max-w-5xl w-full border border-[#e8e8e8]">
+
+        {/* ── Panel izquierdo — beneficios ── */}
+        <div className="flex flex-col justify-between bg-white border-r border-[#e8e8e8] p-10 lg:max-w-sm w-full">
+
+          {/* Logo / claim */}
+          <div className="mb-10">
+            <div className="w-10 h-10 border border-[#c9a84c]/30 flex items-center justify-center mb-6">
+              <FaGem className="text-[#c9a84c] text-base" />
             </div>
-            <h3 className="text-xl font-light text-gray-800 mb-2">✨ ¡Bienvenida a la belleza!</h3>
-            <div className="w-12 h-0.5 bg-gradient-to-r from-pink-300 to-rose-300 mx-auto rounded-full"></div>
-          </div>
-
-          <div className="space-y-6">
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center">
-                <FaGift className="text-pink-500 text-sm" />
-              </div>
-              <div>
-                <h3 className="text-base font-semibold text-gray-800 mb-1">🎁 Ahorra más cada vez que compras</h3>
-                <p className="text-sm text-gray-500">Te damos acceso a precios preferenciales solo por iniciar sesión.</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center">
-                <FaRocket className="text-pink-500 text-sm" />
-              </div>
-              <div>
-                <h3 className="text-base font-semibold text-gray-800 mb-1">🚀 Accede antes que nadie</h3>
-                <p className="text-sm text-gray-500">Sé la primera en conocer y comprar nuestras nuevas colecciones.</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center">
-                <FaHeart className="text-pink-500 text-sm" />
-              </div>
-              <div>
-                <h3 className="text-base font-semibold text-gray-800 mb-1">🎉 Bonos y regalos sorpresa</h3>
-                <p className="text-sm text-gray-500">Tenemos detalles solo para nuestras clientas frecuentes.</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-evenly text-sm text-gray-400 mt-8">
-            <a href="#" className="hover:text-pink-500 transition">Acerca de</a>
-            <a href="#" className="hover:text-pink-500 transition">Términos</a>
-            <a href="#" className="hover:text-pink-500 transition">Contacto</a>
-          </div>
-        </div>
-
-        {/* Formulario de registro */}
-        <div className="flex flex-col justify-center items-center w-full px-8 py-12 lg:py-16">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-light text-gray-800 mb-2">✨ Crea tu cuenta</h2>
-            <div className="w-16 h-1 bg-gradient-to-r from-pink-300 to-rose-300 mx-auto rounded-full"></div>
-            <p className="text-gray-500 text-sm mt-3">y empieza a disfrutar de beneficios exclusivos</p>
-          </div>
-
-          <Alerta alerta={alerta} />
-
-          <form className="w-full max-w-md space-y-5" onSubmit={handleSubmit}>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">Nombre completo</label>
-              <input
-                type="text"
-                placeholder="Tu nombre y apellido"
-                className="w-full px-4 py-3 text-sm border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent bg-rose-50/30 transition-all"
-                value={nombre}
-                onChange={e => setNombre(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">Correo electrónico</label>
-              <input
-                type="email"
-                placeholder="tu@email.com"
-                className="w-full px-4 py-3 text-sm border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent bg-rose-50/30 transition-all"
-                value={email}
-                onChange={e => setEmail(e.target.value.trim().toLowerCase())}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">Contraseña</label>
-              <input
-                type="password"
-                placeholder="Mínimo 8 caracteres"
-                className="w-full px-4 py-3 text-sm border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent bg-rose-50/30 transition-all"
-                value={password}
-                onChange={e => setPassword(e.target.value.trim())}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">Repite la contraseña</label>
-              <input
-                type="password"
-                placeholder="Confirmar contraseña"
-                className="w-full px-4 py-3 text-sm border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent bg-rose-50/30 transition-all"
-                value={repetir}
-                onChange={e => setRepetir(e.target.value.trim())}
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-3 bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 text-white rounded-xl font-semibold transition-all shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-95"
-            >
-              Crear Cuenta
-            </button>
-
-            <p className="text-center text-sm text-gray-500">
-              ¿Ya tienes una cuenta?
-              <Link to="/Auth/inicio-sesion" className="text-pink-500 hover:text-pink-700 ml-1 font-medium">
-                Inicia sesión aquí
-              </Link>
+            <p className="text-[#c9a84c] tracking-[0.3em] uppercase text-[10px] font-semibold mb-2">
+              Membresía exclusiva
             </p>
-          </form>
+            <h3 className="text-2xl font-light text-[#1a1a1a] leading-snug">
+              Bienvenida a<br />
+              <span className="text-[#c9a84c] italic font-serif">la belleza</span>
+            </h3>
+            <div className="w-8 h-px bg-[#c9a84c] mt-4" />
+          </div>
+
+          {/* Beneficios */}
+          <div className="space-y-7 flex-1">
+            {[
+              {
+                icon: <FaGift className="text-[#c9a84c] text-xs" />,
+                title: "Precios preferenciales",
+                desc: "Accede a descuentos exclusivos solo por tener cuenta con nosotros."
+              },
+              {
+                icon: <FaRocket className="text-[#c9a84c] text-xs" />,
+                title: "Acceso anticipado",
+                desc: "Sé la primera en conocer y comprar nuestras nuevas colecciones."
+              },
+              {
+                icon: <FaHeart className="text-[#c9a84c] text-xs" />,
+                title: "Bonos y regalos",
+                desc: "Tenemos detalles especiales solo para nuestras clientas frecuentes."
+              },
+            ].map((b) => (
+              <div key={b.title} className="flex items-start gap-4">
+                <div className="w-7 h-7 border border-[#e8e8e8] flex items-center justify-center flex-shrink-0 mt-0.5">
+                  {b.icon}
+                </div>
+                <div>
+                  <h4 className="text-xs font-semibold text-[#1a1a1a] mb-1 tracking-wide">{b.title}</h4>
+                  <p className="text-[11px] text-[#888] leading-relaxed">{b.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Links footer */}
+          <div className="flex gap-6 text-[10px] text-[#bbb] mt-10 tracking-widest uppercase">
+            <a href="#" className="hover:text-[#c9a84c] transition-colors">Acerca de</a>
+            <a href="#" className="hover:text-[#c9a84c] transition-colors">Términos</a>
+            <a href="#" className="hover:text-[#c9a84c] transition-colors">Contacto</a>
+          </div>
         </div>
+
+        {/* ── Panel derecho — formulario ── */}
+        <div className="flex flex-col justify-center items-center w-full px-8 py-14 lg:py-16 bg-white">
+
+          <div className="w-full max-w-md">
+
+            {/* Encabezado */}
+            <div className="mb-10">
+              <p className="text-[#c9a84c] tracking-[0.3em] uppercase text-[10px] font-semibold mb-2">
+                Nueva cuenta
+              </p>
+              <h2 className="text-3xl font-light text-[#1a1a1a] mb-4 leading-snug">
+                Crea tu <span className="italic font-serif text-[#c9a84c]">perfil</span>
+              </h2>
+              <p className="text-[#aaa] text-xs tracking-wide leading-relaxed">
+                Empieza a disfrutar de beneficios exclusivos y una experiencia personalizada.
+              </p>
+            </div>
+
+            <Alerta alerta={alerta} />
+
+            <form className="space-y-5" onSubmit={handleSubmit}>
+
+              <div>
+                <label className={labelBase}>Nombre completo</label>
+                <input
+                  type="text"
+                  placeholder="Tu nombre y apellido"
+                  className={inputBase}
+                  value={nombre}
+                  onChange={e => setNombre(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className={labelBase}>Correo electrónico</label>
+                <input
+                  type="email"
+                  placeholder="tu@email.com"
+                  className={inputBase}
+                  value={email}
+                  onChange={e => setEmail(e.target.value.trim().toLowerCase())}
+                />
+              </div>
+
+              <div>
+                <label className={labelBase}>Contraseña</label>
+                <input
+                  type="password"
+                  placeholder="Mínimo 8 caracteres"
+                  className={inputBase}
+                  value={password}
+                  onChange={e => setPassword(e.target.value.trim())}
+                />
+              </div>
+
+              <div>
+                <label className={labelBase}>Repite la contraseña</label>
+                <input
+                  type="password"
+                  placeholder="Confirmar contraseña"
+                  className={inputBase}
+                  value={repetir}
+                  onChange={e => setRepetir(e.target.value.trim())}
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3.5 bg-[#c9a84c] hover:bg-[#e0be6a] text-[#0d0d0d] font-bold text-xs tracking-[0.2em] uppercase transition-all mt-2"
+              >
+                Crear Cuenta
+              </button>
+
+              <p className="text-center text-xs text-[#aaa] tracking-wide pt-1">
+                ¿Ya tienes una cuenta?{" "}
+                <Link
+                  to="/Auth/inicio-sesion"
+                  className="text-[#c9a84c] hover:underline underline-offset-2 font-semibold"
+                >
+                  Inicia sesión aquí
+                </Link>
+              </p>
+
+            </form>
+          </div>
+        </div>
+
       </div>
     </div>
   );

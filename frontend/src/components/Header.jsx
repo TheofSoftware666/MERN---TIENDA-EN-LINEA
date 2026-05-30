@@ -5,7 +5,7 @@ import {
   Home, Flame, Star, ShoppingCart, Laptop,
   Cog, Headphones, Monitor, Phone, Search,
   User, LogIn, UserPlus, Truck, Menu, X, Heart,
-  RotateCcw , Package , LogOut  
+  RotateCcw, Package, LogOut
 } from "lucide-react";
 
 export default function Header({ onOpenCart }) {
@@ -14,14 +14,14 @@ export default function Header({ onOpenCart }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [categories, setCategories] = useState([]);
-  const [cartItemsCount, setCartItemsCount ] = useState(0);  
-  const [configEco, setConfigEco] = useState(null); 
+  const [cartItemsCount, setCartItemsCount] = useState(0);
+  const [configEco, setConfigEco] = useState(null);
 
   useEffect(() => {
     GetCategories();
     GetCountCartItems();
     GetCostShipping();
-  } , []);
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -29,49 +29,44 @@ export default function Header({ onOpenCart }) {
       navigate("/Productos");
       return;
     }
-
     navigate(`/Productos?q=${encodeURIComponent(search.trim())}`);
   };
 
   const GetCategories = async () => {
-    try{
+    try {
       const data = await clientAxios.get('/Admin/Categorias/6');
       setCategories(data.data.categorias);
-    }catch(ex){
-      console.warn(ex.data || ex || "Ocurrio un error inesperado al intentar consultar las.categorias");
+    } catch (ex) {
+      console.warn(ex.data || ex || "Error al consultar categorías");
     }
   };
 
   const GetCostShipping = async () => {
-    try{
-      // const token = localStorage.getItem('ape_token');
-      // if(!token || token === null || token === '') return;
+    try {
       const response = await clientAxios.get('/Admin/GetConfigEcoPublic', {
-        headers: {
-          'Content-Type': 'application/json'
-      }});
-
+        headers: { 'Content-Type': 'application/json' }
+      });
       setConfigEco(response.data.tienda.config || null);
-    }catch(ex){
-      console.warn(ex.data || ex || "Ocurrio un error inesperado al intentar consultar el costo de envio");
+    } catch (ex) {
+      console.warn(ex.data || ex || "Error al consultar configuración");
     }
   };
 
   const GetCountCartItems = async () => {
-    try{
+    try {
       const token = localStorage.getItem('ape_token');
-      if(!token || token === null || token === '') return;
+      if (!token) return;
       const data = await clientAxios.get('/getCountItemsByUserId', {
         headers: {
-          'Content-Type': 'application/json', 
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
-      }});
-      
+        }
+      });
       setCartItemsCount(data.data.data);
-    }catch(ex){
-      console.warn(ex.data || ex || "Ocurrio un error inesperado al intentar consultar el total de items en el carrito");
+    } catch (ex) {
+      console.warn(ex.data || ex || "Error al consultar carrito");
     }
-  }
+  };
 
   const formatName = (name) => {
     if (!name) return "";
@@ -82,125 +77,126 @@ export default function Header({ onOpenCart }) {
   const isLoggedIn = !!token;
 
   return (
-    <header className="w-full bg-white border-b border-pink-100 shadow-sm">
+    <header className="w-full bg-[#0d0d0d] border-b border-[#2e2e2e]">
 
-      {/* Barra de promoción con estilo cosmético */}
-      <div className="w-full bg-pink-50 text-pink-700 text-xs md:text-sm text-center py-2 border-b border-pink-200">
-        <span className="inline-flex items-center gap-1">
-          <Truck size={14} className="text-pink-500" />
+      {/* ── Barra de promoción ── */}
+      <div className="w-full bg-[#c9a84c] text-[#0d0d0d] text-xs text-center py-2">
+        <span className="inline-flex items-center gap-2 font-semibold tracking-widest uppercase">
+          <Truck size={13} />
           Envío gratis en compras mayores a ${configEco?.costo_envio || 0} MXN
         </span>
       </div>
 
-      {/* Header principal */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 flex items-center justify-between gap-4">
+      {/* ── Header principal ── */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between gap-4">
 
         {/* Mobile: Hamburguesa */}
         <button
           onClick={() => setMenuOpen(true)}
-          className="md:hidden flex items-center justify-center w-10 h-10 text-pink-600 hover:bg-pink-50 rounded-full transition"
+          className="md:hidden flex items-center justify-center w-9 h-9 border border-[#2e2e2e] hover:border-[#c9a84c] text-[#888] hover:text-[#c9a84c] transition-all"
+          aria-label="Abrir menú"
         >
-          <Menu size={20} />
+          <Menu size={18} />
         </button>
 
-        {/* Logo o Nombre */}
+        {/* Logo / Nombre */}
         <Link to="/" className="flex-1 md:flex-none text-center md:text-left">
           {configEco?.logo_url ? (
             <img
               src={`${import.meta.env.VITE_BACKEND_URL_IMAGENES}${configEco.logo_url}`}
               alt={configEco?.nombre_tienda || "Logo"}
-              className="h-9 md:h-11 object-contain mx-auto md:mx-0"
+              className="h-9 md:h-10 object-contain mx-auto md:mx-0 brightness-0 invert"
               onError={(e) => {
                 e.target.style.display = "none";
                 e.target.nextSibling.style.display = "block";
               }}
             />
           ) : null}
-
           <h1
-            className="text-xl md:text-2xl font-light text-gray-700 tracking-wide"
+            className="text-lg md:text-xl font-light text-white tracking-[0.2em] uppercase"
             style={{ display: configEco?.logo_url ? "none" : "block" }}
           >
             {configEco?.nombre_tienda || "Ecommerce"}
           </h1>
         </Link>
 
-        {/* Búsqueda - SOLO DESKTOP */}
+        {/* Búsqueda — solo desktop */}
         <form
           onSubmit={handleSearch}
-          className="hidden md:flex flex-1 relative max-w-lg mx-4"
+          className="hidden md:flex flex-1 relative max-w-lg mx-6"
         >
           <input
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar productos, marcas o categorías..."
-            className="w-full rounded-full border border-pink-200 bg-white px-5 py-2.5 text-sm text-gray-700 placeholder:text-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent transition"
+            className="w-full bg-[#1a1a1a] border border-[#2e2e2e] focus:border-[#c9a84c] text-white placeholder-[#444] px-5 py-2.5 text-sm outline-none transition-colors"
           />
-
           <button
             type="submit"
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-pink-500 hover:bg-pink-600 text-white p-2 rounded-full transition"
+            className="absolute right-0 top-0 h-full px-4 bg-[#c9a84c] hover:bg-[#e0be6a] text-[#0d0d0d] transition-colors"
+            aria-label="Buscar"
           >
-            <Search size={16} />
+            <Search size={15} />
           </button>
         </form>
 
-        {/* Botones de autenticación - solo desktop */}
+        {/* Auth + carrito — desktop */}
         <div className="hidden md:flex items-center gap-3">
           {!isLoggedIn ? (
             <>
               <Link
                 to="/Auth/inicio-sesion"
-                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-pink-600 border border-pink-200 rounded-full hover:bg-pink-50 hover:border-pink-300 transition"
+                className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-[#888] border border-[#2e2e2e] hover:border-[#c9a84c] hover:text-[#c9a84c] tracking-widest uppercase transition-all"
               >
-                <LogIn size={16} />
+                <LogIn size={14} />
                 Iniciar sesión
               </Link>
               <Link
                 to="/Auth"
-                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-pink-500 to-rose-400 rounded-full hover:from-pink-600 hover:to-rose-500 shadow-sm transition"
+                className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-[#0d0d0d] bg-[#c9a84c] hover:bg-[#e0be6a] tracking-widest uppercase transition-all"
               >
-                <UserPlus size={16} />
+                <UserPlus size={14} />
                 Registrarse
               </Link>
             </>
           ) : (
             <Link
               to="/Pedidos"
-              className="flex items-center gap-2 px-2 py-1.5 rounded-full hover:bg-pink-50 transition"
+              className="flex items-center gap-2 px-3 py-2 border border-[#2e2e2e] hover:border-[#c9a84c] text-[#888] hover:text-[#c9a84c] transition-all group"
             >
-              <div className="w-8 h-8 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center">
-                <Package size={14} />
-              </div>
-              <span className="text-sm font-medium text-gray-700 hidden lg:inline">Mis Pedidos</span>
+              <Package size={15} />
+              <span className="text-xs font-semibold tracking-widest uppercase hidden lg:inline">
+                Mis Pedidos
+              </span>
             </Link>
           )}
         </div>
 
         {/* Carrito */}
         <div className="relative ml-1">
-          <button 
-            onClick={onOpenCart} 
-            className="w-10 h-10 flex items-center justify-center text-pink-600 hover:bg-pink-50 rounded-full transition"
+          <button
+            onClick={onOpenCart}
+            className="w-9 h-9 flex items-center justify-center border border-[#2e2e2e] hover:border-[#c9a84c] text-[#888] hover:text-[#c9a84c] transition-all"
+            aria-label="Abrir carrito"
           >
-            <ShoppingCart size={20} />
+            <ShoppingCart size={17} />
           </button>
           {cartItemsCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs min-w-[18px] h-[18px] flex items-center justify-center px-1 rounded-full font-medium shadow">
+            <span className="absolute -top-1.5 -right-1.5 bg-[#c9a84c] text-[#0d0d0d] text-[10px] min-w-[18px] h-[18px] flex items-center justify-center px-1 font-bold rounded-full">
               {cartItemsCount}
             </span>
           )}
         </div>
       </div>
 
-      {/* Navbar secundaria desktop - minimalista */}
-      <nav className="hidden md:flex justify-center bg-white py-3 gap-8 border-t border-pink-100 text-sm">
+      {/* ── Navbar secundaria desktop — categorías ── */}
+      <nav className="hidden md:flex justify-center bg-[#111] py-3 gap-10 border-t border-[#1e1e1e] text-xs">
         {categories.map(cat => (
           <Link
             key={cat.categoriaId}
             to={`/Productos?categoria=${cat.categoriaId}`}
-            className="text-gray-600 hover:text-pink-600 font-medium transition"
+            className="text-[#666] hover:text-[#c9a84c] font-semibold tracking-[0.2em] uppercase transition-colors"
             onClick={() => setSearch("")}
           >
             {formatName(cat.nombre)}
@@ -208,31 +204,35 @@ export default function Header({ onOpenCart }) {
         ))}
       </nav>
 
-      {/* Sidebar Mobile - estilo cosmético */}
+      {/* ── Sidebar Mobile ── */}
       {menuOpen && (
         <>
-          {/* Fondo oscuro */}
+          {/* Overlay */}
           <div
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/70 z-40"
             onClick={() => setMenuOpen(false)}
-          ></div>
+          />
 
           {/* Drawer */}
-          <div className="fixed top-0 left-0 w-72 h-full bg-white shadow-xl z-50 flex flex-col">
+          <div className="fixed top-0 left-0 w-72 h-full bg-[#111] border-r border-[#2e2e2e] shadow-2xl z-50 flex flex-col">
 
-            {/* Header del Drawer */}
-            <div className="flex items-center justify-between px-4 py-4 border-b border-pink-100">
-              <h2 className="text-lg font-light text-gray-700">Menú</h2>
+            {/* Header drawer */}
+            <div className="flex items-center justify-between px-5 py-5 border-b border-[#2e2e2e]">
+              <div>
+                <p className="text-[#c9a84c] tracking-[0.3em] uppercase text-[10px] font-semibold">Navegación</p>
+                <h2 className="text-base font-light text-white mt-0.5">Menú</h2>
+              </div>
               <button
                 onClick={() => setMenuOpen(false)}
-                className="text-pink-400 hover:text-pink-600 p-1"
+                className="w-8 h-8 flex items-center justify-center border border-[#2e2e2e] hover:border-[#c9a84c] text-[#666] hover:text-[#c9a84c] transition-all"
+                aria-label="Cerrar menú"
               >
-                <X size={20} />
+                <X size={15} />
               </button>
             </div>
 
-            {/* Búsqueda Mobile */}
-            <div className="px-4 py-3 border-b border-pink-100">
+            {/* Búsqueda mobile */}
+            <div className="px-5 py-4 border-b border-[#2e2e2e]">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -240,90 +240,122 @@ export default function Header({ onOpenCart }) {
                   setMenuOpen(false);
                   navigate(`/Productos?q=${encodeURIComponent(search.trim())}`);
                 }}
-                className="flex items-center border border-pink-200 rounded-full overflow-hidden"
+                className="flex"
               >
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Buscar..."
-                  className="flex-1 px-4 py-2 text-sm focus:outline-none text-gray-700 placeholder-pink-300"
+                  className="flex-1 bg-[#1a1a1a] border border-[#2e2e2e] focus:border-[#c9a84c] text-white placeholder-[#444] px-4 py-2 text-sm outline-none transition-colors"
                 />
-                <button className="bg-pink-500 hover:bg-pink-600 text-white px-3 py-2">
-                  <Search size={18} />
+                <button
+                  type="submit"
+                  className="bg-[#c9a84c] hover:bg-[#e0be6a] text-[#0d0d0d] px-3 transition-colors"
+                  aria-label="Buscar"
+                >
+                  <Search size={15} />
                 </button>
               </form>
             </div>
 
-            {/* Menú lateral */}
-            <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-4 text-gray-700">
+            {/* Nav links */}
+            <nav className="flex-1 overflow-y-auto px-5 py-5 space-y-1 text-sm">
 
-              <Link to="/" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-pink-50 text-gray-700" onClick={() => setMenuOpen(false)}>
-                <Home size={18} className="text-pink-400" /> Inicio
+              <Link
+                to="/"
+                className="flex items-center gap-3 px-3 py-3 text-[#888] hover:text-white hover:bg-[#1a1a1a] border-l-2 border-transparent hover:border-[#c9a84c] transition-all"
+                onClick={() => setMenuOpen(false)}
+              >
+                <Home size={16} className="text-[#c9a84c]" />
+                <span className="tracking-wider uppercase text-xs font-semibold">Inicio</span>
               </Link>
 
-              <div className="pt-2">
-                <h3 className="text-xs font-medium text-pink-300 uppercase tracking-wider px-3 mb-1">Categorías</h3>
-                <div className="space-y-1">
-                  {categories.map(cat => (
-                    <Link
-                      key={cat.categoriaId}
-                      to={`/Productos?categoria=${cat.categoriaId}`}
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-pink-50"
-                      onClick={() => {
-                        setSearch("");
-                        setMenuOpen(false);
-                      }}
-                    >
-                      <span className="text-sm text-gray-600">{formatName(cat.nombre)}</span>
-                    </Link>
-                  ))}
-                </div>
+              {/* Categorías */}
+              <div className="pt-4 pb-2">
+                <p className="text-[10px] text-[#444] tracking-[0.3em] uppercase px-3 mb-2 font-semibold">
+                  Categorías
+                </p>
+                {categories.map(cat => (
+                  <Link
+                    key={cat.categoriaId}
+                    to={`/Productos?categoria=${cat.categoriaId}`}
+                    className="flex items-center gap-3 px-3 py-2.5 text-[#888] hover:text-white hover:bg-[#1a1a1a] border-l-2 border-transparent hover:border-[#c9a84c] transition-all"
+                    onClick={() => {
+                      setSearch("");
+                      setMenuOpen(false);
+                    }}
+                  >
+                    <span className="text-xs tracking-wider uppercase font-semibold">
+                      {formatName(cat.nombre)}
+                    </span>
+                  </Link>
+                ))}
               </div>
 
-              <Link to="" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-pink-50" onClick={() => setMenuOpen(false)}>
-                <Phone size={18} className="text-pink-400" /> Contacto
-              </Link>
+              <div className="pt-2 border-t border-[#1e1e1e] space-y-1">
+                <Link
+                  to=""
+                  className="flex items-center gap-3 px-3 py-3 text-[#888] hover:text-white hover:bg-[#1a1a1a] border-l-2 border-transparent hover:border-[#c9a84c] transition-all"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <Phone size={16} className="text-[#c9a84c]" />
+                  <span className="tracking-wider uppercase text-xs font-semibold">Contacto</span>
+                </Link>
 
-              <Link to="/Pedidos" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-pink-50" onClick={() => setMenuOpen(false)}>
-                <Package  size={18} className="text-pink-400" /> Pedidos
-              </Link>
-              
-              <Link to="/Devoluciones" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-pink-50" onClick={() => setMenuOpen(false)}>
-                <RotateCcw  size={18} className="text-pink-400" /> Devoluciones
-              </Link>
+                <Link
+                  to="/Pedidos"
+                  className="flex items-center gap-3 px-3 py-3 text-[#888] hover:text-white hover:bg-[#1a1a1a] border-l-2 border-transparent hover:border-[#c9a84c] transition-all"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <Package size={16} className="text-[#c9a84c]" />
+                  <span className="tracking-wider uppercase text-xs font-semibold">Pedidos</span>
+                </Link>
 
+                <Link
+                  to="/Devoluciones"
+                  className="flex items-center gap-3 px-3 py-3 text-[#888] hover:text-white hover:bg-[#1a1a1a] border-l-2 border-transparent hover:border-[#c9a84c] transition-all"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <RotateCcw size={16} className="text-[#c9a84c]" />
+                  <span className="tracking-wider uppercase text-xs font-semibold">Devoluciones</span>
+                </Link>
+              </div>
             </nav>
 
-            {/* Autenticación en móvil */}
-            <div className="px-4 py-4 border-t border-pink-100 bg-pink-50/50">
+            {/* Auth mobile */}
+            <div className="px-5 py-5 border-t border-[#2e2e2e] bg-[#0d0d0d]">
               {!isLoggedIn ? (
-                <>
+                <div className="space-y-3">
                   <Link
                     to="/Auth/inicio-sesion"
-                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 text-white py-2.5 rounded-full font-medium transition shadow-sm"
+                    className="w-full flex items-center justify-center gap-2 bg-[#c9a84c] hover:bg-[#e0be6a] text-[#0d0d0d] py-3 font-bold text-xs tracking-[0.2em] uppercase transition-all"
                     onClick={() => setMenuOpen(false)}
                   >
-                    <LogIn size={18} />
+                    <LogIn size={15} />
                     Iniciar sesión
                   </Link>
-                  <p className="text-xs text-pink-400 mt-2 text-center">
+                  <p className="text-xs text-[#444] text-center tracking-wide">
                     ¿No tienes cuenta?{" "}
-                    <Link to="/Auth" className="text-pink-600 font-medium hover:underline" onClick={() => setMenuOpen(false)}>
+                    <Link
+                      to="/Auth"
+                      className="text-[#c9a84c] hover:underline underline-offset-2"
+                      onClick={() => setMenuOpen(false)}
+                    >
                       Regístrate
                     </Link>
                   </p>
-                </>
+                </div>
               ) : (
                 <Link
                   to="/"
-                  className="w-full flex items-center justify-center gap-2 bg-white border border-pink-200 text-pink-600 py-2.5 rounded-full font-medium hover:bg-pink-50 transition"
+                  className="w-full flex items-center justify-center gap-2 border border-[#2e2e2e] hover:border-[#c9a84c] text-[#888] hover:text-[#c9a84c] py-3 font-bold text-xs tracking-[0.2em] uppercase transition-all"
                   onClick={() => {
                     setMenuOpen(false);
                     localStorage.removeItem('ape_token');
                   }}
                 >
-                  <LogOut size={18} />
+                  <LogOut size={15} />
                   Cerrar sesión
                 </Link>
               )}
